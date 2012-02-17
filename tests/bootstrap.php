@@ -12,7 +12,7 @@ error_reporting(E_ALL | E_STRICT);
 require __DIR__.'/../src/autoload.dist.php';
 
 ### Load classes needed for jackalope unit tests ###
-require '../lib/jackalope/tests/Jackalope/TestCase.php';
+require __DIR__.'../lib/jackalope/tests/Jackalope/TestCase.php';
 require 'Jackalope/Transport/Jackrabbit/JackrabbitTestCase.php';
 
 ### Load the implementation loader class ###
