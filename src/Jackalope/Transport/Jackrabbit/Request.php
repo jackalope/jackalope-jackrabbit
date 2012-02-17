@@ -14,7 +14,6 @@ use PHPCR\ReferentialIntegrityException;
 use PHPCR\NodeType\ConstraintViolationException;
 use PHPCR\NodeType\NoSuchNodeTypeException;
 
-use Jackalope\Transport\curl;
 use Jackalope\FactoryInterface;
 
 /**

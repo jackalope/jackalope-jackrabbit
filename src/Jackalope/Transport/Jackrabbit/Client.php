@@ -22,7 +22,6 @@ use PHPCR\Query\QueryInterface;
 use PHPCR\Query\QOM\QueryObjectModelInterface;
 
 use Jackalope\Transport\BaseTransport;
-use Jackalope\Transport\curl;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\WritingInterface;

@@ -11,7 +11,7 @@ class RequestTest extends JackrabbitTestCase
 {
     protected function getCurlFixture($fixture = null, $httpCode = 200, $errno = null)
     {
-        $curl =  $this->getMock('Jackalope\Transport\curl', array('exec', 'getinfo', 'errno', 'setopt'));
+        $curl =  $this->getMock('Jackalope\\Transport\\Jackrabbit\\curl', array('exec', 'getinfo', 'errno', 'setopt'));
 
         if ($fixture) {
             if (is_file($fixture)) {

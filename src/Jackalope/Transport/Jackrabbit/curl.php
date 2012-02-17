@@ -1,5 +1,5 @@
 <?php
-namespace Jackalope\Transport;
+namespace Jackalope\Transport\Jackrabbit;
 
 /**
  * Capsulate curl as an object

@@ -5,24 +5,25 @@ There are two kind of tests. The folder ``tests/phpcr-api`` contains the
 against the specification. This is what you want to look at when using
 jackalope as a PHPCR implementation.
 
-The folder ``tests/Jackalope`` contains unit tests for the jackalope
-implementation. You should only need those if you want to debug jackalope
-itself or implement new features.
-
 For both, you need to have the test workspace created in the storage (see
 below).
 
 
-There is one bootstrap and one phpunit file per backend implementation.
-The additional classes required to bootstrap the tests are found in inc/
-Utility code is placed in bin/ and lib/.
+# Unit tests
+
+Unit tests for the client are in tests/Jackalope/Transport/Jackrabbit
+
+Note that the base jackalope repository contains some unit tests for jackalope in
+its tests folder.
 
 
-The phpunit_*.xml.dist are configured to run all tests. You can limit the tests
+# Functional Tests
+
+The phpunit.xml.dist is configured to run all tests. You can limit the tests
 to run by specifying the path to those tests to phpunit.
 
 Note that the phpcr-api tests are skipped for features not implemented in
-jackalope. Have a look at the tests/inc/*ImplementationLoader.php files to see
+jackalope. Have a look at the tests/inc/JackrabbitImplementationLoader.php files to see
 which features are skipped for what backend.
 
 
@@ -30,15 +31,22 @@ which features are skipped for what backend.
 
 
 Jackalope bundles the extensive phpcr-api-tests suite to test compliance with
-the PHPCR standard. Additionally jackalope contains a set of unit tests.
-After setting tests up (see below), you can simply run them with phpunit
+the PHPCR standard.
 
 You should only see success or skipped tests, no failures or errors.
 
+To run the tests.
 
-## Test setup for Jackrabbit Transport
+    cd /path/to/jackalope/tests
+    cp phpunit.xml.dist phpunit.xml
+    phpunit
 
-You need to create a new workspace. The simplest way to do this is
+
+## Use a non-default workspace
+
+If you want to run the tests against a non-default workspace, edit phpunit.xml and change
+<var name="phpcr.workspace" value="default" /> to point to a different name. Then create
+a workspace in jackrabbit.
 
     java -jar jackrabbit-*.jar
     # when it says "Apache Jackrabbit is now running at http://localhost:8080/" ctrl-c to stop
@@ -48,30 +56,6 @@ You need to create a new workspace. The simplest way to do this is
     java -jar jackrabbit-*.jar
 
 See also "Jackrabbit Doc":http://jackrabbit.apache.org/jackrabbit-configuration.html#JackrabbitConfiguration-Workspaceconfiguration
-
-Once you have jackrabbit with a tests workspace, run the tests.
-
-    cd /path/to/jackalope/tests
-    cp phpunit_jackrabbit.xml.dist phpunit.xml
-    phpunit
-
-## Test setup for the Doctrine DBAL transport
-
-There is a phpunit_doctrinedbal.xml.dist file in the tests/ folder. Copy that to phpunit.xml and adjust settings as you need them.
-
-To setup a new mysql database to run the tests against, you can do something like - or use your favorite GUI frontend
-
-    sudo mysqladmin -u root -p  create jackalope_doctrine
-    echo "grant all privileges on jackalope_doctrine.* to 'jackalope'@'localhost' identified by '1234test'; flush privileges;" | mysql -u root -p
-
-Test fixtures for functional tests are written in JCR System XML format. Use the converter script ``tests/generate_doctrine_dbal_fixture.php`` to prepare the fixtures for doctrine tests.
-The converted fixtures are written into **tests/fixtures/doctrine**. The converted fixtures are not tracked in the repository, you should regenerate them whenever the fixtures in tests/phpcr-api/fixtures change.
-
-    cd /path/to/jackalope/tests
-    cp phpunit_doctrine_dbal.xml.dist phpunit.xml
-    ./generate_doctrine_dbal_fixture.php
-    phpunit
-
 
 
 # Some notes on the jackalope-jackrabbit api testing.
