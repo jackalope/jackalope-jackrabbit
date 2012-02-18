@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
-VERSION=2.3.7
+VERSION=2.4.0
 
 JAR=jackrabbit-standalone-$VERSION.jar
 
