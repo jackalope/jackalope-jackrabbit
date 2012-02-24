@@ -20,6 +20,8 @@ use PHPCR\PathNotFoundException;
 use PHPCR\LoginException;
 use PHPCR\Query\QueryInterface;
 use PHPCR\Query\QOM\QueryObjectModelInterface;
+use PHPCR\Util\UUIDHelper;
+
 
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\QueryInterface as QueryTransport;
@@ -454,7 +456,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $url = $this->encodeAndValidatePathForDavex("/").".0.json";
         foreach ($paths as $path) {
-            $body[] = http_build_query(array(":include" => $path));
+            if (UUIDHelper::isUUID($path)) {
+                $body[] = http_build_query(array(":id" => $path));
+            } else {
+                $body[] = http_build_query(array(":include" => $path));
+            }
         }
         $body = implode("&",$body);
         $request = $this->getRequest(Request::POST, $url);
