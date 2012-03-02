@@ -964,6 +964,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
             case PropertyType::BINARY:
+            case PropertyType::PATH:
                 return null;
             case PropertyType::NAME:
                 if ($property->getName() != 'jcr:primaryType') {
