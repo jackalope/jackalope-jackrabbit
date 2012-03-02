@@ -965,13 +965,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         
         $type = $property->getType();
         switch ($type) {
+            case PropertyType::DECIMAL:
+                return null;
+            case PropertyType::DOUBLE:
+                return (float) $property->getValueForStorage();
+            case PropertyType::LONG:
+                return (int) $property->getValueForStorage();
             case PropertyType::DATE:
-                $nativeValue = $property->getValueForStorage();
-                return json_encode(PropertyType::convertType($nativeValue, PropertyType::STRING));
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
             case PropertyType::BINARY:
             case PropertyType::PATH:
+            case PropertyType::URI:
                 return null;
             case PropertyType::NAME:
                 if ($property->getName() != 'jcr:primaryType') {
@@ -1749,7 +1754,14 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"' . $eol;
                 $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
                 $data .= 'Content-Transfer-Encoding: 8bit'. $eol.$eol;
-                $data .= $value[0] . $eol;
+                switch ($value[1]) {
+                    case PropertyType::DATE:
+                        $data .= PropertyType::convertType($value[0], PropertyType::STRING);
+                        break;
+                    default:
+                        $data .= $value[0];
+                }
+                $data .= $eol;
             }
             
         } else {
