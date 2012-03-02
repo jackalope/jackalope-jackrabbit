@@ -842,7 +842,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         if (!$value) {
             $this->setJsopBody($nativeValue, $path, $typeid);
+            if (is_array($nativeValue)) {
+            $this->setJsopBody('^' . $path . ' : []');
+            } else {
             $this->setJsopBody('^' . $path . ' : ');
+                
+            }
         } else {
             $this->setJsopBody('^' . $path . ' : ' . $value);
         }
@@ -959,6 +964,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
             case PropertyType::BINARY:
+            case PropertyType::NAME:
                 return null;
         }
         $nativeValue = $property->getValueForStorage();
@@ -1714,7 +1720,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $eol = "\r\n";
         $data .= '--' . $mime_boundary . $eol ;
         if (is_array($value)) {
-            
+            if (is_array($value[0])) {
+                foreach($value[0] as $v) {
+                    $data .= $this->getMimePart($name,$v,$mime_boundary);
+                }
+                return $data;
+                
+            }
             if (is_resource(($value[0]))) {
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $name . '"' . $eol;
                 $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
@@ -1728,7 +1740,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
             
         } else {
-            
+            if (is_array($value)) {
+                foreach($value as $v) {
+                    $data .= $this->getMimePart($name,$v,$mime_boundary);
+                }
+                return $data;
+                
+            }
             $data .= 'Content-Disposition: form-data; name="'.$name.'"'. $eol;
             $data .= 'Content-Type: text/plain; charset=UTF-8'. $eol;
             $data .= 'Content-Transfer-Encoding: 8bit'. $eol. $eol;
