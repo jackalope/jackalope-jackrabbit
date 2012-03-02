@@ -964,8 +964,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
             case PropertyType::BINARY:
-            case PropertyType::NAME:
                 return null;
+            case PropertyType::NAME:
+                if ($property->getName() != 'jcr:primaryType') {
+                    return null;
+                }
+                break;
+           
         }
         $nativeValue = $property->getValueForStorage();
         return json_encode($nativeValue);
