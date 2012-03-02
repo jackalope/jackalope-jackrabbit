@@ -781,13 +781,20 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function moveNode($srcAbsPath, $dstAbsPath)
+    public function moveNode($srcAbsPath, $dstAbsPath, $immediatly = false)
     {
-        $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
-        $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
+        if ($immediatly) {
+            $request = $this->getRequest(Request::MOVE, $srcAbsPath);
+            $request->setDepth(Request::INFINITY);
+            $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
+            $request->setTransactionId($this->transactionToken);
+            $request->execute();
+        } else {
+            $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
+            $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
 
-        $this->setJsopBody(">".$srcAbsPath . " : " . $dstAbsPath);
-
+            $this->setJsopBody(">" . $srcAbsPath . " : " . $dstAbsPath);
+        }
     }
 
     /**
