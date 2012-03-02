@@ -263,9 +263,9 @@ class Request
      */
     public function setBody($body)
     {
-        $this->body = (string) $body;
+        $this->body =  $body;
     }
-
+    
     /**
      * Set or update the HTTP method to be used in this request.
      *
@@ -350,6 +350,9 @@ class Request
         $curl->setopt(CURLOPT_CUSTOMREQUEST, $this->method);
 
         $curl->setopt(CURLOPT_HTTPHEADER, $headers);
+        if (is_array($this->body)) {
+            $curl->setopt(CURLOPT_POST, 1);
+        }
         $curl->setopt(CURLOPT_POSTFIELDS, $this->body);
         if ($getCurlObject) {
             $curl->parseResponseHeaders();
@@ -464,6 +467,9 @@ class Request
         $curl->setopt(CURLOPT_CUSTOMREQUEST, $this->method);
         $curl->setopt(CURLOPT_URL, reset($this->uri));
         $curl->setopt(CURLOPT_HTTPHEADER, $headers);
+        if (is_array($this->body)) {
+            $curl->setopt(CURLOPT_POST, 1);
+        }
         $curl->setopt(CURLOPT_POSTFIELDS, $this->body);
         // TODO: uncomment next line to get verbose information from CURL
         //$curl->setopt(CURLOPT_VERBOSE, 1);
