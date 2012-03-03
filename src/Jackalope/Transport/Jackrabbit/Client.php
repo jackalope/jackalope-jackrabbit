@@ -844,16 +844,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         //$type = PropertyType::nameFromValue($typeid);
         $nativeValue = $property->getValueForStorage();
 
-      
         $value = $this->propertyToJsopString($property);
-
         if (!$value) {
             $this->setJsopBody($nativeValue, $path, $typeid);
             if (is_array($nativeValue)) {
-            $this->setJsopBody('^' . $path . ' : []');
+                $this->setJsopBody('^' . $path . ' : []');
             } else {
-            $this->setJsopBody('^' . $path . ' : ');
-                
+                $this->setJsopBody('^' . $path . ' : ');
             }
         } else {
             $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
