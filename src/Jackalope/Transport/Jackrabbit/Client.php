@@ -856,7 +856,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 
             }
         } else {
-            $this->setJsopBody('^' . $path . ' : ' . $value);
+            $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
         }
 
 
@@ -888,7 +888,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             if (!$value) {
                 $binaries[] = $property;
             } else {
-                $body .= json_encode($name) . ':' . $value . ",";
+                $body .= json_encode($name) . ':' . json_encode($value) . ",";
             }
         }
         $body .= "}";
@@ -960,7 +960,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @param $type
      * @return mixed|string
      */
-    protected function propertyToJsopString($property)
+    protected function propertyToJsopString(PropertyInterface $property)
     {
         
         $type = $property->getType();
@@ -968,9 +968,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             case PropertyType::DECIMAL:
                 return null;
             case PropertyType::DOUBLE:
-                return (float) $property->getValueForStorage();
+                return PropertyType::convertType($property->getValueForStorage(), PropertyType::DOUBLE);
             case PropertyType::LONG:
-                return (int) $property->getValueForStorage();
+                return PropertyType::convertType($property->getValueForStorage(), PropertyType::LONG);
             case PropertyType::DATE:
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
@@ -986,7 +986,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
            
         }
         $nativeValue = $property->getValueForStorage();
-        return json_encode($nativeValue);
+        return $nativeValue;
     }
 
     /**
