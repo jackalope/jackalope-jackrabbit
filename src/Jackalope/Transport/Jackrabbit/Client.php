@@ -58,7 +58,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, TransactionInterface, LockingInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface // FIXME: JSOP: temporary disabled: TransactionInterface
 {
     /**
      * minimal version needed for the backend server
