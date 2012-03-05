@@ -568,17 +568,57 @@ class Request
             }
         }
         if (404 === $httpCode) {
-            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} ".var_export($this->uri, true));
+            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n" . $this->getShortErrorString());
         } elseif (405 == $httpCode) {
-            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} ".var_export($this->uri, true), 405);
+            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
         } elseif ($httpCode >= 500) {
-            throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} ".var_export($this->uri, true)."\n\n$response");
+            throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response));
         }
 
         $curlError = $curl->error();
 
-        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} ".var_export($this->uri, true)."\n\n$response";
+        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl,$response);
         throw new RepositoryException($msg);
+    }
+    
+    /**
+     * returns a shorter error string to be used in exceptions
+     *
+     * It returns a "nicely" formatted URI of the request
+     *
+     * @return string the error message
+     */
+    
+    protected function getShortErrorString() 
+    {
+        return "--uri: --\n" . var_export($this->uri, true) . "\n";
+    }
+    
+    /**
+     * returns a longer error string to be used in generic exceptions
+     *
+     * It returns a "nicely" formatted URI of the request
+     * plus the output of curl_getinfo
+     * plus the response body including its size
+     *
+     * @param curl $curl The curl object
+     * @param string $response the response body
+     * @return string the error message
+     */
+    
+    protected function getLongErrorString($curl, $response) 
+    {
+        $string = $this->getShortErrorString();
+        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) . "\n" ;
+        $string .= "--request body (size: " . strlen($this->body) . " bytes): --\n";
+        if (strlen($this->body) > 2000) {
+            $string .= substr($this->body,0,2000);
+            $string .= "\n (truncated)\n";
+        } else {
+            $string .= $this->body . "\n";
+        }
+        $string .= "--response body (size: " . strlen($response) . " bytes): --\n$response\n--end response body--\n";
+        return $string;
     }
 
     /**
