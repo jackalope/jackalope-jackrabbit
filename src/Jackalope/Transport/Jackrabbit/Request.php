@@ -608,7 +608,6 @@ class Request
     protected function getLongErrorString($curl,$response) {
         $string = $this->getShortErrorString();
         $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) ."\n" ;
-        $string .= "--request header : --\n" . var_export($this->headers, true). "\n";
         $string .= "--request body (size: ".strlen($this->body). " bytes): --\n";
         if (strlen($this->body) > 2000) {
             $string .=  substr($this->body,0,2000);
