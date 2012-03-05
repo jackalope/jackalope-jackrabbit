@@ -3,4 +3,4 @@
 	url = git://github.com/phpcr/phpcr-api-tests.git
 [submodule "lib/jackalope"]
 	path = lib/jackalope
-	url = git://github.com/chregu/jackalope.git
+	url = git://github.com/jackalope/jackalope.git
