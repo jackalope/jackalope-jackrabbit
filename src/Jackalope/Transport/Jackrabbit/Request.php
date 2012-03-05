@@ -568,17 +568,28 @@ class Request
             }
         }
         if (404 === $httpCode) {
-            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} ".var_export($this->uri, true));
+            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n" . $this->getShortErrorString());
         } elseif (405 == $httpCode) {
-            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} ".var_export($this->uri, true), 405);
+            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
         } elseif ($httpCode >= 500) {
-            throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} ".var_export($this->uri, true)."\n\n$response");
+            throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response));
         }
 
         $curlError = $curl->error();
 
-        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} ".var_export($this->uri, true)."\n\n$response";
+        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl,$response);
         throw new RepositoryException($msg);
+    }
+    
+    protected function getShortErrorString() {
+        return "--uri: --\n" . var_export($this->uri, true) ."\n";
+    }
+    
+    protected function getLongErrorString($curl,$response) {
+        $string = $this->getShortErrorString();
+        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) ."\n" ;
+        $string .= "--response body (size: ".strlen($response). " bytes): --\n$response\n--end response body--\n";
+        return $string;
     }
 
     /**
