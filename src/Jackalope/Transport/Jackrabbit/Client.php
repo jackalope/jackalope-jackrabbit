@@ -1575,7 +1575,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    
     public function finishSave() 
     {
         if (count($this->jsopBody) > 0) {
