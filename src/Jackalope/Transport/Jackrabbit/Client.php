@@ -766,7 +766,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
          */
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
-        
+
         if ($srcWorkspace) {
             $srcAbsPath = $this->server . $srcAbsPath;
         }
@@ -858,7 +858,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return true;
     }
 
-    
     /**
      * create the node markup and a list of value dispatches for multivalue properties
      *
@@ -872,11 +871,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function createNodeJsop($path, $properties, $children)
     {
-        //$body = '<sv:node xmlns:sv="http://www.jcp.org/jcr/sv/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" sv:name="'.basename($path).'">';
 
-        $body = '+' . $path . ' : {';//. json_encode($properties);
-        
+        $body = '+' . $path . ' : {';
         $binaries = array();
+        
         foreach ($properties as $name => $property) {
             $value = $this->propertyToJsopString($property);
             if (!$value) {
@@ -894,8 +892,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         foreach ($children as $name => $node) {
             $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
         }
-        
-        return true ;
+
+        return true;
     }
 
     /**
@@ -907,9 +905,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function propertyToJsopString(PropertyInterface $property)
     {
-        
-        $type = $property->getType();
-        switch ($type) {
+        switch ($property->getType()) {
             case PropertyType::DECIMAL:
                 return null;
             case PropertyType::DOUBLE:
@@ -930,57 +926,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 break;
            
         }
-        $nativeValue = $property->getValueForStorage();
-        return $nativeValue;
-    }
-
-    /**
-     * This method is used when building an XML of the properties
-     *
-     * @param $value
-     * @param $type
-     * @return mixed|string
-     */
-    protected function propertyToXmlString($value, $type)
-    {
-        switch ($type) {
-            case PropertyType::TYPENAME_BOOLEAN:
-                return $value ? 'true' : 'false';
-            case PropertyType::TYPENAME_DATE:
-                return PropertyType::convertType($value, PropertyType::STRING);
-            case PropertyType::TYPENAME_BINARY:
-                $ret = base64_encode(stream_get_contents($value));
-                fclose($value);
-                return $ret;
-            case PropertyType::TYPENAME_UNDEFINED:
-            case PropertyType::TYPENAME_STRING:
-            case PropertyType::TYPENAME_URI:
-                $value = str_replace(']]>',']]]]><![CDATA[>',$value);
-                return '<![CDATA['.$value.']]>';
-        }
-        return $value;
-    }
-    
-    /**
-     * This method is used to directly set a property
-     *
-     * @param $value
-     * @param $type
-     * @return mixed|string
-     */
-    protected function propertyToRawString($value, $type)
-    {
-        switch ($type) {
-            case PropertyType::TYPENAME_BINARY:
-                $ret = stream_get_contents($value);
-                fclose($value);
-                return $ret;
-            case PropertyType::TYPENAME_UNDEFINED:
-            case PropertyType::TYPENAME_STRING:
-            case PropertyType::TYPENAME_URI:
-                return $value;
-        }
-        return $this->propertyToXmlString($value, $type);
+        return $property->getValueForStorage();
     }
 
     /**
@@ -1474,7 +1420,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
             $uri = $this->workspaceUriRoot . $uri;
         }
-        
         return $uri;
     }
 
