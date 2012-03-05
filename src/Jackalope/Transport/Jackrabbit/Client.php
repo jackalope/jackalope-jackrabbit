@@ -1643,6 +1643,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
                 $data .= 'Content-Transfer-Encoding: binary'. $eol.$eol;
                 $data .= stream_get_contents($value[0]) . $eol;
+                fclose($value[0]);
             } else {
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"' . $eol;
                 $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
