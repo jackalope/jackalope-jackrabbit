@@ -581,9 +581,29 @@ class Request
         throw new RepositoryException($msg);
     }
     
+    /**
+     * returns a shorter error string to be used in exceptions
+     *
+     * It returns a "nicely" formatted URI of the request
+     *
+     * @return string the error message
+     */
+    
     protected function getShortErrorString() {
         return "--uri: --\n" . var_export($this->uri, true) ."\n";
     }
+    
+    /**
+     * returns a longer error string to be used in generic exceptions
+     *
+     * It returns a "nicely" formatted URI of the request
+     * plus the output of curl_getinfo
+     * plus the response body including its size
+     *
+     * @param curl $curl The curl object
+     * @param string $response the response body
+     * @return string the error message
+     */
     
     protected function getLongErrorString($curl,$response) {
         $string = $this->getShortErrorString();
