@@ -114,7 +114,11 @@ class curl
      */
     public function getinfo($option = null)
     {
-        return curl_getinfo($this->curl, $option);
+        if ($option === null) {
+            return curl_getinfo($this->curl);
+        } else {
+            return curl_getinfo($this->curl, $option);
+        }
     }
 
     /**
