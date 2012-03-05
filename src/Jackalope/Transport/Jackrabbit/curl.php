@@ -116,9 +116,8 @@ class curl
     {
         if ($option === null) {
             return curl_getinfo($this->curl);
-        } else {
-            return curl_getinfo($this->curl, $option);
-        }
+        }   
+        return curl_getinfo($this->curl, $option);
     }
 
     /**
