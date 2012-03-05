@@ -1632,4 +1632,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         throw new \InvalidArgumentException("Invalid timeout value '$timeoutValue'");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+
+    public function finishSave() 
+    {
+    }
+
 }
