@@ -825,10 +825,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function storeNode(NodeInterface $node)
     {
-        $buffer = array();
         $path = $node->getPath();
-        $this->createNodeJsop($path, $node->getProperties(), $node->getNodes(), $buffer);
-        
+        $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
         return true;
     }
 
@@ -869,11 +867,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @param string $path path to the current node, basename is the name of the node
      * @param array $properties of this node
      * @param array $children nodes of this node
-     * @param array $buffer list of xml strings to set multivalue properties
      *
      * @return string the xml for the node
      */
-    protected function createNodeJsop($path, $properties, $children, array &$buffer)
+    protected function createNodeJsop($path, $properties, $children)
     {
         //$body = '<sv:node xmlns:sv="http://www.jcp.org/jcr/sv/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" sv:name="'.basename($path).'">';
 
@@ -895,61 +892,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $this->storeProperty($binary);
         }
         foreach ($children as $name => $node) {
-            $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes(), $buffer);
+            $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
         }
         
         return true ;
     }
-    
-    /**
-     * create the node markup and a list of value dispatches for multivalue properties
-     *
-     * this is a recursive function.
-     *
-     * @param string $path path to the current node, basename is the name of the node
-     * @param array $properties of this node
-     * @param array $children nodes of this node
-     * @param array $buffer list of xml strings to set multivalue properties
-     *
-     * @return string the xml for the node
-     */
-    protected function createNodeMarkup($path, $properties, $children, array &$buffer)
-    {
-        $body = '<sv:node xmlns:sv="http://www.jcp.org/jcr/sv/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" sv:name="'.basename($path).'">';
 
-        foreach ($properties as $name => $property) {
-            $type = PropertyType::nameFromValue($property->getType());
-            $nativeValue = $property->getValueForStorage();
-            $valueBody = '';
-            // handle multivalue properties
-            if (is_array($nativeValue)) {
-                // multivalue properties with many rows can be inlined
-                if (count($nativeValue) > 1 || $name === 'jcr:mixinTypes') {
-                    foreach ($nativeValue as $value) {
-                        $valueBody .= '<sv:value>'.$this->propertyToXmlString($value, $type).'</sv:value>';
-                    }
-                } else {
-                    // multivalue properties with just one value have to be saved separately to transmit the multivalue info
-                    $buffer[$path.'/'.$name] = '<?xml version="1.0" encoding="UTF-8"?><dcr:values xmlns:dcr="http://www.day.com/jcr/webdav/1.0">'.
-                        '<dcr:value dcr:type="'.$type.'">'.$this->propertyToXmlString(reset($nativeValue), $type).'</dcr:value>'.
-                    '</dcr:values>';
-                    continue;
-                }
-            } else {
-                // handle single value properties
-                $valueBody = '<sv:value>'.$this->propertyToXmlString($nativeValue, $type).'</sv:value>';
-            }
-            $body .= '<sv:property sv:name="'.$name.'" sv:type="'.$type.'">'.$valueBody.'</sv:property>';
-        }
-
-        foreach ($children as $name => $node) {
-            $body .= $this->createNodeMarkup($path.'/'.$name, $node->getProperties(), $node->getNodes(), $buffer);
-        }
-
-        return $body . '</sv:node>';
-    }
-
-    
     /**
      * This method is used when building an XML of the properties
      *
