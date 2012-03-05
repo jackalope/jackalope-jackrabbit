@@ -589,8 +589,9 @@ class Request
      * @return string the error message
      */
     
-    protected function getShortErrorString() {
-        return "--uri: --\n" . var_export($this->uri, true) ."\n";
+    protected function getShortErrorString() 
+    {
+        return "--uri: --\n" . var_export($this->uri, true) . "\n";
     }
     
     /**
@@ -605,17 +606,18 @@ class Request
      * @return string the error message
      */
     
-    protected function getLongErrorString($curl,$response) {
+    protected function getLongErrorString($curl, $response) 
+    {
         $string = $this->getShortErrorString();
-        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) ."\n" ;
-        $string .= "--request body (size: ".strlen($this->body). " bytes): --\n";
+        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) . "\n" ;
+        $string .= "--request body (size: " . strlen($this->body) . " bytes): --\n";
         if (strlen($this->body) > 2000) {
-            $string .=  substr($this->body,0,2000);
-            $string .=   "\n (truncated)\n";
+            $string .= substr($this->body,0,2000);
+            $string .= "\n (truncated)\n";
         } else {
-            $string .= $this->body."\n";
+            $string .= $this->body . "\n";
         }
-        $string .= "--response body (size: ".strlen($response). " bytes): --\n$response\n--end response body--\n";
+        $string .= "--response body (size: " . strlen($response) . " bytes): --\n$response\n--end response body--\n";
         return $string;
     }
 
