@@ -5,7 +5,8 @@ php:
   - 5.4
 
 before_script:
-  - ./tests/vendor/vendors.sh
+  - ./tests/vendor/jackrabbit.sh
+  - ./tests/vendor/vendors.php
 
 script: phpunit -c tests/phpunit.xml.dist
 
