@@ -5,7 +5,7 @@ php:
   - 5.4
 
 before_script:
-  - ./tests/travis.sh
+  - ./tests/vendor/vendors.sh
 
 script: phpunit -c tests/phpunit.xml.dist
 
