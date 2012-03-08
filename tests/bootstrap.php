@@ -17,11 +17,6 @@ error_reporting(E_ALL | E_STRICT);
  * Bootstrap file for jackalope
  */
 
-/**
- * autoloader: tests rely on an autoloader.
- */
-require __DIR__.'/../src/autoload.dist.php';
-
 ### Load classes needed for jackalope unit tests ###
 require 'Jackalope/Transport/Jackrabbit/JackrabbitTestCase.php';
 
