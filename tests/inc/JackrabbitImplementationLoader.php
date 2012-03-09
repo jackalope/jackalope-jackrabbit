@@ -55,7 +55,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
                     'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
                     'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
                     'Writing\\MoveMethodsTest::testSessionMoveReplace',
-                    'Writing\\NodeTypeAssignementTest::testAddMixinTwice', // will work as soon as the jsop branch is merged
         );
     }
 
