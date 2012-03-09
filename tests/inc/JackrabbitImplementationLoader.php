@@ -43,17 +43,19 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
                     'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
                     'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
-                    'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
+                    'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes?
 
                     'Query\\QueryManagerTest::testGetQuery',
                     'Query\\QueryManagerTest::testGetQueryInvalid',
                     'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
                     'Query\\NodeViewTest::testSeekable',
 
+                    'Writing\\SetPropertyMethodsTest::testSetPropertyNewExistingNode', // see http://www.mail-archive.com/dev@jackrabbit.apache.org/msg28035.html
                     'Writing\\NamespaceRegistryTest::testRegisterUnregisterNamespace',
                     'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
                     'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
                     'Writing\\MoveMethodsTest::testSessionMoveReplace',
+                    'Writing\\NodeTypeAssignementTest::testAddMixinTwice', // will work as soon as the jsop branch is merged
         );
     }
 
