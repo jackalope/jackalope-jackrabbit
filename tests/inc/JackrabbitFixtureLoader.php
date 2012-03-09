@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../phpcr-api/inc/FixtureLoaderInterface.php';
+require_once __DIR__.'/../../vendor/phpcr/phpcr-api-tests/inc/FixtureLoaderInterface.php';
 
 /**
  * Handles basic importing and exporting of fixtures trough
