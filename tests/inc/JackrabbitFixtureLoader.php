@@ -26,7 +26,7 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
     public function __construct($fixturePath = null, $jackjar = null)
     {
         if (is_null($fixturePath)) {
-            $this->fixturePath = __DIR__ . '/../phpcr-api/fixtures/';
+            $this->fixturePath = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures/';
         } else {
             $this->fixturePath = $fixturePath;
         }
