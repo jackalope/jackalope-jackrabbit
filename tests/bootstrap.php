@@ -15,7 +15,7 @@ error_reporting(E_ALL | E_STRICT);
 require 'Jackalope/Transport/Jackrabbit/JackrabbitTestCase.php';
 
 ### Load the implementation loader class ###
-require 'inc/JackrabbitImplementationLoader.php';
+require __DIR__.'/../vendor/phpcr/phpcr-api-tests/inc/JackrabbitImplementationLoader.php';
 
 /*
  * constants for the repository descriptor test for JCR 1.0/JSR-170 and JSR-283 specs
