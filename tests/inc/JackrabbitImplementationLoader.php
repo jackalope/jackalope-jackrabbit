@@ -107,6 +107,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     function getFixtureLoader()
     {
         require_once "JackrabbitFixtureLoader.php";
-        return new JackrabbitFixtureLoader(__DIR__.'/../phpcr-api/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
+        return new JackrabbitFixtureLoader(__DIR__.'/../../vendor/phpcr/phpcr-api-tests/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
     }
 }
