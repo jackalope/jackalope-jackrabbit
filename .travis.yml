@@ -5,7 +5,9 @@ php:
   - 5.4
 
 before_script:
-  - ./tests/travis.sh
+  - ./tests/vendor/jackrabbit.sh
+  - curl -s http://getcomposer.org/installer | php
+  - php composer.phar install --install-suggests
 
 script: phpunit -c tests/phpunit.xml.dist
 
