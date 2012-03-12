@@ -190,13 +190,6 @@ class Request
     protected $lockToken = false;
 
     /**
-     * The transaction id active for this request otherwise FALSE for not
-     * performing a transaction
-     * @var string|FALSE
-     */
-    protected $transactionId = false;
-
-    /**
      * Whether we already did a version check in handling an error.
      * Doing this once per php process is enough.
      *
@@ -309,16 +302,6 @@ class Request
     }
 
     /**
-     * Set the transaction identifier to be used in this request
-     *
-     * @param string $transactionId
-     */
-    public function setTransactionId($transactionId)
-    {
-        $this->transactionId = (string) $transactionId;
-    }
-
-    /**
      * used by multiCurl with fresh curl instances
      *
      * @param curl $curl
@@ -340,10 +323,6 @@ class Request
 
         if ($this->lockToken) {
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
-        }
-
-        if ($this->transactionId) {
-            $headers[] = 'TransactionId: <'.$this->transactionId.'>';
         }
 
         $curl->setopt(CURLOPT_RETURNTRANSFER, true);
@@ -454,10 +433,6 @@ class Request
 
         if ($this->lockToken) {
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
-        }
-
-        if ($this->transactionId) {
-            $headers[] = 'TransactionId: <'.$this->transactionId.'>';
         }
 
         $curl->setopt(CURLOPT_RETURNTRANSFER, true);

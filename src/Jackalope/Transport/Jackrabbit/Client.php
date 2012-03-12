@@ -27,7 +27,6 @@ use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\WritingInterface;
 use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
-use Jackalope\Transport\TransactionInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
@@ -58,7 +57,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface // FIXME: JSOP: temporary disabled: TransactionInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface
 {
     /**
      * minimal version needed for the backend server
@@ -189,14 +188,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected $descriptors = null;
 
-    /**
-      * The transaction token received by a LOCKing request
-      *
-      * Is FALSE while no transaction running.
-      * @var string|FALSE
-      */
-    protected $transactionToken = false;
-    
     protected $jsopBody = array();
 
     /**
@@ -427,7 +418,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path .= '.0.json';
 
         $request = $this->getRequest(Request::GET, $path);
-        $request->setTransactionId($this->transactionToken);
         try {
             return $request->executeJson();
         } catch (PathNotFoundException $e) {
@@ -462,7 +452,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
-        $request->setTransactionId($this->transactionToken);
         try {
             $data = $request->executeJson();
             return $data->nodes;
@@ -497,7 +486,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         $request = $this->getRequest(Request::GET, $path);
-        $request->setTransactionId($this->transactionToken);
         $curl = $request->execute(true);
         switch ($curl->getHeader('Content-Type')) {
             case 'text/xml; charset=utf-8':
@@ -577,7 +565,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         $identifier = $weak_reference ? 'weakreferences' : 'references';
         $request = $this->getRequest(Request::PROPFIND, $path);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($this->buildPropfindRequest(array('dcr:'.$identifier)));
         $request->setDepth(0);
         $dom = $request->executeDom();
@@ -606,7 +593,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
             $request = $this->getRequest(Request::CHECKIN, $path);
-            $request->setTransactionId($this->transactionToken);
             $curl = $request->execute(true);
             if ($curl->getHeader("Location")) {
                 return $this->stripServerRootFromUri(urldecode($curl->getHeader("Location")));
@@ -629,7 +615,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
             $request = $this->getRequest(Request::CHECKOUT, $path);
-            $request->setTransactionId($this->transactionToken);
             $request->execute();
         } catch (HTTPErrorException $e) {
             if ($e->getCode() == 405) {
@@ -659,7 +644,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->getRequest(Request::UPDATE, $path);
         $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
         $request->execute(); // errors are checked in request
     }
 
@@ -670,7 +654,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($versionPath . '/' . $versionName);
         $request = $this->getRequest(Request::DELETE, $path);
-        $request->setTransactionId($this->transactionToken);
         $resp = $request->execute();
         return $resp;
     }
@@ -705,7 +688,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $path = $this->addWorkspacePathToUri('/');
         $request = $this->getRequest(Request::SEARCH, $path);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($body);
 
         $rawData = $request->execute();
@@ -774,7 +756,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::COPY, $srcAbsPath);
         $request->setDepth(Request::INFINITY);
         $request->addHeader('Destination: '.$this->addWorkspacePathToUri($dstAbsPath));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
     }
 
@@ -787,7 +768,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $request = $this->getRequest(Request::MOVE, $srcAbsPath);
             $request->setDepth(Request::INFINITY);
             $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
-            $request->setTransactionId($this->transactionToken);
             $request->execute();
         } else {
             $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
@@ -936,7 +916,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildLocateRequest($uuid));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         /* answer looks like
@@ -967,7 +946,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildReportRequest('dcr:registerednamespaces'));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         if ($dom->firstChild->localName != 'registerednamespaces-report'
@@ -1019,7 +997,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
         $namespaces[$prefix] = $uri;
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
         return true;
     }
@@ -1038,7 +1015,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $namespaces = $this->getNamespaces();
         unset($namespaces[$prefix]);
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
         return true;
         */
@@ -1051,7 +1027,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUriRoot);
         $request->setBody($this->buildNodeTypesRequest($nodeTypes));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         if ($dom->firstChild->localName != 'nodeTypes') {
@@ -1065,76 +1040,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $this->typeXmlConverter->getNodeTypesFromXml($dom);
     }
 
-    // TransactionInterface //
-
-    /**
-     * {@inheritDoc}
-     */
-    public function beginTransaction()
-    {
-        $request = $this->getRequest(Request::LOCK, $this->workspaceUriRoot);
-        $request->setDepth('infinity');
-        $request->setTransactionId($this->transactionToken);
-        $request->setBody('<?xml version="1.0" encoding="utf-8"?>'.
-            '<D:lockinfo xmlns:D="'.self::NS_DAV.'" xmlns:jcr="'.self::NS_DCR.'">'.
-            ' <D:lockscope><jcr:local /></D:lockscope>'.
-            ' <D:locktype><jcr:transaction /></D:locktype>'.
-            '</D:lockinfo>');
-
-        $dom = $request->executeDom();
-        $hrefs = $dom->getElementsByTagNameNS(self::NS_DAV, 'href');
-
-        if (!$hrefs->length) {
-            throw new RepositoryException('No transaction token received');
-        }
-        $this->transactionToken = $hrefs->item(0)->textContent;
-        return $this->transactionToken;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function endTransaction($tag)
-    {
-        if ($tag != 'commit' && $tag != 'rollback') {
-            throw new InvalidArgumentException('Expected \'commit\' or \'rollback\' as argument');
-        }
-
-        $request = $this->getRequest(Request::UNLOCK, $this->workspaceUriRoot);
-        $request->setLockToken($this->transactionToken);
-        $request->setBody('<?xml version="1.0" encoding="utf-8"?>'.
-            '<jcr:transactioninfo xmlns:jcr="'.self::NS_DCR.'">'.
-            ' <jcr:transactionstatus><jcr:'.$tag.' /></jcr:transactionstatus>'.
-            '</jcr:transactioninfo>');
-
-        $request->execute();
-        $this->transactionToken = false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function commitTransaction()
-    {
-        $this->endTransaction('commit');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function rollbackTransaction()
-    {
-        $this->endTransaction('rollback');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setTransactionTimeout($seconds)
-    {
-        throw new NotImplementedException();
-    }
-
     // NodeTypeCndManagementInterface //
 
     /**
@@ -1143,7 +1048,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function registerNodeTypesCnd($cnd, $allowUpdate)
     {
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($this->buildRegisterNodeTypeRequest($cnd, $allowUpdate));
         $request->execute();
         return true;
@@ -1172,7 +1076,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         foreach ($dom->getElementsByTagNameNS(self::NS_DAV, 'current-user-privilege-set') as $node) {
@@ -1606,7 +1509,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
         try {
             $request->execute();
             
