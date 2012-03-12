@@ -29,6 +29,7 @@ use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\TransactionInterface;
 use Jackalope\Transport\LockingInterface;
+use Jackalope\Transport\ObservationInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
 use Jackalope\NodeType\NodeTypeManager;
@@ -58,7 +59,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, TransactionInterface, LockingInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, TransactionInterface, LockingInterface, ObservationInterface
 {
     /**
      * minimal version needed for the backend server
