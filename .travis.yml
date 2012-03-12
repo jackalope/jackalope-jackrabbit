@@ -6,9 +6,10 @@ php:
 
 before_script:
   - ./tests/vendor/jackrabbit.sh
-  - ./tests/vendor/vendors.php
+  - curl -s http://getcomposer.org/installer | php
+  - php composer.phar install --install-suggests
 
-script: phpunit -c tests/phpunit.xml.dist
+script: phpunit -c tests/phpunit.xml.dist --coverage-text
 
 notifications:
   irc: "irc.freenode.org#jackalope"
