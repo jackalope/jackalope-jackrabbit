@@ -31,6 +31,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
                     'LifecycleManagement',
                     'RetentionAndHold',
                     'SameNameSiblings',
+                    'Transactions'
         );
 
         $this->unsupportedCases = array(
