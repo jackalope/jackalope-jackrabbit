@@ -90,6 +90,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     const JCR_INFINITE_LOCK_TIMEOUT = 2147483;
 
     /**
+     * The path to request to get the Jackrabbit event journal
+     */
+    const JCR_JOURNAL_PATH = '?type=journal';
+
+    /**
      * The factory to instantiate objects
      * @var FactoryInterface
      */
@@ -258,7 +263,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * @return Request The Request
      */
-    protected function getRequest($method, $uri)
+    protected function getRequest($method, $uri, $addWorkspacePathToUri = true)
     {
         if (!is_array($uri)) {
             $uri = array($uri => $uri);
@@ -272,10 +277,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             throw new LogicException("Tried to start a request on a closed transport ($method for ".var_export($uri,true).")");
         }
 
-        foreach ($uri as $key => $row) {
-            $uri[$key] = $this->addWorkspacePathToUri($row);
+        if ($addWorkspacePathToUri) {
+            foreach ($uri as $key => $row) {
+                $uri[$key] = $this->addWorkspacePathToUri($row);
+            }
         }
-
 
         $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $this->curl, $method, $uri));
         $request->setCredentials($this->credentials);
@@ -1328,6 +1334,25 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request->execute();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getEventJournal($eventTypes = null, $absPath = null, $isDeep = null, array $uuid = null, array $nodeTypeName = null)
+    {
+        $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
+        $request = $this->getRequest(Request::GET, $path, false);
+        $data = $request->executeDom();
+
+        // The last parameter of the EventJournal contructor is used in the EventJournal to extract paths from
+        // full node URIs. Unfortunately the URIs returned by the backend are partially encoded which is not the
+        // case with the workspaceUriRoot value we have here. That's why we manually encode the workspace URI to
+        // fit what is needed in the journal. See EventJournal::constructEventJournal
+        return $this->factory->get(
+            'Observation\\EventJournal',
+            array($data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
+        );
+    }
+
     // protected helper methods //
 
     /**
@@ -1640,5 +1665,4 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function finishSave() 
     {
     }
-
 }
