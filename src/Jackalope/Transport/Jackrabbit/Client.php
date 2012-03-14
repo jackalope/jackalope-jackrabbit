@@ -1534,7 +1534,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (is_array($value)) {
             if (is_array($value[0])) {
                 foreach($value[0] as $v) {
-                    $data .= $this->getMimePart($name,$v,$mime_boundary);
+                    $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
                 }
                 return $data;
                 
