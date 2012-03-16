@@ -1337,7 +1337,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getEventJournal($eventTypes = null, $absPath = null, $isDeep = null, array $uuid = null, array $nodeTypeName = null)
+    public function getEventJournal(SessionInterface $session, $eventTypes = null, $absPath = null, $isDeep = null, array $uuid = null, array $nodeTypeName = null)
     {
         $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
         $request = $this->getRequest(Request::GET, $path, false);
@@ -1349,7 +1349,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         // fit what is needed in the journal. See EventJournal::constructEventJournal
         return $this->factory->get(
             'Observation\\EventJournal',
-            array($data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
+            array($session, $data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
         );
     }
 
