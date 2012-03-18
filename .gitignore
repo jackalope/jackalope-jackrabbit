@@ -19,3 +19,6 @@ tests/vendor/jackrabbit
 jackrabbit/
 
 vendor
+
+composer.phar
+composer.lock
