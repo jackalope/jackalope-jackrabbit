@@ -7,7 +7,7 @@ php:
 before_script:
   - curl -s http://getcomposer.org/installer | php
   - php composer.phar install --install-suggests
-  - ./tests/jackrabbit.sh
+  - ./bin/jackrabbit.sh
 
 script: phpunit -c tests/phpunit.xml.dist
 
