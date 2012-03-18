@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../phpcr-api/inc/FixtureLoaderInterface.php';
+require_once __DIR__.'/../../vendor/phpcr/phpcr-api-tests/inc/FixtureLoaderInterface.php';
 
 /**
  * Handles basic importing and exporting of fixtures trough
@@ -26,7 +26,7 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
     public function __construct($fixturePath = null, $jackjar = null)
     {
         if (is_null($fixturePath)) {
-            $this->fixturePath = __DIR__ . '/../phpcr-api/fixtures/';
+            $this->fixturePath = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures/';
         } else {
             $this->fixturePath = $fixturePath;
         }
