@@ -901,7 +901,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         foreach ($children as $name => $node) {
-            $body .= $this->createNodeMarkup($path.'/'.$name, $node->getProperties(), $node->getNodes(), $buffer);
+            if ($node->isNew()) {
+                // TODO: FIXME: even if the node is not new, its children could be new
+                $body .= $this->createNodeMarkup($path.'/'.$name, $node->getProperties(), $node->getNodes(), $buffer);
+            }
         }
 
         return $body . '</sv:node>';
@@ -1636,7 +1639,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * {@inheritDoc}
      */
 
-    public function finishSave() 
+    public function finishSave()
     {
     }
 
