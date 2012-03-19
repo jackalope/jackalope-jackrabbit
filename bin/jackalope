@@ -1,12 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-$autoload = __DIR__.'/../src/autoload.php';
-if (! file_exists($autoload)) {
-    die("Please copy one of the autoload dist files in src/ to $autoload and adjust as needed\n");
+if (!$loader = @include __DIR__.'/../vendor/.composer/autoload.php') {
+    die('You must set up the project dependencies, run the following commands:'.PHP_EOL.
+        'curl -s http://getcomposer.org/installer | php'.PHP_EOL.
+        'php composer.phar install'.PHP_EOL);
 }
-
-require_once($autoload);
 
 $configFile = getcwd() . DIRECTORY_SEPARATOR . 'cli-config.php';
 
