@@ -10,9 +10,6 @@ abstract class JackrabbitTestCase extends TestCase
     {
         parent::setUp();
 
-        if (! isset($GLOBALS['jackrabbit.uri'])) {
-            throw new \PHPUnit_Framework_SkippedTestSuiteError('jackrabbit.uri is not set. Skipping jackrabbit specific tests');
-        }
         $this->config['url'] = $GLOBALS['jackrabbit.uri'];
     }
 }
