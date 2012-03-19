@@ -35,7 +35,6 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         'jackalope.default_header' => 'string: Set a default header to send on each request to the backend (i.e. for load balancers to identify sessions)',
         'jackalope.jackrabbit_expect' => 'boolean: Send the "Expect: 100-continue" header on larger PUT and POST requests. Disabled by default to avoid issues with proxies and load balancers.',
         'jackalope.check_login_on_server' => 'boolean: if set to empty or false, skip initial check whether repository exists. Enabled by default, disable to gain a few milliseconds off each repository instantiation.',
-        'jackalope.disable_transactions' => 'boolean: if set and not empty, transactions are disabled, otherwise transactions are enabled. If transactions are enabled but not actively used, every save operation is wrapped into a transaction.',
         'jackalope.disable_stream_wrapper' => 'boolean: if set and not empty, stream wrapper is disabled, otherwise the stream wrapper is enabled and streams are only fetched when reading from for the first time. If your code always uses all binary properties it reads, you can disable this for a small performance gain.',
     );
 
@@ -89,7 +88,6 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
             $transport->setCheckLoginOnServer($parameters['jackalope.check_login_on_server']);
         }
 
-        $options['transactions'] = empty($parameters['jackalope.disable_transactions']);
         $options['stream_wrapper'] = empty($parameters['jackalope.disable_stream_wrapper']);
         return new Repository($factory, $transport, $options);
     }

@@ -27,7 +27,6 @@ use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\WritingInterface;
 use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
-use Jackalope\Transport\TransactionInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
@@ -58,7 +57,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, TransactionInterface, LockingInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface
 {
     /**
      * minimal version needed for the backend server
@@ -189,13 +188,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected $descriptors = null;
 
-    /**
-      * The transaction token received by a LOCKing request
-      *
-      * Is FALSE while no transaction running.
-      * @var string|FALSE
-      */
-    protected $transactionToken = false;
+    protected $jsopBody = array();
 
     /**
      * Create a transport pointing to a server url.
@@ -425,7 +418,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path .= '.0.json';
 
         $request = $this->getRequest(Request::GET, $path);
-        $request->setTransactionId($this->transactionToken);
         try {
             return $request->executeJson();
         } catch (PathNotFoundException $e) {
@@ -460,7 +452,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
-        $request->setTransactionId($this->transactionToken);
         try {
             $data = $request->executeJson();
             return $data->nodes;
@@ -495,7 +486,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         $request = $this->getRequest(Request::GET, $path);
-        $request->setTransactionId($this->transactionToken);
         $curl = $request->execute(true);
         switch ($curl->getHeader('Content-Type')) {
             case 'text/xml; charset=utf-8':
@@ -575,7 +565,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         $identifier = $weak_reference ? 'weakreferences' : 'references';
         $request = $this->getRequest(Request::PROPFIND, $path);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($this->buildPropfindRequest(array('dcr:'.$identifier)));
         $request->setDepth(0);
         $dom = $request->executeDom();
@@ -604,7 +593,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
             $request = $this->getRequest(Request::CHECKIN, $path);
-            $request->setTransactionId($this->transactionToken);
             $curl = $request->execute(true);
             if ($curl->getHeader("Location")) {
                 return $this->stripServerRootFromUri(urldecode($curl->getHeader("Location")));
@@ -627,7 +615,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
             $request = $this->getRequest(Request::CHECKOUT, $path);
-            $request->setTransactionId($this->transactionToken);
             $request->execute();
         } catch (HTTPErrorException $e) {
             if ($e->getCode() == 405) {
@@ -657,7 +644,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->getRequest(Request::UPDATE, $path);
         $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
         $request->execute(); // errors are checked in request
     }
 
@@ -668,7 +654,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($versionPath . '/' . $versionName);
         $request = $this->getRequest(Request::DELETE, $path);
-        $request->setTransactionId($this->transactionToken);
         $resp = $request->execute();
         return $resp;
     }
@@ -703,7 +688,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $path = $this->addWorkspacePathToUri('/');
         $request = $this->getRequest(Request::SEARCH, $path);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($body);
 
         $rawData = $request->execute();
@@ -742,10 +726,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function deleteNode($path)
     {
         $path = $this->encodeAndValidatePathForDavex($path);
-
-        $request = $this->getRequest(Request::DELETE, $path);
-        $request->setTransactionId($this->transactionToken);
-        $request->execute();
+        $this->setJsopBody("-" . $path . " : ");
         return true;
     }
 
@@ -762,6 +743,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function copyNode($srcAbsPath, $dstAbsPath, $srcWorkspace = null)
     {
+        /**
+         * No JSOP possible, is a workspace method
+         */
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
 
@@ -772,23 +756,25 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::COPY, $srcAbsPath);
         $request->setDepth(Request::INFINITY);
         $request->addHeader('Destination: '.$this->addWorkspacePathToUri($dstAbsPath));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
     }
 
     /**
      * {@inheritDoc}
      */
-    public function moveNode($srcAbsPath, $dstAbsPath)
+    public function moveNode($srcAbsPath, $dstAbsPath, $immediatly = false)
     {
-        $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
-        $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
+        if ($immediatly) {
+            $request = $this->getRequest(Request::MOVE, $srcAbsPath);
+            $request->setDepth(Request::INFINITY);
+            $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
+            $request->execute();
+        } else {
+            $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
+            $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
 
-        $request = $this->getRequest(Request::MOVE, $srcAbsPath);
-        $request->setDepth(Request::INFINITY);
-        $request->addHeader('Destination: '.$this->addWorkspacePathToUri($dstAbsPath));
-        $request->setTransactionId($this->transactionToken);
-        $request->execute();
+            $this->setJsopBody(">" . $srcAbsPath . " : " . $dstAbsPath);
+        }
     }
 
     /**
@@ -803,14 +789,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         foreach ($reorders as $r) {
             $body .= '>'.$absPath.'/'.$r[0] . ' : '. $r[1] . '#before'."\r";
         }
-        $body = ":diff=".trim($body);
-        $url = $this->encodeAndValidatePathForDavex("/");
-        $request = $this->getRequest(Request::POST, $url);
-        $request->setBody($body);
-        $request->setContentType('application/x-www-form-urlencoded');
-
-        $request->setTransactionId($this->transactionToken);
-        $request->execute();
+        $this->setJsopBody($body);
     }
 
     /**
@@ -827,34 +806,34 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function storeNode(NodeInterface $node)
     {
         $path = $node->getPath();
-        $path = $this->encodeAndValidatePathForDavex($path);
+        $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
+        return true;
+    }
 
-        $buffer = array();
-        $body = '<?xml version="1.0" encoding="UTF-8"?>';
-        $body .= $this->createNodeMarkup($path, $node->getProperties(), $node->getNodes(), $buffer);
 
-        $request = $this->getRequest(Request::MKCOL, $path);
-        $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
-        try {
-            $request->execute();
-        } catch (HTTPErrorException $e) {
-            // TODO: this will need to be changed when we refactor transport to use the diff format to store changes.
-            if (strpos($e->getMessage(), "405") !== false && strpos($e->getMessage(), "MKCOL") !== false) {
-                // TODO: can the 405 exception be thrown for other reasons too?
-                throw new ItemExistsException('This node probably already exists: '.$node->getPath(), $e->getCode(), $e);
+    /**
+     * {@inheritDoc}
+     */
+    public function storeProperty(PropertyInterface $property)
+    {
+        $path = $property->getPath();
+       // $path = $this->encodeAndValidatePathForDavex($path);
+        $typeid = $property->getType();
+        //$type = PropertyType::nameFromValue($typeid);
+        $nativeValue = $property->getValueForStorage();
+
+        $value = $this->propertyToJsopString($property);
+        if (!$value) {
+            $this->setJsopBody($nativeValue, $path, $typeid);
+            if (is_array($nativeValue)) {
+                $this->setJsopBody('^' . $path . ' : []');
+            } else {
+                $this->setJsopBody('^' . $path . ' : ');
             }
-            // TODO: can we throw any other more specific errors here?
-            throw new RepositoryException('Something went wrong while saving node: '.$node->getPath(), $e->getCode(), $e);
+        } else {
+            $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
         }
 
-        // store single-valued multivalue properties separately
-        foreach ($buffer as $path => $body) {
-            $request = $this->getRequest(Request::PUT, $path);
-            $request->setBody($body);
-            $request->setTransactionId($this->transactionToken);
-            $request->execute();
-        }
 
         return true;
     }
@@ -867,92 +846,36 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @param string $path path to the current node, basename is the name of the node
      * @param array $properties of this node
      * @param array $children nodes of this node
-     * @param array $buffer list of xml strings to set multivalue properties
      *
      * @return string the xml for the node
      */
-    protected function createNodeMarkup($path, $properties, $children, array &$buffer)
+    protected function createNodeJsop($path, $properties, $children)
     {
-        $body = '<sv:node xmlns:sv="http://www.jcp.org/jcr/sv/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" sv:name="'.basename($path).'">';
+        $body = '+' . $path . ' : {';
+        $binaries = array();
 
         foreach ($properties as $name => $property) {
-            $type = PropertyType::nameFromValue($property->getType());
-            $nativeValue = $property->getValueForStorage();
-            $valueBody = '';
-            // handle multivalue properties
-            if (is_array($nativeValue)) {
-                // multivalue properties with many rows can be inlined
-                if (count($nativeValue) > 1 || $name === 'jcr:mixinTypes') {
-                    foreach ($nativeValue as $value) {
-                        $valueBody .= '<sv:value>'.$this->propertyToXmlString($value, $type).'</sv:value>';
-                    }
-                } else {
-                    // multivalue properties with just one value have to be saved separately to transmit the multivalue info
-                    $buffer[$path.'/'.$name] = '<?xml version="1.0" encoding="UTF-8"?><dcr:values xmlns:dcr="http://www.day.com/jcr/webdav/1.0">'.
-                        '<dcr:value dcr:type="'.$type.'">'.$this->propertyToXmlString(reset($nativeValue), $type).'</dcr:value>'.
-                    '</dcr:values>';
-                    continue;
-                }
+            $value = $this->propertyToJsopString($property);
+            if (!$value) {
+                $binaries[] = $property;
             } else {
-                // handle single value properties
-                $valueBody = '<sv:value>'.$this->propertyToXmlString($nativeValue, $type).'</sv:value>';
+                $body .= json_encode($name) . ':' . json_encode($value) . ",";
             }
-            $body .= '<sv:property sv:name="'.$name.'" sv:type="'.$type.'">'.$valueBody.'</sv:property>';
+        }
+
+        $body .= "}";
+        $this->setJsopBody($body);
+
+        foreach ($binaries as $binary) {
+            $this->storeProperty($binary);
         }
 
         foreach ($children as $name => $node) {
             if ($node->isNew()) {
                 // TODO: FIXME: even if the node is not new, its children could be new
-                $body .= $this->createNodeMarkup($path.'/'.$name, $node->getProperties(), $node->getNodes(), $buffer);
+                $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
             }
         }
-
-        return $body . '</sv:node>';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function storeProperty(PropertyInterface $property)
-    {
-        $path = $property->getPath();
-        $path = $this->encodeAndValidatePathForDavex($path);
-
-        $typeid = $property->getType();
-        $type = PropertyType::nameFromValue($typeid);
-        $nativeValue = $property->getValueForStorage();
-
-        $request = $this->getRequest(Request::PUT, $path);
-        if ($property->getName() === 'jcr:mixinTypes') {
-            $uri = $this->addWorkspacePathToUri(dirname($path) === '\\' ? '/' : dirname($path));
-            $request->setUri($uri);
-            $request->setMethod(Request::PROPPATCH);
-            $body = '<?xml version="1.0" encoding="UTF-8"?>'.
-                '<D:propertyupdate xmlns:D="DAV:">'.
-                '<D:set>'.
-                '<D:prop>'.
-                '<dcr:mixinnodetypes xmlns:dcr="http://www.day.com/jcr/webdav/1.0">';
-            foreach ($nativeValue as $value) {
-                $body .= '<dcr:nodetype><dcr:nodetypename>'.$value.'</dcr:nodetypename></dcr:nodetype>';
-            }
-            $body .= '</dcr:mixinnodetypes>'.
-                '</D:prop>'.
-                '</D:set>'.
-                '</D:propertyupdate>';
-        } elseif (is_array($nativeValue)) {
-            $body = '<?xml version="1.0" encoding="UTF-8"?>'.
-                '<jcr:values xmlns:jcr="http://www.day.com/jcr/webdav/1.0">';
-            foreach ($nativeValue as $value) {
-                $body .= '<jcr:value jcr:type="'.$type.'">'.$this->propertyToXmlString($value, $type).'</jcr:value>';
-            }
-            $body .= '</jcr:values>';
-        } else {
-            $body = $this->propertyToRawString($nativeValue, $type);
-            $request->setContentType('jcr-value/'.strtolower($type));
-        }
-        $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
-        $request->execute();
 
         return true;
     }
@@ -964,46 +887,30 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @param $type
      * @return mixed|string
      */
-    protected function propertyToXmlString($value, $type)
+    protected function propertyToJsopString(PropertyInterface $property)
     {
-        switch ($type) {
-            case PropertyType::TYPENAME_BOOLEAN:
-                return $value ? 'true' : 'false';
-            case PropertyType::TYPENAME_DATE:
-                return PropertyType::convertType($value, PropertyType::STRING);
-            case PropertyType::TYPENAME_BINARY:
-                $ret = base64_encode(stream_get_contents($value));
-                fclose($value);
-                return $ret;
-            case PropertyType::TYPENAME_UNDEFINED:
-            case PropertyType::TYPENAME_STRING:
-            case PropertyType::TYPENAME_URI:
-                $value = str_replace(']]>',']]]]><![CDATA[>',$value);
-                return '<![CDATA['.$value.']]>';
-        }
-        return $value;
-    }
+        switch ($property->getType()) {
+            case PropertyType::DECIMAL:
+                return null;
+            case PropertyType::DOUBLE:
+                return PropertyType::convertType($property->getValueForStorage(), PropertyType::DOUBLE);
+            case PropertyType::LONG:
+                return PropertyType::convertType($property->getValueForStorage(), PropertyType::LONG);
+            case PropertyType::DATE:
+            case PropertyType::WEAKREFERENCE:
+            case PropertyType::REFERENCE:
+            case PropertyType::BINARY:
+            case PropertyType::PATH:
+            case PropertyType::URI:
+                return null;
+            case PropertyType::NAME:
+                if ($property->getName() != 'jcr:primaryType') {
+                    return null;
+                }
+                break;
 
-    /**
-     * This method is used to directly set a property
-     *
-     * @param $value
-     * @param $type
-     * @return mixed|string
-     */
-    protected function propertyToRawString($value, $type)
-    {
-        switch ($type) {
-            case PropertyType::TYPENAME_BINARY:
-                $ret = stream_get_contents($value);
-                fclose($value);
-                return $ret;
-            case PropertyType::TYPENAME_UNDEFINED:
-            case PropertyType::TYPENAME_STRING:
-            case PropertyType::TYPENAME_URI:
-                return $value;
         }
-        return $this->propertyToXmlString($value, $type);
+        return $property->getValueForStorage();
     }
 
     /**
@@ -1013,7 +920,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildLocateRequest($uuid));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         /* answer looks like
@@ -1044,7 +950,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildReportRequest('dcr:registerednamespaces'));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         if ($dom->firstChild->localName != 'registerednamespaces-report'
@@ -1096,7 +1001,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
         $namespaces[$prefix] = $uri;
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
         return true;
     }
@@ -1115,7 +1019,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $namespaces = $this->getNamespaces();
         unset($namespaces[$prefix]);
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
-        $request->setTransactionId($this->transactionToken);
         $request->execute();
         return true;
         */
@@ -1128,7 +1031,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUriRoot);
         $request->setBody($this->buildNodeTypesRequest($nodeTypes));
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         if ($dom->firstChild->localName != 'nodeTypes') {
@@ -1142,76 +1044,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $this->typeXmlConverter->getNodeTypesFromXml($dom);
     }
 
-    // TransactionInterface //
-
-    /**
-     * {@inheritDoc}
-     */
-    public function beginTransaction()
-    {
-        $request = $this->getRequest(Request::LOCK, $this->workspaceUriRoot);
-        $request->setDepth('infinity');
-        $request->setTransactionId($this->transactionToken);
-        $request->setBody('<?xml version="1.0" encoding="utf-8"?>'.
-            '<D:lockinfo xmlns:D="'.self::NS_DAV.'" xmlns:jcr="'.self::NS_DCR.'">'.
-            ' <D:lockscope><jcr:local /></D:lockscope>'.
-            ' <D:locktype><jcr:transaction /></D:locktype>'.
-            '</D:lockinfo>');
-
-        $dom = $request->executeDom();
-        $hrefs = $dom->getElementsByTagNameNS(self::NS_DAV, 'href');
-
-        if (!$hrefs->length) {
-            throw new RepositoryException('No transaction token received');
-        }
-        $this->transactionToken = $hrefs->item(0)->textContent;
-        return $this->transactionToken;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected function endTransaction($tag)
-    {
-        if ($tag != 'commit' && $tag != 'rollback') {
-            throw new InvalidArgumentException('Expected \'commit\' or \'rollback\' as argument');
-        }
-
-        $request = $this->getRequest(Request::UNLOCK, $this->workspaceUriRoot);
-        $request->setLockToken($this->transactionToken);
-        $request->setBody('<?xml version="1.0" encoding="utf-8"?>'.
-            '<jcr:transactioninfo xmlns:jcr="'.self::NS_DCR.'">'.
-            ' <jcr:transactionstatus><jcr:'.$tag.' /></jcr:transactionstatus>'.
-            '</jcr:transactioninfo>');
-
-        $request->execute();
-        $this->transactionToken = false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function commitTransaction()
-    {
-        $this->endTransaction('commit');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function rollbackTransaction()
-    {
-        $this->endTransaction('rollback');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setTransactionTimeout($seconds)
-    {
-        throw new NotImplementedException();
-    }
-
     // NodeTypeCndManagementInterface //
 
     /**
@@ -1220,7 +1052,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function registerNodeTypesCnd($cnd, $allowUpdate)
     {
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
-        $request->setTransactionId($this->transactionToken);
         $request->setBody($this->buildRegisterNodeTypeRequest($cnd, $allowUpdate));
         $request->execute();
         return true;
@@ -1249,7 +1080,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($body);
-        $request->setTransactionId($this->transactionToken);
         $dom = $request->executeDom();
 
         foreach ($dom->getElementsByTagNameNS(self::NS_DAV, 'current-user-privilege-set') as $node) {
@@ -1491,7 +1321,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function addWorkspacePathToUri($uri)
     {
-        if (substr($uri, 0, 1) === '/') {
+        if (substr($uri, 0, 1) === '/' || $uri === "") {
             if (empty($this->workspaceUri)) {
                 throw new RepositoryException("Implementation error: Please login before accessing content");
             }
@@ -1635,12 +1465,119 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         throw new \InvalidArgumentException("Invalid timeout value '$timeoutValue'");
     }
 
+    protected function setJsopBody($value, $key = ":diff", $type = null)
+    {
+        if ($type) {
+             $this->jsopBody[$key] = array($value,$type);
+        } else {
+            if (!isset($this->jsopBody[$key])) {
+                $this->jsopBody[$key] = "";
+            } else {
+                $this->jsopBody[$key] .= "\r";
+            }
+            $this->jsopBody[$key] .= $value;
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
-
     public function finishSave()
     {
+        if (count($this->jsopBody) > 0) {
+        $request = $this->getRequest(Request::POST, "/");
+        $body = "";
+
+        if (count($this->jsopBody) > 1 || !isset($this->jsopBody[':diff'])) {
+            $mime_boundary = md5(mt_rand());
+            //do the diffs at last
+            $diff = null;
+            if (isset($this->jsopBody[':diff'])) {
+                $diff = $this->jsopBody[':diff'];
+                unset($this->jsopBody[':diff']);
+            }
+            foreach ($this->jsopBody as $n => $v) {
+                $body .= $this->getMimePart($n, $v, $mime_boundary);
+            }
+            if ($diff) {
+               $body .= $this->getMimePart(":diff", $diff, $mime_boundary);
+            }
+            $body .= "--" . $mime_boundary . "--". "\r\n\r\n" ; // finish with two eol's!!
+
+
+            $request->setContentType("multipart/form-data; boundary=$mime_boundary");
+        } else {
+            $body = urlencode(":diff")."=". urlencode($this->jsopBody[':diff']);
+            $request->setContentType("application/x-www-form-urlencoded; charset=utf-8");
+
+        }
+
+        $request->setBody($body);
+        try {
+            $request->execute();
+
+        } catch (HTTPErrorException $e) {
+            // TODO: this will need to be changed when we refactor transport to use the diff format to store changes.
+            if (strpos($e->getMessage(), "405") !== false && strpos($e->getMessage(), "MKCOL") !== false) {
+                // TODO: can the 405 exception be thrown for other reasons too?
+                throw new ItemExistsException('This node probably already exists: '.$node->getPath(), $e->getCode(), $e);
+            }
+            // TODO: can we throw any other more specific errors here?
+            throw new RepositoryException('Something went wrong while saving node: '.$node->getPath(), $e->getCode(), $e);
+        }
+        }
+        $this->jsopBody = array();
     }
 
+    protected function getMimePart($name, $value, $mime_boundary)
+    {
+        $data = '';
+
+        $eol = "\r\n";
+        $data .= '--' . $mime_boundary . $eol ;
+        if (is_array($value)) {
+            if (is_array($value[0])) {
+                foreach($value[0] as $v) {
+                    $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
+                }
+                return $data;
+
+            }
+            if (is_resource(($value[0]))) {
+                $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $name . '"' . $eol;
+                $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
+                $data .= 'Content-Transfer-Encoding: binary'. $eol.$eol;
+                $data .= stream_get_contents($value[0]) . $eol;
+                fclose($value[0]);
+            } else {
+                $data .= 'Content-Disposition: form-data; name="' . $name . '"' . $eol;
+                $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
+                $data .= 'Content-Transfer-Encoding: 8bit'. $eol.$eol;
+                switch ($value[1]) {
+                    case PropertyType::DATE:
+                        $data .= PropertyType::convertType($value[0], PropertyType::STRING);
+                        break;
+                    default:
+                        $data .= $value[0];
+                }
+                $data .= $eol;
+            }
+
+        } else {
+            if (is_array($value)) {
+                foreach($value as $v) {
+                    $data .= $this->getMimePart($name,$v,$mime_boundary);
+                }
+                return $data;
+
+            }
+            $data .= 'Content-Disposition: form-data; name="'.$name.'"'. $eol;
+            $data .= 'Content-Type: text/plain; charset=UTF-8'. $eol;
+            $data .= 'Content-Transfer-Encoding: 8bit'. $eol. $eol;
+            //$data .= '--' . $mime_boundary . $eol;
+            $data .= $value . $eol;
+
+        }
+        return $data;
+    }
 }
