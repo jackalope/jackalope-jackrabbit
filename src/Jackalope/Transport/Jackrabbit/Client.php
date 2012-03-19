@@ -743,7 +743,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function copyNode($srcAbsPath, $dstAbsPath, $srcWorkspace = null)
     {
-        /** 
+        /**
          * No JSOP possible, is a workspace method
          */
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
@@ -810,7 +810,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return true;
     }
 
-    
+
     /**
      * {@inheritDoc}
      */
@@ -851,10 +851,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function createNodeJsop($path, $properties, $children)
     {
-
         $body = '+' . $path . ' : {';
         $binaries = array();
-        
+
         foreach ($properties as $name => $property) {
             $value = $this->propertyToJsopString($property);
             if (!$value) {
@@ -863,14 +862,19 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $body .= json_encode($name) . ':' . json_encode($value) . ",";
             }
         }
+
         $body .= "}";
         $this->setJsopBody($body);
-       
+
         foreach ($binaries as $binary) {
             $this->storeProperty($binary);
         }
+
         foreach ($children as $name => $node) {
-            $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
+            if ($node->isNew()) {
+                // TODO: FIXME: even if the node is not new, its children could be new
+                $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
+            }
         }
 
         return true;
@@ -904,7 +908,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     return null;
                 }
                 break;
-           
+
         }
         return $property->getValueForStorage();
     }
@@ -1478,12 +1482,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function finishSave() 
+    public function finishSave()
     {
         if (count($this->jsopBody) > 0) {
         $request = $this->getRequest(Request::POST, "/");
         $body = "";
-        
+
         if (count($this->jsopBody) > 1 || !isset($this->jsopBody[':diff'])) {
             $mime_boundary = md5(mt_rand());
             //do the diffs at last
@@ -1500,18 +1504,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
             $body .= "--" . $mime_boundary . "--". "\r\n\r\n" ; // finish with two eol's!!
 
-            
+
             $request->setContentType("multipart/form-data; boundary=$mime_boundary");
         } else {
             $body = urlencode(":diff")."=". urlencode($this->jsopBody[':diff']);
             $request->setContentType("application/x-www-form-urlencoded; charset=utf-8");
-        
+
         }
 
         $request->setBody($body);
         try {
             $request->execute();
-            
+
         } catch (HTTPErrorException $e) {
             // TODO: this will need to be changed when we refactor transport to use the diff format to store changes.
             if (strpos($e->getMessage(), "405") !== false && strpos($e->getMessage(), "MKCOL") !== false) {
@@ -1524,11 +1528,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
         $this->jsopBody = array();
     }
-    
-    protected function getMimePart($name, $value, $mime_boundary) 
+
+    protected function getMimePart($name, $value, $mime_boundary)
     {
         $data = '';
- 
+
         $eol = "\r\n";
         $data .= '--' . $mime_boundary . $eol ;
         if (is_array($value)) {
@@ -1537,7 +1541,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
                 }
                 return $data;
-                
+
             }
             if (is_resource(($value[0]))) {
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $name . '"' . $eol;
@@ -1558,21 +1562,21 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 }
                 $data .= $eol;
             }
-            
+
         } else {
             if (is_array($value)) {
                 foreach($value as $v) {
                     $data .= $this->getMimePart($name,$v,$mime_boundary);
                 }
                 return $data;
-                
+
             }
             $data .= 'Content-Disposition: form-data; name="'.$name.'"'. $eol;
             $data .= 'Content-Type: text/plain; charset=UTF-8'. $eol;
             $data .= 'Content-Transfer-Encoding: 8bit'. $eol. $eol;
             //$data .= '--' . $mime_boundary . $eol;
             $data .= $value . $eol;
-        
+
         }
         return $data;
     }
