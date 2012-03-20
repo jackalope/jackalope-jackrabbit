@@ -858,8 +858,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $body = '+' . $path . ' : {';
         $binaries = array();
+        // first do the main properties, so they are certainly in the beginning
+        $nodeCreationProperties = array("jcr:primaryType", "jcr:mixinTypes");
+        foreach ($nodeCreationProperties as $name) {
+            if (isset($properties[$name])) {
+                $body .= json_encode($name) . ':' . json_encode($properties[$name]->getValueForStorage()) . ",";
+            }
+        }
 
         foreach ($properties as $name => $property) {
+            if (in_array($name, $nodeCreationProperties)) {
+                continue;
+            }
             $value = $this->propertyToJsopString($property);
             if (!$value) {
                 $binaries[] = $property;
@@ -886,7 +896,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * This method is used when building an XML of the properties
+     * This method is used when building a JSOP of the properties
      *
      * @param $value
      * @param $type
