@@ -196,6 +196,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
     protected $jsopBody = array();
 
+    protected $userData;
+
     /**
      * Create a transport pointing to a server url.
      *
@@ -278,6 +280,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $this->curl, $method, $uri));
         $request->setCredentials($this->credentials);
+        if (null !== $this->userData) {
+            $request->addUserData($this->userData);
+        }
         foreach ($this->defaultHeaders as $header) {
             $request->addHeader($header);
         }
@@ -1184,6 +1189,25 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             'Observation\\EventJournal',
             array($session, $data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
         );
+    }
+
+    /**
+     * Set user data to be included with subsequent requests.
+     * Setting userData to null (which it is by default) will result in no user data header being sent.
+     *
+     * @param mixed $userData null or string
+     */
+    public function setUserData($userData)
+    {
+        $this->userData = $userData;
+    }
+
+    /**
+     * @return mixed null or string
+     */
+    public function getUserData()
+    {
+        return $this->userData;
     }
 
     // protected helper methods //
