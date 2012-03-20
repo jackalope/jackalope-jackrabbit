@@ -23,7 +23,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
         $this->unsupportedChapters = array(
                     'PermissionsAndCapabilities',
-                    'Import',
                     'ShareableNodes',
                     'AccessControlManagement',
                     'LifecycleManagement',
