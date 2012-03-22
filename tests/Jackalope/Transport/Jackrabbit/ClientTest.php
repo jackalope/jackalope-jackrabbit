@@ -69,7 +69,7 @@ class ClientTest extends JackrabbitTestCase
         $factory = new \Jackalope\Factory;
         $transport = new ClientMock($factory, 'testuri');
         $transport->__destruct();
-        $this->assertNull($transport->curl);
+        $this->assertFalse($transport->curl);
     }
 
     /**

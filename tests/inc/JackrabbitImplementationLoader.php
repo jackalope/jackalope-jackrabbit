@@ -58,7 +58,11 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
                     'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
                     'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
                     'Writing\\MoveMethodsTest::testSessionMoveReplace',
-                    'Writing\\CombinedManipulationsTest::testAddAndChildAddAndMove'
+                    'Writing\\CombinedManipulationsTest::testAddAndChildAddAndMove',
+
+                    'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithSource',
+                    'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithInvalidSource',
+                    'WorkspaceManagement\\WorkspaceManagementTest::testDeleteWorkspace',
         );
     }
 

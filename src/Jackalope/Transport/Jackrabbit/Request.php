@@ -102,6 +102,12 @@ class Request
     const UNLOCK = 'UNLOCK';
 
     /**
+     * Identifier of the 'MKWORKSPACE' http request method to make a new workspace
+     * @var string
+     */
+    const MKWORKSPACE = 'MKWORKSPACE';
+
+    /**
      * Identifier of the 'COPY' http request method.
      * @var string
      */
@@ -565,7 +571,7 @@ class Request
         $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl,$response);
         throw new RepositoryException($msg);
     }
-    
+
     /**
      * returns a shorter error string to be used in exceptions
      *
@@ -573,12 +579,12 @@ class Request
      *
      * @return string the error message
      */
-    
-    protected function getShortErrorString() 
+
+    protected function getShortErrorString()
     {
         return "--uri: --\n" . var_export($this->uri, true) . "\n";
     }
-    
+
     /**
      * returns a longer error string to be used in generic exceptions
      *
@@ -590,8 +596,8 @@ class Request
      * @param string $response the response body
      * @return string the error message
      */
-    
-    protected function getLongErrorString($curl, $response) 
+
+    protected function getLongErrorString($curl, $response)
     {
         $string = $this->getShortErrorString();
         $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) . "\n" ;

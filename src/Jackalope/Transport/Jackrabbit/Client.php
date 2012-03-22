@@ -29,12 +29,12 @@ use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
+use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
-
 
 /**
  * Connection to one Jackrabbit server.
@@ -58,7 +58,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
 {
     /**
      * minimal version needed for the backend server
@@ -219,9 +219,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function __destruct()
     {
-        if ($this->curl) {
-            $this->curl->close();
-        }
+        $this->logout();
     }
 
     /**
@@ -264,13 +262,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $uri = array($uri => $uri);
         }
 
-        if (is_null($this->curl)) {
-            // lazy init curl
-            $this->curl = new curl();
-        } elseif ($this->curl === false) {
-            // but do not re-connect, rather report the error if trying to access a closed connection
-            throw new LogicException("Tried to start a request on a closed transport ($method for ".var_export($uri,true).")");
-        }
+        $curl = $this->getCurl();
 
         if ($addWorkspacePathToUri) {
             foreach ($uri as $key => $row) {
@@ -278,7 +270,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
         }
 
-        $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $this->curl, $method, $uri));
+        $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $curl, $method, $uri));
+
         $request->setCredentials($this->credentials);
         if (null !== $this->userData) {
             $request->addUserData($this->userData);
@@ -292,6 +285,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         return $request;
+    }
+
+    protected function getCurl()
+    {
+        if (is_null($this->curl)) {
+            // lazy init curl
+            $this->curl = new curl();
+        } elseif ($this->curl === false) {
+            // but do not re-connect, rather report the error if trying to access a closed connection
+            throw new LogicException('Tried to start a request on a closed transport.');
+        }
+        return $this->curl;
     }
 
     // CoreInterface //
@@ -865,8 +870,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $body = '+' . $path . ' : {';
         $binaries = array();
+        // first do the main properties, so they are certainly in the beginning
+        $nodeCreationProperties = array("jcr:primaryType", "jcr:mixinTypes");
+        foreach ($nodeCreationProperties as $name) {
+            if (isset($properties[$name])) {
+                $body .= json_encode($name) . ':' . json_encode($properties[$name]->getValueForStorage()) . ",";
+            }
+        }
 
         foreach ($properties as $name => $property) {
+            if (in_array($name, $nodeCreationProperties)) {
+                continue;
+            }
             $value = $this->propertyToJsopString($property);
             if (!$value) {
                 $binaries[] = $property;
@@ -893,7 +908,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * This method is used when building an XML of the properties
+     * This method is used when building a JSOP of the properties
      *
      * @param $value
      * @param $type
@@ -1208,6 +1223,38 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function getUserData()
     {
         return $this->userData;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createWorkspace($name, $srcWorkspace = null)
+    {
+        if (null != $srcWorkspace) {
+            // https://issues.apache.org/jira/browse/JCR-3144
+            throw new UnsupportedRepositoryOperationException('Can not create a workspace from a source workspace as we neither implemented clone nor have native support for this');
+        }
+
+        $curl = $this->getCurl();
+        $uri = $this->server . $name;
+
+        $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $curl, Request::MKWORKSPACE, $uri));
+        $request->setCredentials($this->credentials);
+        foreach ($this->defaultHeaders as $header) {
+            $request->addHeader($header);
+        }
+
+        if (!$this->sendExpect) {
+            $request->addHeader("Expect:");
+        }
+
+        $request->execute();
+    }
+
+    public function deleteWorkspace($name)
+    {
+        // https://issues.apache.org/jira/browse/JCR-3144
+        throw new UnsupportedRepositoryOperationException("Can not delete a workspace as jackrabbit can not do it. Find the jackrabbit folder and look for workspaces/$name and delete that folder");
     }
 
     // protected helper methods //

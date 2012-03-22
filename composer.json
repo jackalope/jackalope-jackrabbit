@@ -22,7 +22,7 @@
     "suggest": {
         "phpcr/phpcr-api-tests": "dev-master",
         "phpcr/phpcr-utils": "dev-master",
-        "symfony/console": "dev-master"
+        "symfony/console": ">=2.0.0,<2.2.0-dev"
     },
     "autoload": {
         "psr-0": { "Jackalope\\": "src/" }
