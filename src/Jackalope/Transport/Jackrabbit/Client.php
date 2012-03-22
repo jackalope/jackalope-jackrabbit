@@ -28,13 +28,13 @@ use Jackalope\Transport\WritingInterface;
 use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
+use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
-
 
 /**
  * Connection to one Jackrabbit server.
@@ -58,7 +58,7 @@ use Jackalope\FactoryInterface;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, WorkspaceManagementInterface
+class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
 {
     /**
      * minimal version needed for the backend server
@@ -87,6 +87,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * This has been fixed in 2.4
      */
     const JCR_INFINITE_LOCK_TIMEOUT = 2147483;
+
+    /**
+     * The path to request to get the Jackrabbit event journal
+     */
+    const JCR_JOURNAL_PATH = '?type=journal';
 
     /**
      * The factory to instantiate objects
@@ -191,6 +196,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
     protected $jsopBody = array();
 
+    protected $userData;
+
     /**
      * Create a transport pointing to a server url.
      *
@@ -249,7 +256,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * @return Request The Request
      */
-    protected function getRequest($method, $uri)
+    protected function getRequest($method, $uri, $addWorkspacePathToUri = true)
     {
         if (!is_array($uri)) {
             $uri = array($uri => $uri);
@@ -257,13 +264,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $curl = $this->getCurl();
 
-        foreach ($uri as $key => $row) {
-            $uri[$key] = $this->addWorkspacePathToUri($row);
+        if ($addWorkspacePathToUri) {
+            foreach ($uri as $key => $row) {
+                $uri[$key] = $this->addWorkspacePathToUri($row);
+            }
         }
 
-
         $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $curl, $method, $uri));
+
         $request->setCredentials($this->credentials);
+        if (null !== $this->userData) {
+            $request->addUserData($this->userData);
+        }
         foreach ($this->defaultHeaders as $header) {
             $request->addHeader($header);
         }
@@ -1173,6 +1185,44 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::UNLOCK, $absPath);
         $request->setLockToken($lockToken);
         $request->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getEventJournal(SessionInterface $session, $eventTypes = null, $absPath = null, $isDeep = null, array $uuid = null, array $nodeTypeName = null)
+    {
+        $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
+        $request = $this->getRequest(Request::GET, $path, false);
+        $data = $request->executeDom();
+
+        // The last parameter of the EventJournal contructor is used in the EventJournal to extract paths from
+        // full node URIs. Unfortunately the URIs returned by the backend are partially encoded which is not the
+        // case with the workspaceUriRoot value we have here. That's why we manually encode the workspace URI to
+        // fit what is needed in the journal. See EventJournal::constructEventJournal
+        return $this->factory->get(
+            'Observation\\EventJournal',
+            array($session, $data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
+        );
+    }
+
+    /**
+     * Set user data to be included with subsequent requests.
+     * Setting userData to null (which it is by default) will result in no user data header being sent.
+     *
+     * @param mixed $userData null or string
+     */
+    public function setUserData($userData)
+    {
+        $this->userData = $userData;
+    }
+
+    /**
+     * @return mixed null or string
+     */
+    public function getUserData()
+    {
+        return $this->userData;
     }
 
     /**
