@@ -298,6 +298,16 @@ class Request
     }
 
     /**
+     * Add the user data header
+     * @param string $userData
+     */
+    public function addUserData($userData)
+    {
+        $userDataHeader = 'Link: <data:,' . urlencode($userData) . '>; rel="http://www.day.com/jcr/webdav/1.0/user-data"';
+        $this->addHeader($userDataHeader);
+    }
+
+    /**
      * Set the transaction lock token to be used with this request
      *
      * @param string $lockToken the transaction lock
