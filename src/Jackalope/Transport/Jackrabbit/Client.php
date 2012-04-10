@@ -211,6 +211,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if ('/' !== substr($serverUri, -1)) {
             $serverUri .= '/';
         }
+
         $this->server = $serverUri;
     }
 
@@ -337,6 +338,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if ($set->item(0)->textContent != $this->workspace) {
             throw new RepositoryException('Wrong workspace in answer from server: '.$dom->saveXML());
         }
+
         return true;
     }
 
@@ -404,6 +406,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     '". Need at least "'.self::VERSION.'"');
             }
         }
+
         return $this->descriptors;
     }
 
@@ -423,6 +426,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $workspaces[] = substr(trim($value->nodeValue), strlen($this->server), -1);
             }
         }
+
         return array_unique($workspaces);
     }
 
@@ -469,6 +473,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
+
         try {
             $data = $request->executeJson();
             return $data->nodes;
@@ -478,6 +483,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             if ($e->getMessage() == 'HTTP 403: Prefix must not be empty (org.apache.jackrabbit.spi.commons.conversion.IllegalNameException)') {
                 throw new UnsupportedRepositoryOperationException("Jackalope currently needs a patched jackrabbit for Session->getNodes() to work. Until our patches make it into the official distribution, see https://github.com/jackalope/jackrabbit/blob/2.2-jackalope/README.jackalope.patches.md for details and downloads.");
             }
+
             throw $e;
         }
     }
@@ -538,6 +544,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (! $dom->loadXML($xml)) {
             throw new RepositoryException("Failed to load xml data:\n\n$xml");
         }
+
         $ret = array();
         foreach ($dom->getElementsByTagNameNS(self::NS_DCR, 'values') as $node) {
             foreach ($node->getElementsByTagNameNS(self::NS_DCR, 'value') as $value) {
@@ -551,6 +558,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $ret[] = $stream;
             }
         }
+
         return $ret;
     }
 
@@ -640,6 +648,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
             throw new RepositoryException($e->getMessage());
         }
+
         return;
     }
 
@@ -674,7 +683,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $resp = $request->execute();
         return $resp;
     }
-
 
     // QueryInterface //
 
@@ -744,6 +752,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         $this->setJsopBody("-" . $path . " : ");
+
         return true;
     }
 
@@ -802,10 +811,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (count($reorders) == 0) {
             return;
         }
-        $body = "";
+
+        $body = '';
         foreach ($reorders as $r) {
             $body .= '>'.$absPath.'/'.$r[0] . ' : '. $r[1] . '#before'."\r";
         }
+
         $this->setJsopBody($body);
     }
 
@@ -824,6 +835,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $node->getPath();
         $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
+
         return true;
     }
 
@@ -850,7 +862,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         } else {
             $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
         }
-
 
         return true;
     }
@@ -937,6 +948,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 break;
 
         }
+
         return $property->getValueForStorage();
     }
 
@@ -967,6 +979,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $this->workspaceUriRoot
             );
         }
+
         return $this->stripServerRootFromUri(substr(urldecode($fullPath),0,-1));
     }
 
@@ -990,6 +1003,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         foreach ($namespaces as $elem) {
             $mappings[$elem->firstChild->textContent] = $elem->lastChild->textContent;
         }
+
         return $mappings;
     }
 
@@ -1029,6 +1043,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $namespaces[$prefix] = $uri;
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
         $request->execute();
+
         return true;
     }
 
@@ -1311,6 +1326,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
         }
         $xml .='</jcr:nodetypes>';
+
         return $xml;
     }
 
@@ -1331,6 +1347,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $xml .= '<'. $property . '/>';
         }
         $xml .= '</D:prop></D:propfind>';
+
         return $xml;
     }
 
@@ -1393,6 +1410,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%-]*$/i', $path)) {
             throw new RepositoryException('Internal error: path valid but not properly encoded: '.$path);
         }
+
         return $path;
     }
 
@@ -1424,6 +1442,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
             $uri = $this->workspaceUriRoot . $uri;
         }
+
         return $uri;
     }
 
@@ -1516,6 +1535,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             if ($errorMessage) {
                 throw new RepositoryException($errorMessage);
             }
+
             return false;
         }
 
@@ -1557,9 +1577,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             // prevent glitches due to second boundary during request
             return null;
         }
-        return time() + $time;
 
-        throw new \InvalidArgumentException("Invalid timeout value '$timeoutValue'");
+        return time() + $time;
     }
 
     protected function setJsopBody($value, $key = ":diff", $type = null)
@@ -1638,8 +1657,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
                 }
                 return $data;
-
             }
+
             if (is_resource(($value[0]))) {
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $name . '"' . $eol;
                 $data .= 'Content-Type: jcr-value/'. strtolower(PropertyType::nameFromValue($value[1])) .'; charset=UTF-8'. $eol;
@@ -1665,8 +1684,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 foreach($value as $v) {
                     $data .= $this->getMimePart($name,$v,$mime_boundary);
                 }
-                return $data;
 
+                return $data;
             }
             $data .= 'Content-Disposition: form-data; name="'.$name.'"'. $eol;
             $data .= 'Content-Type: text/plain; charset=UTF-8'. $eol;
@@ -1675,6 +1694,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $data .= $value . $eol;
 
         }
+
         return $data;
     }
 }
