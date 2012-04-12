@@ -138,24 +138,29 @@ usage (except for supported features, that is).
 See [PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md)
 for a more detailed tutorial on how to use the PHPCR API.
 
+
 # Query Languages
 
-Jackrabbit and this implementation support SQL2, SQL and XPath as query language. 
-SQL2 is the perferred language to use, since the other two are deprecated by the 
-JCR specifications. The deprecated languages will be suported by Jackrabbit for 
-the forseeable future, but almost certainly won't be supported by other PHPCR 
-implementations. So use them with care and only if you know what you are doing.
+Jackalope supports the PHPCR standard query language SQL2 as well as the Query
+Object Model (QOM) to build queries programmatically. We recommend using the
+QOM or the QueryBuilder mentioned in the
+[PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md).
+They are built to use the best possible query language depending on the
+capabilities of the backend. A later switching to another PHPCR implementation
+shouldn't cause any issues then.
+
+Jackalope-Jackrabbit also supports the depricated SQL and XPath query languages
+from JCR 1.0. Those languages will be suported by Jackrabbit for the forseeable
+future, but almost certainly won't be supported by other PHPCR implementations.
+So use them with care and only if you know what you are doing.
 
 One reason for using SQL or XPath is that the newer and more capable SQL2 is not
-as optimized as the older languages on the Jackrabbit side. Queries with large 
+as optimized as the older languages on the Jackrabbit side. Queries with large
 resultsets are much slower with SQL2 than with XPath or SQL.
 
-The best thing to do instead of using those query engines directly is to use the 
-QueryBuilder and the QueryObjectModel mentioned in the
-[PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md). 
-They are built to use the best possible query language depending on the capabilities
-of the backend. A later switching to another PHPCR implementation shouldn't cause 
-any issues then.
+However, the best is to use the QueryBuilder mentioned above to let the
+implementation chose the most efficient query language for your implementation.
+
 
 # Implementation notes
 
