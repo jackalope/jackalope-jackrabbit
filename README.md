@@ -138,6 +138,24 @@ usage (except for supported features, that is).
 See [PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md)
 for a more detailed tutorial on how to use the PHPCR API.
 
+# Query Languages
+
+Jackrabbit and this implementation support SQL2, SQL and XPath as query language. 
+SQL2 is the perferred language to use, since the other two are deprecated by the 
+JCR specifications. The deprecated languages will be suported by Jackrabbit for 
+the forseeable future, but almost certainly won't be supported by other PHPCR 
+implementations. So use them with care and only if you know what you are doing.
+
+One reason for using SQL or XPath is that the newer and more capable SQL2 is not
+as optimized as the older languages on the Jackrabbit side. Queries with large 
+resultsets are much slower with SQL2 than with XPath or SQL.
+
+The best thing to do instead of using those query engines directly is to use the 
+QueryBuilder and the QueryObjectModel mentioned in the
+[PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md). 
+They are built to use the best possible query language depending on the capabilities
+of the backend. A later switching to another PHPCR implementation shouldn't cause 
+any issues then.
 
 # Implementation notes
 
