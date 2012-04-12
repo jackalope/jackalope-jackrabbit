@@ -43,11 +43,15 @@ class QueryObjectModelFactoryCustom extends QueryObjectModelFactory
             //FIXME: we should check for interfaces..
             switch (get_class($c)) {
                 case 'Jackalope\Query\QOM\ComparisonConstraint':
+                case 'Jackalope\Query\QOM\AndConstraint':
+                case 'Jackalope\Query\QOM\OrConstraint':
+                case 'Jackalope\Query\QOM\FullTextSearchInterface':
                     continue;
+                    
                 default:
                     return false;
             }
-            return true;
         }
+        return true;
     }
 }
