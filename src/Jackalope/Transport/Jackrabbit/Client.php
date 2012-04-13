@@ -32,6 +32,8 @@ use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Query\SqlQuery;
+use Jackalope\Query\Sql1Query;
+use Jackalope\Query\XpathQuery;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
@@ -695,17 +697,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $querystring = $query->getStatement();
         $limit = $query->getLimit();
         $offset = $query->getOffset();
+        $language = $query->getLanguage();
 
-        if ($query->getLanguage() == QueryInterface::JCR_XPATH) {
+        if ($query instanceof XpathQuery || $language == QueryInterface::JCR_XPATH) {
             $langElement = 'dcr:xpath';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
-        } else if ($query->getLanguage() == QueryInterface::JCR_SQL) {
+        } else if ($query instanceof Sql1Query || $language == QueryInterface::JCR_SQL) {
             $langElement = 'dcr:sql';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
         } else {
             $ns = '';
             $langElement = 'JCR-SQL2';
-        }    
+        }
         $body ='<D:searchrequest ' . $ns . ' xmlns:D="DAV:"><'.$langElement.'><![CDATA['.$querystring.']]></'.$langElement.'>';
 
         if (null !== $limit || null !== $offset) {
