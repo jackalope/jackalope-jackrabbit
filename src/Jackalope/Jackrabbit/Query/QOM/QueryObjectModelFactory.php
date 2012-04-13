@@ -13,7 +13,7 @@ use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
  *
  * @api
  */
-class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFactory 
+class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFactory
 {
     /**
      * {@inheritDoc}
@@ -30,7 +30,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
         if ($this->isSimple($source, $constraint)) {
             return $this->factory->get('Query\QOM\QueryObjectModelSql1',
                                    array($this->objectManager, $source, $constraint, $orderings, $columns));
-        } else { 
+        } else {
             return $this->factory->get('Query\QOM\QueryObjectModel',
                                    array($this->objectManager, $source, $constraint, $orderings, $columns));
         }
@@ -53,7 +53,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                 case 'Jackalope\Query\QOM\NotConstraint':
                 case 'Jackalope\Query\QOM\FullTextSearchInterface':
                     continue;
-                    
+
                 default:
                     return false;
             }
