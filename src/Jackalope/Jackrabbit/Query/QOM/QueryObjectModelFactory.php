@@ -4,6 +4,7 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\ObjectManager;
 use Jackalope\FactoryInterface;
+use PHPCR\Query\QOM\JoinInterface;
 
 use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
 
@@ -25,7 +26,8 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                          array $columns,
                          $simpleQuery = false
     ) {
-        if ($this->isSimple($constraint)) {
+
+        if ($this->isSimple($source, $constraint)) {
             return $this->factory->get('Query\QOM\QueryObjectModelSql1',
                                    array($this->objectManager, $source, $constraint, $orderings, $columns));
         } else { 
@@ -33,9 +35,12 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                                    array($this->objectManager, $source, $constraint, $orderings, $columns));
         }
     }
-    
-    protected function isSimple($constraint) {
-        
+
+    protected function isSimple($source, $constraint) {
+        if ($source instanceof JoinInterface) {
+            return false;
+        }
+
         if (!$constraint) {
             return true;
         }
@@ -45,6 +50,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                 case 'Jackalope\Query\QOM\ComparisonConstraint':
                 case 'Jackalope\Query\QOM\AndConstraint':
                 case 'Jackalope\Query\QOM\OrConstraint':
+                case 'Jackalope\Query\QOM\NotConstraint':
                 case 'Jackalope\Query\QOM\FullTextSearchInterface':
                     continue;
                     
