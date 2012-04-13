@@ -824,10 +824,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $body = '';
         foreach ($reorders as $r) {
-            $body .= '>'.$absPath.'/'.$r[0] . ' : '. $r[1] . '#before'."\r";
+            if (is_null($r[1])) {
+                $body .= '>'.$absPath.'/'.$r[0] . ' : #last'."\r";
+            } else {
+                $body .= '>'.$absPath.'/'.$r[0] . ' : '. $r[1] . '#before'."\r";
+            }
         }
-
-        $this->setJsopBody($body);
+        $this->setJsopBody(trim($body));
     }
 
     /**
