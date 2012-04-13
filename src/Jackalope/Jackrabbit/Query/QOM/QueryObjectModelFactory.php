@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackalope\Query\QOM;
+namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\ObjectManager;
 use Jackalope\FactoryInterface;
@@ -12,7 +12,7 @@ use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
  *
  * @api
  */
-class QueryObjectModelFactoryCustom extends QueryObjectModelFactory 
+class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFactory 
 {
     /**
      * {@inheritDoc}
