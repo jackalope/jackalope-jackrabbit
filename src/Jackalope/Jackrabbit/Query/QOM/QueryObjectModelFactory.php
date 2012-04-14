@@ -5,7 +5,7 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 use Jackalope\ObjectManager;
 use Jackalope\FactoryInterface;
 use PHPCR\Query\QOM\JoinInterface;
-
+use PHPCR\Query\QOM\SelectorInterface;
 use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
 
 /**
@@ -39,6 +39,11 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
     protected function isSimple($source, $constraint) {
         if ($source instanceof JoinInterface) {
             return false;
+        } else if ($source instanceof SelectorInterface) {
+            //SQL1 can't handle selector names
+            if ($source->getSelectorName()) {
+                return false;
+            }
         }
 
         if (!$constraint) {
