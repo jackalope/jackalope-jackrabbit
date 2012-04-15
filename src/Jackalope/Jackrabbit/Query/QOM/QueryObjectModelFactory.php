@@ -56,7 +56,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                 case 'Jackalope\Query\QOM\AndConstraint':
                 case 'Jackalope\Query\QOM\OrConstraint':
                 case 'Jackalope\Query\QOM\NotConstraint':
-                case 'Jackalope\Query\QOM\FullTextSearchInterface':
+                case 'Jackalope\Query\QOM\FullTextSearchConstraint':
                 case 'Jackalope\Query\QOM\PropertyExistence':
                     continue;
 
