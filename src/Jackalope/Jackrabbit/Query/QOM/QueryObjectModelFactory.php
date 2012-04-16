@@ -52,7 +52,6 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
         foreach($constraint->getConstraints() as $c) {
             //FIXME: we should check for interfaces..
             switch (get_class($c)) {
-                case 'Jackalope\Query\QOM\ComparisonConstraint':
                 case 'Jackalope\Query\QOM\AndConstraint':
                 case 'Jackalope\Query\QOM\OrConstraint':
                 case 'Jackalope\Query\QOM\NotConstraint':
@@ -60,8 +59,16 @@ class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFacto
                 case 'Jackalope\Query\QOM\ChildNodeConstraint':
                 case 'Jackalope\Query\QOM\NotConstraint':
                 case 'Jackalope\Query\QOM\PropertyExistence':
-                    continue;
-
+                    continue 2;
+                case 'Jackalope\Query\QOM\ComparisonConstraint':
+                    $o = $c->getOperand1();
+                    switch (get_class($o)) {
+                        case 'Jackalope\Query\QOM\LowerCase':
+                        case 'Jackalope\Query\QOM\UpperCase':
+                        case 'Jackalope\Query\QOM\PropertyValue':
+                            continue 3;
+                    }
+                    return false;
                 default:
                     return false;
             }
