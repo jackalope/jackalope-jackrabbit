@@ -29,12 +29,12 @@ To install jackalope itselves, run the following in the parent directory of wher
 
     git clone git://github.com/jackalope/jackalope-jackrabbit.git
     cd jackalope-jackrabbit
-    php /usr/local/bin/composer.phar install --install-suggests
+    php /usr/local/bin/composer.phar install --dev
 
-Note that the --install-suggests parameter is only needed if you want to be
+Note that the --dev parameter is only needed if you want to be
 able to run the test suite. If you already installed jackalope without the test
 suite, you need to remove composer.lock before running composer again with the
---install-suggests parameter.
+--dev parameter.
 
 
 ## Jackrabbit storage server
@@ -135,8 +135,31 @@ usage (except for supported features, that is).
     $session->save();
 
 
-See [PHPCR Tutorial](https://github.com/phpcr/phpcr/blob/master/doc/Tutorial.md)
+See [PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md)
 for a more detailed tutorial on how to use the PHPCR API.
+
+
+# Query Languages
+
+Jackalope supports the PHPCR standard query language SQL2 as well as the Query
+Object Model (QOM) to build queries programmatically. We recommend using the
+QOM or the QueryBuilder mentioned in the
+[PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md).
+They are built to use the best possible query language depending on the
+capabilities of the backend. A later switching to another PHPCR implementation
+shouldn't cause any issues then.
+
+Jackalope-Jackrabbit also supports the depricated SQL and XPath query languages
+from JCR 1.0. Those languages will be suported by Jackrabbit for the forseeable
+future, but almost certainly won't be supported by other PHPCR implementations.
+So use them with care and only if you know what you are doing.
+
+One reason for using SQL or XPath is that the newer and more capable SQL2 is not
+as optimized as the older languages on the Jackrabbit side. Queries with large
+resultsets are much slower with SQL2 than with XPath or SQL.
+
+However, the best is to use the QueryBuilder mentioned above to let the
+implementation chose the most efficient query language for your implementation.
 
 
 # Implementation notes
