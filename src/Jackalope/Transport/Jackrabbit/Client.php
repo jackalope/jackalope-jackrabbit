@@ -699,7 +699,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if ($query->getLanguage() == QueryInterface::XPATH) {
             $langElement = 'dcr:xpath';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
-        } else if ($query->getLanguage() == QueryInterface::JCR_SQL) {
+        } else if ($query->getLanguage() == QueryInterface::SQL) {
             $langElement = 'dcr:sql';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
         } else {
