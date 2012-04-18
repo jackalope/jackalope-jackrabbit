@@ -9,8 +9,6 @@ use InvalidArgumentException;
 use PHPCR\CredentialsInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
-use PHPCR\PropertyInterface;
-use PHPCR\NodeInterface;
 use PHPCR\SessionInterface;
 use PHPCR\RepositoryException;
 use PHPCR\UnsupportedRepositoryOperationException;
@@ -31,9 +29,9 @@ use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
-use Jackalope\Query\SqlQuery;
-use Jackalope\Query\Sql1Query;
-use Jackalope\Query\XpathQuery;
+use Jackalope\Node;
+use Jackalope\Property;
+use Jackalope\Query\Query;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
@@ -146,7 +144,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * Set once login() has been executed and may not be changed later on.
      *
-     * @var CredentialsInterface
+     * @var SimpleCredentials
      */
     protected $credentials;
 
@@ -204,7 +202,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * Create a transport pointing to a server url.
      *
      * @param FactoryInterface $factory the object factory
-     * @param string serverUri location of the server
+     * @param string $serverUri location of the server
      */
     public function __construct(FactoryInterface $factory, $serverUri)
     {
@@ -686,12 +684,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $resp;
     }
 
-    // QueryInterface //
+    // QueryTransport //
 
     /**
      * {@inheritDoc}
      */
-    public function query(QueryInterface $query)
+    public function query(Query $query)
     {
         // TODO handle bind variables
         $querystring = $query->getStatement();
@@ -699,10 +697,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $offset = $query->getOffset();
         $language = $query->getLanguage();
 
-        if ($query instanceof XpathQuery || $language == QueryInterface::JCR_XPATH) {
+        if ($language == QueryInterface::XPATH) {
             $langElement = 'dcr:xpath';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
-        } else if ($query instanceof Sql1Query || $language == QueryInterface::JCR_SQL) {
+        } else if ($language == QueryInterface::SQL) {
             $langElement = 'dcr:sql';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
         } else {
@@ -847,7 +845,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function storeNode(NodeInterface $node)
+    public function storeNode(Node $node)
     {
         $path = $node->getPath();
         $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
@@ -859,7 +857,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function storeProperty(PropertyInterface $property)
+    public function storeProperty(Property $property)
     {
         $path = $property->getPath();
        // $path = $this->encodeAndValidatePathForDavex($path);
@@ -941,7 +939,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @param $type
      * @return mixed|string
      */
-    protected function propertyToJsopString(PropertyInterface $property)
+    protected function propertyToJsopString(Property $property)
     {
         switch ($property->getType()) {
             case PropertyType::DECIMAL:
@@ -1466,7 +1464,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * Extract the information from a LOCK DAV response and create the
      * corresponding Lock object.
      *
-     * @param DOMElement $response
+     * @param \DOMElement $response
      * @param bool $sessionOwning whether the current session is owning the lock (aka
      *      we created it in this request)
      * @param string $path the owning node path, if we created this node

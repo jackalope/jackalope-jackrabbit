@@ -487,7 +487,7 @@ class Request
      *
      * @throws NoSuchWorkspaceException if it was not possible to reach the server (resolve host or connect)
      * @throws ItemNotFoundException if the object was not found
-     * @throws RepositoryExceptions if on any other error.
+     * @throws RepositoryException on any other error.
      * @throws PathNotFoundException if the path was not found (server returned 404 without xml response)
      *
      */
