@@ -696,13 +696,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $limit = $query->getLimit();
         $offset = $query->getOffset();
 
-        if ($query->getLanguage() == QueryInterface::JCR_XPATH) {
+        if ($query->getLanguage() == QueryInterface::XPATH) {
             $langElement = 'dcr:xpath';
             $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
         } else {
             $ns = '';
             $langElement = 'JCR-SQL2';
-        }    
+        }
         $body ='<D:searchrequest ' . $ns . ' xmlns:D="DAV:"><'.$langElement.'><![CDATA['.$querystring.']]></'.$langElement.'>';
 
         if (null !== $limit || null !== $offset) {
