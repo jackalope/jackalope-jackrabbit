@@ -13,7 +13,7 @@ use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
  *
  * @api
  */
-class QueryObjectModelFactory extends \Jackalope\Query\Qom\QueryObjectModelFactory
+class QueryObjectModelFactory extends \Jackalope\Query\QOM\QueryObjectModelFactory
 {
     /**
      * {@inheritDoc}
