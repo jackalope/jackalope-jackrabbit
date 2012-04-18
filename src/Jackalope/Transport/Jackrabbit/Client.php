@@ -438,7 +438,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function getNode($path)
     {
         $path = $this->encodeAndValidatePathForDavex($path);
-        $path .= '.0.json';
+        $path .= '.'.$this->getFetchDepth().'.json';
 
         $request = $this->getRequest(Request::GET, $path);
         try {
