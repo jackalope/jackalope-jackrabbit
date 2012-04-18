@@ -467,7 +467,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
         $body = array();
 
-        $url = $this->encodeAndValidatePathForDavex("/").".0.json";
+        $url = $this->encodeAndValidatePathForDavex("/").'.'.$this->getFetchDepth().'.json';
         foreach ($paths as $path) {
             if (UUIDHelper::isUUID($path)) {
                 $body[] = http_build_query(array(":id" => $path));
