@@ -1,41 +1,33 @@
 # Tests
 
-There are two kind of tests. The folder ``tests/phpcr-api`` contains the
+There are two kind of tests. The folder ``vendor/phpcr/phpcr-api-tests`` contains the
 [phpcr-api-tests](https://github.com/phpcr/phpcr-api-tests/) suite to test
 against the specification. This is what you want to look at when using
 jackalope as a PHPCR implementation.
 
-For both, you need to have the test workspace created in the storage (see
-below).
-
-
-# Unit tests
-
-Unit tests for the client are in tests/Jackalope/Transport/Jackrabbit
+Unit tests for the jackrabbit client implementation are in tests/Jackalope/Transport/Jackrabbit
 
 Note that the base jackalope repository contains some unit tests for jackalope in
 its tests folder.
 
-
-# Functional Tests
+## API test suite
 
 The phpunit.xml.dist is configured to run all tests. You can limit the tests
 to run by specifying the path to those tests to phpunit.
 
 Note that the phpcr-api tests are skipped for features not implemented in
-jackalope. Have a look at the tests/inc/JackrabbitImplementationLoader.php files to see
-which features are skipped for what backend.
+jackalope. Have a look at the tests/inc/JackrabbitImplementationLoader.php file
+to see which features are currently skipped.
+
+You should only see success or skipped tests, no failures or errors.
 
 
 # Setup
 
+**Careful: If you run the tests without changing the workspace in the phpunit.xml,
+the default workspace will be used and all content in that workspace is destroyed.**
 
-Jackalope bundles the extensive phpcr-api-tests suite to test compliance with
-the PHPCR standard.
-
-You should only see success or skipped tests, no failures or errors.
-
-To run the tests.
+To run the tests:
 
     cd /path/to/jackalope/tests
     cp phpunit.xml.dist phpunit.xml
@@ -44,36 +36,11 @@ To run the tests.
 
 ## Use a non-default workspace
 
-If you want to run the tests against a non-default workspace, edit phpunit.xml and change
-<var name="phpcr.workspace" value="default" /> to point to a different name. Then create
-a workspace in jackrabbit.
+If you want to run the tests against a non-default workspace, edit phpunit.xml
+and change the "default" in ``<var name="phpcr.workspace" value="default" />``
+to point to a different name, e.g. "tests". Then create that workspace once:
 
-    java -jar jackrabbit-*.jar
-    # when it says "Apache Jackrabbit is now running at http://localhost:8080/" ctrl-c to stop
-    cp -r jackrabbit/workspaces/default jackrabbit/workspace/tests
-    edit jackrabbit/workspaces/tests/workspace.xml
-    # change the line <Workspace name="default"> to <Workspace name="tests">
-    java -jar jackrabbit-*.jar
-
-See also "Jackrabbit Doc":http://jackrabbit.apache.org/jackrabbit-configuration.html#JackrabbitConfiguration-Workspaceconfiguration
-
-
-# Some notes on the jackalope-jackrabbit api testing.
-
-## Using JackrabbitFixtureLoader for load your own fixtures
-
-Note that the best would be to implement the Session::importXML method
-
-Until this happens, you can use the class JackrabbitFixtureLoader found in
-inc/JackrabbitFixtureLoader.php to import fixtures in the JCR XML formats.
-It relies on jack.jar. The class can be plugged in Symfony2 autoload mechanism
-through autoload.php, which can be used to feed a MapFileClassLoader instance. E.g:
-
-
-    $phpcr_loader = new MapFileClassLoader(
-        __DIR__.'/../vendor/doctrine-phpcr-odm/lib/vendor/jackalope/inc/JackrabbitFixtureLoader.php'
-    );
-    $phpcr_loader->register();
+    bin/jackalope phpcr:workspace:create tests
 
 
 ## Note on JCR

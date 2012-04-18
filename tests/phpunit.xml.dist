@@ -19,7 +19,10 @@
     <testsuites>
         <testsuite name="Jackalope Jackrabbit Tests">
             <directory>./Jackalope</directory>
-            <directory>./phpcr-api/</directory>
+            <directory>../vendor/jackalope/jackalope/tests</directory>
+            <directory>../vendor/phpcr/phpcr/tests</directory>
+            <directory>../vendor/phpcr/phpcr-utils/tests</directory>
+            <directory>../vendor/phpcr/phpcr-api-tests/</directory>
         </testsuite>
     </testsuites>
 
@@ -27,18 +30,23 @@
     <filter>
         <whitelist>
             <directory>../src</directory>
-            <directory>../lib/jackalope/src</directory>
-            <directory>../lib/jackalope/lib/phpcr/src</directory>
+            <directory>../vendor/jackalope/jackalope/src</directory>
+            <directory>../vendor/phpcr/phpcr/src</directory>
+            <directory>../vendor/phpcr/phpcr-utils/src</directory>
 
             <exclude>
                 <!-- ignore helpers -->
-                <file>../src/Jackalope/autoloader.php</file>
                 <file>../src/Jackalope/Transport/Jackrabbit/curl.php</file>
 
                 <!-- ignore whats not implemented yet -->
-                <directory>../lib/jackalope/lib/phpcr/src/PHPCR/Observation</directory>
-                <directory>../lib/jackalope/lib/phpcr/src/PHPCR/Retention</directory>
-                <directory>../lib/jackalope/lib/phpcr/src/PHPCR/Security</directory>
+                <directory>../vendor/phpcr/phpcr/src/PHPCR/Transaction</directory>
+                <directory>../vendor/jackalope/jackalope/src/Jackalope/Transaction</directory>
+
+                <directory>../vendor/phpcr/phpcr/src/PHPCR/Retention</directory>
+                <directory>../vendor/jackalope/jackalope/src/Jackalope/Retention</directory>
+
+                <directory>../vendor/phpcr/phpcr/src/PHPCR/Security</directory>
+                <directory>../vendor/jackalope/jackalope/src/Jackalope/Security</directory>
             </exclude>
         </whitelist>
     </filter>

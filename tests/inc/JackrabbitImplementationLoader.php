@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../phpcr-api/inc/AbstractLoader.php';
+require_once __DIR__.'/../../vendor/phpcr/phpcr-api-tests/inc/AbstractLoader.php';
 
 /**
  * Implementation loader for jackalope-jackrabbit
@@ -22,38 +22,51 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryJackrabbit', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-                    'PermissionsAndCapabilities',
-                    'Import',
-                    'Observation',
-                    'WorkspaceManagement',
-                    'ShareableNodes',
-                    'AccessControlManagement',
-                    'LifecycleManagement',
-                    'RetentionAndHold',
-                    'SameNameSiblings',
+            'PermissionsAndCapabilities',
+            'ShareableNodes',
+            'AccessControlManagement',
+            'LifecycleManagement',
+            'RetentionAndHold',
+            'SameNameSiblings',
+            'Transactions'
         );
 
         $this->unsupportedCases = array(
         );
 
         $this->unsupportedTests = array(
-                    'Connecting\\RepositoryTest::testLoginException', //TODO: figure out what would be invalid credentials
-                    'Connecting\\RepositoryTest::testNoLogin',
-                    'Connecting\\RepositoryTest::testNoLoginAndWorkspace',
+            'Connecting\\RepositoryTest::testLoginException', //TODO: figure out what would be invalid credentials
+            'Connecting\\RepositoryTest::testNoLogin',
+            'Connecting\\RepositoryTest::testNoLoginAndWorkspace',
 
-                    'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
-                    'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
-                    'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
+            'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+            'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
+            'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes?
 
-                    'Query\\QueryManagerTest::testGetQuery',
-                    'Query\\QueryManagerTest::testGetQueryInvalid',
-                    'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
-                    'Query\\NodeViewTest::testSeekable',
+            'Query\\QueryManagerTest::testGetQuery',
+            'Query\\QueryManagerTest::testGetQueryInvalid',
+            'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
+            // this seems a bug in php with arrayiterator - and jackalope is using
+            // arrayiterator for the search result
+            // https://github.com/phpcr/phpcr-api-tests/issues/22
+            'Query\\NodeViewTest::testSeekable',
 
-                    'Writing\\NamespaceRegistryTest::testRegisterUnregisterNamespace',
-                    'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
-                    'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
-                    'Writing\\MoveMethodsTest::testSessionMoveReplace',
+            'Writing\\SetPropertyMethodsTest::testSetPropertyNewExistingNode', // see http://www.mail-archive.com/dev@jackrabbit.apache.org/msg28035.html
+            'Writing\\NamespaceRegistryTest::testRegisterUnregisterNamespace',
+            'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
+            'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
+            'Writing\\MoveMethodsTest::testSessionMoveReplace',
+            'Writing\\CombinedManipulationsTest::testAddAndChildAddAndMove',
+
+            'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithSource',
+            'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithInvalidSource',
+            'WorkspaceManagement\\WorkspaceManagementTest::testDeleteWorkspace',
+
+            // Implemented bug jackrabbit bug prevents saving https://issues.apache.org/jira/browse/JCR-3279
+            'Import\\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingSession',
+            'Import\\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingWorkspace',
+            'Import\\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingSession',
+            'Import\\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingWorkspace',
         );
     }
 
@@ -90,20 +103,9 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         return $GLOBALS['phpcr.user'];
     }
 
-    public function getTestSupported($chapter, $case, $name)
-    {
-        // this seems a bug in php with arrayiterator - and jackalope is using
-        // arrayiterator for the search result
-        // https://github.com/phpcr/phpcr-api-tests/issues/22
-        if ('Query\\NodeViewTest::testSeekable' == $name && PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 3 && PHP_RELEASE_VERSION <= 3) {
-            return false;
-        }
-        return parent::getTestSupported($chapter, $case, $name);
-    }
-
     function getFixtureLoader()
     {
         require_once "JackrabbitFixtureLoader.php";
-        return new JackrabbitFixtureLoader(__DIR__.'/../phpcr-api/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
+        return new JackrabbitFixtureLoader(__DIR__.'/../../vendor/phpcr/phpcr-api-tests/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
     }
 }

@@ -16,4 +16,9 @@ tests/phpunit.xml
 tests/vendor/jackrabbit-standalone*.jar
 tests/vendor/jackrabbit
 
-jackrabbit/
+/jackrabbit/
+
+vendor
+
+composer.phar
+composer.lock
