@@ -10,7 +10,6 @@ use Jackalope\Query\QOM\EquiJoinCondition;
 
 class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $qf;
     protected $qb;
 
@@ -41,7 +40,6 @@ class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
         $this->qb->join($this->qf->selector("nt:unstructured"),new equiJoinCondition("foo", "data", "bar","data"));
         $this->assertSame($this->qb->getQuery()->getLanguage(),"JCR-SQL2");
         $this->assertSame("SELECT * FROM [nt:base] INNER JOIN [nt:unstructured] ON foo.data=bar.data WHERE ISDESCENDANTNODE([/foo])",$this->qb->getQuery()->getStatement());
-
     }
 
 }

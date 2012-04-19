@@ -4,42 +4,43 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\ObjectManager;
 use Jackalope\FactoryInterface;
+use Jackalope\Query\QOM\QueryObjectModelFactory as BaseQueryObjectModelFactory;
+
 use PHPCR\Query\QOM\JoinInterface;
 use PHPCR\Query\QOM\SelectorInterface;
 use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
+use PHPCR\Query\QOM\SourceInterface;
+use PHPCR\Query\QOM\ConstraintInterface;
 
 /**
  * {@inheritDoc}
  *
  * @api
  */
-class QueryObjectModelFactory extends \Jackalope\Query\QOM\QueryObjectModelFactory
+class QueryObjectModelFactory extends BaseQueryObjectModelFactory
 {
     /**
      * {@inheritDoc}
      *
      * @api
      */
-    function createQuery(\PHPCR\Query\QOM\SourceInterface $source,
-                         \PHPCR\Query\QOM\ConstraintInterface $constraint = null,
+    public function createQuery(SourceInterface $source,
+                         ConstraintInterface $constraint = null,
                          array $orderings,
                          array $columns,
                          $simpleQuery = false
     ) {
-
-        if ($this->isSimple($source, $constraint)) {
-            return $this->factory->get('Query\QOM\QueryObjectModelSql1',
-                                   array($this->objectManager, $source, $constraint, $orderings, $columns));
-        } else {
-            return $this->factory->get('Query\QOM\QueryObjectModel',
-                                   array($this->objectManager, $source, $constraint, $orderings, $columns));
-        }
+        $className = $this->isSimple($source, $constraint) ? 'Query\QOM\QueryObjectModelSql1' : 'Query\QOM\QueryObjectModel';
+        return $this->factory->get($className, array($this->objectManager, $source, $constraint, $orderings, $columns));
     }
 
-    protected function isSimple($source, $constraint) {
+    protected function isSimple($source, $constraint)
+    {
         if ($source instanceof JoinInterface) {
             return false;
-        } else if ($source instanceof SelectorInterface) {
+        }
+
+        if ($source instanceof SelectorInterface) {
             //SQL1 can't handle selector names
             if ($source->getSelectorName()) {
                 return false;
@@ -74,6 +75,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\QOM\QueryObjectModelFacto
                     return false;
             }
         }
+
         return true;
     }
 }
