@@ -11,6 +11,17 @@ use PHPCR\Query\QOM\SelectorInterface;
 use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
 use PHPCR\Query\QOM\SourceInterface;
 use PHPCR\Query\QOM\ConstraintInterface;
+use PHPCR\Query\QOM\AndInterface;
+use PHPCR\Query\QOM\OrInterface;
+use PHPCR\Query\QOM\NotInterface;
+use PHPCR\Query\QOM\DescendantNodeInterface;
+use PHPCR\Query\QOM\ChildNodeInterface;
+use PHPCR\Query\QOM\FullTextSearchInterface;
+use PHPCR\Query\QOM\PropertyExistenceInterface;
+use PHPCR\Query\QOM\ComparisonInterface;
+use PHPCR\Query\QOM\LowerCaseInterface;
+use PHPCR\Query\QOM\UpperCaseInterface;
+use PHPCR\Query\QOM\PropertyValueInterface;
 
 /**
  * {@inheritDoc}
@@ -40,40 +51,37 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
             return false;
         }
 
-        if ($source instanceof SelectorInterface) {
-            //SQL1 can't handle selector names
-            if ($source->getSelectorName()) {
-                return false;
-            }
+        if ($source instanceof SelectorInterface && $source->getSelectorName()) {
+            return false;
         }
 
         if (!$constraint) {
             return true;
         }
-        foreach($constraint->getConstraints() as $c) {
-            //FIXME: we should check for interfaces..
-            switch (get_class($c)) {
-                case 'Jackalope\Query\QOM\AndConstraint':
-                case 'Jackalope\Query\QOM\OrConstraint':
-                case 'Jackalope\Query\QOM\NotConstraint':
-                case 'Jackalope\Query\QOM\DescendantNodeConstraint':
-                case 'Jackalope\Query\QOM\ChildNodeConstraint':
-                case 'Jackalope\Query\QOM\NotConstraint':
-                case 'Jackalope\Query\QOM\FullTextSearchConstraint':
-                case 'Jackalope\Query\QOM\PropertyExistence':
-                    continue 2;
-                case 'Jackalope\Query\QOM\ComparisonConstraint':
-                    $o = $c->getOperand1();
-                    switch (get_class($o)) {
-                        case 'Jackalope\Query\QOM\LowerCase':
-                        case 'Jackalope\Query\QOM\UpperCase':
-                        case 'Jackalope\Query\QOM\PropertyValue':
-                            continue 3;
-                    }
-                    return false;
-                default:
-                    return false;
+
+        foreach ($constraint->getConstraints() as $c) {
+            if ($c instanceof AndInterface
+                || $c instanceof OrInterface
+                || $c instanceof NotInterface
+                || $c instanceof DescendantNodeInterface
+                || $c instanceof ChildNodeInterface
+                || $c instanceof FullTextSearchInterface
+                || $c instanceof PropertyExistenceInterface
+            ) {
+                continue;
+            } elseif ($c instanceof ComparisonInterface) {
+                $o = $c->getOperand1();
+                if ($o instanceof LowerCaseInterface
+                    || $o instanceof UpperCaseInterface
+                    || $o instanceof PropertyValueInterface
+                ) {
+                    continue;
+                }
+
+                return false;
             }
+
+            return false;
         }
 
         return true;
