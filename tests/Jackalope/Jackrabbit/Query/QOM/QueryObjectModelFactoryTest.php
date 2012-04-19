@@ -8,18 +8,19 @@ use PHPCR\Util\QOM\QueryBuilder;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
 use Jackalope\Query\QOM\EquiJoinCondition;
 
-class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase {
+class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
+{
 
     protected $qf;
     protected $qb;
 
-    function setUp()
+    public function setUp()
     {
         $this->qf = new QueryObjectModelFactory(new Factory());
         $this->qb = new QueryBuilder($this->qf);
     }
 
-    function testStatements()
+    public function testStatements()
     {
         //simple query, should be sql
         $this->qb->from($this->qf->selector("nt:base"));
