@@ -58,6 +58,7 @@ class QueryObjectModelFactory extends \Jackalope\Query\QOM\QueryObjectModelFacto
                 case 'Jackalope\Query\QOM\DescendantNodeConstraint':
                 case 'Jackalope\Query\QOM\ChildNodeConstraint':
                 case 'Jackalope\Query\QOM\NotConstraint':
+                case 'Jackalope\Query\QOM\FullTextSearchConstraint':
                 case 'Jackalope\Query\QOM\PropertyExistence':
                     continue 2;
                 case 'Jackalope\Query\QOM\ComparisonConstraint':
