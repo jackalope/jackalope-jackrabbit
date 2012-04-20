@@ -41,7 +41,9 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
                          array $columns,
                          $simpleQuery = false
     ) {
-        $className = $this->isSimple($source, $constraint) ? 'Query\QOM\QueryObjectModelSql1' : 'Query\QOM\QueryObjectModel';
+        $className = $this->isSimple($source, $constraint)
+            ? 'Query\QOM\QueryObjectModelSql1' : 'Query\QOM\QueryObjectModel';
+
         return $this->factory->get($className, array($this->objectManager, $source, $constraint, $orderings, $columns));
     }
 
@@ -77,8 +79,6 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
                 ) {
                     continue;
                 }
-
-                return false;
             }
 
             return false;
