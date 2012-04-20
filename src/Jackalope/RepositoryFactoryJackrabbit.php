@@ -69,7 +69,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
             $factory = $parameters['jackalope.factory'] instanceof FactoryInterface
                 ? $parameters['jackalope.factory'] : new $parameters['jackalope.factory'];
         } else {
-            $factory = new Factory();
+            $factory = new Jackrabbit\Factory();
         }
 
         $uri = $parameters['jackalope.jackrabbit_uri'];
