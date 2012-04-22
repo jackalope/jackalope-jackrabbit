@@ -1621,47 +1621,41 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function finishSave()
     {
         if (count($this->jsopBody) > 0) {
-        $request = $this->getRequest(Request::POST, "/");
-        $body = "";
+            $request = $this->getRequest(Request::POST, "/");
+            $body = '';
 
-        if (count($this->jsopBody) > 1 || !isset($this->jsopBody[':diff'])) {
-            $mime_boundary = md5(mt_rand());
-            //do the diffs at last
-            $diff = null;
-            if (isset($this->jsopBody[':diff'])) {
-                $diff = $this->jsopBody[':diff'];
-                unset($this->jsopBody[':diff']);
+            if (count($this->jsopBody) > 1 || !isset($this->jsopBody[':diff'])) {
+                $mime_boundary = md5(mt_rand());
+                //do the diffs at last
+                $diff = null;
+                if (isset($this->jsopBody[':diff'])) {
+                    $diff = $this->jsopBody[':diff'];
+                    unset($this->jsopBody[':diff']);
+                }
+                foreach ($this->jsopBody as $n => $v) {
+                    $body .= $this->getMimePart($n, $v, $mime_boundary);
+                }
+                if ($diff) {
+                   $body .= $this->getMimePart(":diff", $diff, $mime_boundary);
+                }
+                $body .= "--" . $mime_boundary . "--". "\r\n\r\n" ; // finish with two eol's!!
+
+
+                $request->setContentType("multipart/form-data; boundary=$mime_boundary");
+            } else {
+                $body = urlencode(":diff")."=". urlencode($this->jsopBody[':diff']);
+                $request->setContentType("application/x-www-form-urlencoded; charset=utf-8");
             }
-            foreach ($this->jsopBody as $n => $v) {
-                $body .= $this->getMimePart($n, $v, $mime_boundary);
+
+            try {
+                $request->setBody($body);
+                $request->execute();
+            } catch (HTTPErrorException $e) {
+                // TODO: can we throw any other more specific errors here?
+                throw new RepositoryException('Something went wrong while saving nodes', $e->getCode(), $e);
             }
-            if ($diff) {
-               $body .= $this->getMimePart(":diff", $diff, $mime_boundary);
-            }
-            $body .= "--" . $mime_boundary . "--". "\r\n\r\n" ; // finish with two eol's!!
-
-
-            $request->setContentType("multipart/form-data; boundary=$mime_boundary");
-        } else {
-            $body = urlencode(":diff")."=". urlencode($this->jsopBody[':diff']);
-            $request->setContentType("application/x-www-form-urlencoded; charset=utf-8");
-
         }
 
-        $request->setBody($body);
-        try {
-            $request->execute();
-
-        } catch (HTTPErrorException $e) {
-            // TODO: this will need to be changed when we refactor transport to use the diff format to store changes.
-            if (strpos($e->getMessage(), "405") !== false && strpos($e->getMessage(), "MKCOL") !== false) {
-                // TODO: can the 405 exception be thrown for other reasons too?
-                throw new ItemExistsException('This node probably already exists: '.$node->getPath(), $e->getCode(), $e);
-            }
-            // TODO: can we throw any other more specific errors here?
-            throw new RepositoryException('Something went wrong while saving node: '.$node->getPath(), $e->getCode(), $e);
-        }
-        }
         $this->jsopBody = array();
     }
 
