@@ -513,6 +513,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         switch ($curl->getHeader('Content-Type')) {
             case 'text/xml; charset=utf-8':
                 return $this->decodeBinaryDom($curl->getResponse());
+            case 'jcr-value/binary;charset=utf-8':
             case 'jcr-value/binary; charset=utf-8':
                 // TODO: OPTIMIZE stream handling!
                 $stream = fopen('php://memory', 'rwb+');
