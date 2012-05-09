@@ -517,7 +517,7 @@ class Request
         // TODO extract HTTP status string from response, more descriptive about error
 
         // use XML error response if it's there
-        if (substr($response, 0, 1) === '<') {
+        if (substr($response, 0, 2) === '<?') {
             $dom = new DOMDocument();
             $dom->loadXML($response);
             $err = $dom->getElementsByTagNameNS(Client::NS_DCR, 'exception');
@@ -558,7 +558,7 @@ class Request
                 }
             }
         }
-        if (404 === $httpCode) {
+        if (404 == $httpCode) {
             throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n" . $this->getShortErrorString());
         } elseif (405 == $httpCode) {
             throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
