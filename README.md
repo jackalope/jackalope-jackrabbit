@@ -162,6 +162,14 @@ However, the best is to use the QueryBuilder mentioned above to let the
 implementation chose the most efficient query language for your implementation.
 
 
+# Performance tweaks
+
+If you know that you will need many child nodes of a node you are about to
+request, you can use Session::setSessionOption with Session::OPTION_FETCH_DEPTH
+to something bigger than 1. This will prefetch the children to reduce the round
+trips to the database.
+
+
 # Implementation notes
 
 See [doc/architecture.md](https://github.com/jackalope/jackalope/blob/master/doc/architecture.md)
