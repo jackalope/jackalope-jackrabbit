@@ -19,7 +19,7 @@
         "jackalope/jackalope": "1.0.*"
     },
     "provide": {
-        "jackalope/jackalope-transport": "dev-master"
+        "jackalope/jackalope-transport": "1.0-beta1"
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
