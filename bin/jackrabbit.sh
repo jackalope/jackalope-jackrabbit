@@ -7,8 +7,10 @@ VERSION=2.4.2
 
 JAR=jackrabbit-standalone-$VERSION.jar
 
+# download jackrabbit jar from archive, as the dist only contains the latest
+# stable versions
 if [ ! -f "$DIR/$JAR" ]; then
-    wget http://mirror.switch.ch/mirror/apache/dist/jackrabbit/$VERSION/$JAR
+    wget http://archive.apache.org/dist/jackrabbit/$VERSION/$JAR
 fi
 
 java -jar $DIR/$JAR&
