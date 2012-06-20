@@ -763,7 +763,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function deleteNode($path)
     {
-        $path = $this->encodeAndValidatePathForDavex($path);
+        $this->assertValidPath($path);
+
         $this->setJsopBody("-" . $path . " : ");
 
         return true;
@@ -809,8 +810,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
             $request->execute();
         } else {
-            $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
-            $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
+            $this->assertValidPath($srcAbsPath);
+            $this->assertValidPath($dstAbsPath);
 
             $this->setJsopBody(">" . $srcAbsPath . " : " . $dstAbsPath);
         }
@@ -862,9 +863,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function storeProperty(Property $property)
     {
         $path = $property->getPath();
-       // $path = $this->encodeAndValidatePathForDavex($path);
         $typeid = $property->getType();
-        //$type = PropertyType::nameFromValue($typeid);
         $nativeValue = $property->getValueForStorage();
 
         $value = $this->propertyToJsopString($property);
