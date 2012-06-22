@@ -14,6 +14,7 @@
     "require": {
         "php": ">=5.3.2",
         "ext-libxml":"*",
+        "ext-curl":"*",
         "phpcr/phpcr": "2.1.*",
         "phpcr/phpcr-utils": "2.1.*",
         "jackalope/jackalope": "1.0.*"
