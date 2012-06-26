@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\TestCase;
+use Jackalope\Factory;
 
 use DOMDocument;
 use DOMXPath;
@@ -48,13 +49,13 @@ class RequestTest extends JackrabbitTestCase
 
     public function getRequest($fixture = null, $httpCode = 200, $errno = null)
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         return new RequestMock($factory, $this->getClientMock(), $this->getCurlFixture($fixture, $httpCode, $errno), 'GET', 'http://foo/');
     }
 
     public function testExecuteDom()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $request = $this->getMock('Jackalope\\Transport\\Jackrabbit\\Request', array('execute'), array($factory, $this->getClientMock(), $this->getCurlFixture(),null, null));
         $request->expects($this->once())
             ->method('execute')

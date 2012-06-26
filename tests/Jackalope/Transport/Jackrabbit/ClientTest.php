@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\TestCase;
+use Jackalope\Factory;
 
 use DOMDocument;
 use DOMXPath;
@@ -14,7 +15,7 @@ class ClientTest extends JackrabbitTestCase
 {
     public function getTransportMock($args = 'testuri', $changeMethods = array())
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         //Array XOR
         $defaultMockMethods = array('getRequest', '__destruct', '__construct');
         $mockMethods = array_merge(array_diff($defaultMockMethods, $changeMethods), array_diff($changeMethods, $defaultMockMethods));
@@ -56,7 +57,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testConstructor()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $transport = new ClientMock($factory, 'testuri');
         $this->assertSame('testuri/', $transport->server);
     }
@@ -66,7 +67,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testDestructor()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $transport = new ClientMock($factory, 'testuri');
         $transport->__destruct();
         $this->assertFalse($transport->curl);
@@ -143,7 +144,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testExceptionIfNotLoggedIn()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $t = new ClientMock($factory, 'http://localhost:1/server');
         $t->getNodeTypes();
     }
@@ -154,7 +155,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetRepositoryDescriptorsNoserver()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $t = new \Jackalope\Transport\Jackrabbit\Client($factory, 'http://localhost:1/server');
         $d = $t->getRepositoryDescriptors();
     }
@@ -267,7 +268,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginNoServer()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $t = new \Jackalope\Transport\Jackrabbit\Client($factory, 'http://localhost:1/server');
         $t->login($this->credentials, $this->config['workspace']);
     }
@@ -278,7 +279,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginNoSuchWorkspace()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $t = new \Jackalope\Transport\Jackrabbit\Client($factory, $this->config['url']);
         $t->login($this->credentials, 'not-an-existing-workspace');
     }
@@ -530,7 +531,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testAddWorkspacePathToUri()
     {
-        $factory = new \Jackalope\Factory;
+        $factory = new Factory;
         $transport = new ClientMock($factory, '');
 
         $this->assertEquals('foo/bar', $transport->addWorkspacePathToUriMock('foo/bar'), 'Relative uri was prepended with workspaceUriRoot');
