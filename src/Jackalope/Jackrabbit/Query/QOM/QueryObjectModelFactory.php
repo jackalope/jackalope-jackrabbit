@@ -37,8 +37,8 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
      */
     public function createQuery(SourceInterface $source,
                          ConstraintInterface $constraint = null,
-                         array $orderings,
-                         array $columns,
+                         array $orderings = array(),
+                         array $columns = array(),
                          $simpleQuery = false
     ) {
         $className = $this->isSimple($source, $constraint)
