@@ -5,10 +5,9 @@ php:
   - 5.4
 
 before_script:
-  - curl -s http://getcomposer.org/installer | php
 # work around bug in composer: https://github.com/composer/composer/issues/789
-  - php composer.phar install
-  - php composer.phar install --dev
+  - composer install
+  - composer install --dev
   - ./bin/jackrabbit.sh
 
 script: phpunit -c tests/phpunit.xml.dist
