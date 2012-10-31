@@ -16,7 +16,7 @@
         "php": ">=5.3.2",
         "ext-libxml":"*",
         "ext-curl":"*",
-        "phpcr/phpcr": ">=2.1.0-beta3",
+        "phpcr/phpcr": ">=2.1.0-beta5",
         "phpcr/phpcr-utils": ">=1.0-beta3",
         "jackalope/jackalope": "1.0.*"
     },
