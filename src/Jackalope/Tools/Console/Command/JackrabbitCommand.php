@@ -22,6 +22,12 @@ class JackrabbitCommand extends Command
     protected $jackrabbit_jar;
 
     /**
+     * Path to the Jackrabbit workspace dir
+     * @var string
+     */
+    protected $workspace_dir;
+
+    /**
      * Configures the current command.
      */
     protected function configure()
@@ -29,6 +35,7 @@ class JackrabbitCommand extends Command
         $this->setName('jackalope:run:jackrabbit')
             ->addArgument('cmd', InputArgument::REQUIRED, 'Command to execute (start | stop | status)')
             ->addOption('jackrabbit_jar', null, InputOption::VALUE_OPTIONAL, 'Path to the Jackrabbit jar file')
+            ->addOption('workspace_dir', null, InputOption::VALUE_OPTIONAL, 'Path to the Jackrabbit workspace dir')
             ->setDescription('Start and stop the Jackrabbit server')
             ->setHelp(<<<EOF
 The <info>jackalope:run:jackrabbit</info> command allows to have a minimal
@@ -43,6 +50,11 @@ EOF
     protected function setJackrabbitPath($jackrabbit_jar)
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
+    }
+
+    protected function setWorkspaceDir($workspace_dir)
+    {
+        $this->workspace_dir = $workspace_dir;
     }
 
     /**
@@ -72,7 +84,13 @@ EOF
             throw new \Exception("Could not find the specified Jackrabbit .jar file '$jar'");
         }
 
-        $helper = new JackrabbitHelper($jar);
+        $workspace_dir = $input->getOption('workspace_dir')?:$this->workspace_dir?:null;
+
+        if ($workspace_dir && !file_exists($workspace_dir)) {
+            throw new \Exception("Could not find the specified directory'$workspace_dir'");
+        }
+
+        $helper = new JackrabbitHelper($jar, $workspace_dir);
 
         switch (strtolower($cmd)) {
             case 'start':
