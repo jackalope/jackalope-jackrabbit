@@ -766,8 +766,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $this->assertValidPath($path);
 
         $this->setJsopBody("-" . $path . " : ");
-
-        return true;
     }
 
     /**
@@ -852,8 +850,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $node->getPath();
         $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
-
-        return true;
     }
 
 
@@ -877,8 +873,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         } else {
             $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
         }
-
-        return true;
     }
 
     /**
@@ -929,8 +923,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
             }
         }
-
-        return true;
     }
 
     /**
@@ -1058,8 +1050,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $namespaces[$prefix] = $uri;
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
         $request->execute();
-
-        return true;
     }
 
     /**
@@ -1077,7 +1067,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         unset($namespaces[$prefix]);
         $request->setBody($this->buildRegisterNamespaceRequest($namespaces));
         $request->execute();
-        return true;
         */
     }
 
@@ -1111,7 +1100,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
         $request->setBody($this->buildRegisterNodeTypeRequest($cnd, $allowUpdate));
         $request->execute();
-        return true;
     }
 
     // PermissionInterface //
@@ -1613,6 +1601,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
+    public function prepareSave()
+    {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function finishSave()
     {
         if (count($this->jsopBody) > 0) {
@@ -1652,6 +1647,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         $this->jsopBody = array();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function rollbackSave()
+    {
     }
 
     protected function getMimePart($name, $value, $mime_boundary)
