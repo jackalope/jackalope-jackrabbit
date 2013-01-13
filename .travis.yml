@@ -6,8 +6,8 @@ php:
 
 before_script:
   # work around bug in composer: https://github.com/composer/composer/issues/789
-  - composer install
-  - composer install --dev
+  - composer install --prefer-source
+  - composer install --prefer-source --dev
   - ./bin/jackrabbit.sh
 
 script: phpunit -c tests/phpunit.xml.dist
