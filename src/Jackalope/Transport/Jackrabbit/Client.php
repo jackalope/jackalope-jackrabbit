@@ -12,12 +12,11 @@ use PHPCR\PropertyType;
 use PHPCR\SessionInterface;
 use PHPCR\RepositoryException;
 use PHPCR\UnsupportedRepositoryOperationException;
-use PHPCR\ItemExistsException;
 use PHPCR\ItemNotFoundException;
 use PHPCR\PathNotFoundException;
 use PHPCR\LoginException;
 use PHPCR\Query\QueryInterface;
-use PHPCR\Query\QOM\QueryObjectModelInterface;
+use PHPCR\Observation\EventFilterInterface;
 
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\QueryInterface as QueryTransport;
@@ -1208,19 +1207,19 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getEventJournal(SessionInterface $session, $eventTypes = null, $absPath = null, $isDeep = null, array $uuid = null, array $nodeTypeName = null)
+    public function getEventJournal(SessionInterface $session, EventFilterInterface $filter)
     {
         $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
         $request = $this->getRequest(Request::GET, $path, false);
         $data = $request->executeDom();
 
-        // The last parameter of the EventJournal contructor is used in the EventJournal to extract paths from
+        // The last parameter of the EventJournal constructor is used in the EventJournal to extract paths from
         // full node URIs. Unfortunately the URIs returned by the backend are partially encoded which is not the
         // case with the workspaceUriRoot value we have here. That's why we manually encode the workspace URI to
         // fit what is needed in the journal. See EventJournal::constructEventJournal
         return $this->factory->get(
             'Observation\\EventJournal',
-            array($session, $data, $eventTypes, $absPath, $isDeep, $uuid, $nodeTypeName, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
+            array($session, $data, $filter, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
         );
     }
 
