@@ -848,7 +848,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function storeNode(Node $node)
     {
         $path = $node->getPath();
-        $this->createNodeJsop($path, $node->getProperties(), $node->getNodes());
+        $this->createNodeJsop($path, $node->getProperties());
     }
 
 
@@ -877,15 +877,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * create the node markup and a list of value dispatches for multivalue properties
      *
-     * this is a recursive function.
-     *
      * @param string $path path to the current node, basename is the name of the node
      * @param array $properties of this node
-     * @param array $children nodes of this node
      *
      * @return string the xml for the node
      */
-    protected function createNodeJsop($path, $properties, $children)
+    protected function createNodeJsop($path, $properties)
     {
         $body = '+' . $path . ' : {';
         $binaries = array();
@@ -914,13 +911,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         foreach ($binaries as $binary) {
             $this->storeProperty($binary);
-        }
-
-        foreach ($children as $name => $node) {
-            if ($node->isNew()) {
-                // TODO: FIXME: even if the node is not new, its children could be new
-                $this->createNodeJsop($path.'/'.$name, $node->getProperties(), $node->getNodes());
-            }
         }
     }
 
@@ -1621,11 +1611,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     $diff = $this->jsopBody[':diff'];
                     unset($this->jsopBody[':diff']);
                 }
+
                 foreach ($this->jsopBody as $n => $v) {
                     $body .= $this->getMimePart($n, $v, $mime_boundary);
                 }
+
                 if ($diff) {
-                   $body .= $this->getMimePart(":diff", $diff, $mime_boundary);
+                    $body .= $this->getMimePart(":diff", $diff, $mime_boundary);
                 }
                 $body .= "--" . $mime_boundary . "--". "\r\n\r\n" ; // finish with two eol's!!
 
