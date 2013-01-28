@@ -353,7 +353,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * {@inheritDoc}
+     * Configure whether to check if we are logged in before doing a request.
+     *
+     * Will improve error reporting at the cost of some round trips.
      */
     public function setCheckLoginOnServer($bool)
     {
@@ -760,19 +762,53 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function deleteNode($path)
+    public function deleteNodes(array $operations)
     {
-        $this->assertValidPath($path);
-
-        $this->setJsopBody("-" . $path . " : ");
+        foreach ($operations as $operation) {
+            $this->deleteItem($operation->srcPath);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function deleteProperty($path)
+    public function deleteProperties(array $operations)
     {
-        return $this->deleteNode($path);
+        foreach ($operations as $operation) {
+            $this->deleteItem($operation->srcPath);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deleteNodeImmediately($path)
+    {
+        $this->prepareSave();
+        $this->deleteItem($path);
+        $this->finishSave();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deletePropertyImmediately($path)
+    {
+        $this->prepareSave();
+        $this->deleteItem($path);
+        $this->finishSave();
+    }
+
+    /**
+     * Record that we need to delete the item at $path
+     *
+     * @param string $path path to node or property
+     */
+    protected function deleteItem($path)
+    {
+        $this->assertValidPath($path);
+
+        $this->setJsopBody("-" . $path . " : ");
     }
 
     /**
@@ -799,19 +835,24 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function moveNode($srcAbsPath, $dstAbsPath, $immediatly = false)
+    public function moveNodes(array $operations)
     {
-        if ($immediatly) {
-            $request = $this->getRequest(Request::MOVE, $srcAbsPath);
-            $request->setDepth(Request::INFINITY);
-            $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
-            $request->execute();
-        } else {
-            $this->assertValidPath($srcAbsPath);
-            $this->assertValidPath($dstAbsPath);
+        foreach ($operations as $operation) {
+            $this->assertValidPath($operation->srcPath);
+            $this->assertValidPath($operation->dstPath);
 
-            $this->setJsopBody(">" . $srcAbsPath . " : " . $dstAbsPath);
+            $this->setJsopBody(">" . $operation->srcPath . " : " . $operation->dstPath);
         }
+    }
+    /**
+     * {@inheritDoc}
+     */
+    public function moveNodeImmediately($srcAbsPath, $dstAbsPath)
+    {
+        $request = $this->getRequest(Request::MOVE, $srcAbsPath);
+        $request->setDepth(Request::INFINITY);
+        $request->addHeader('Destination: ' . $this->addWorkspacePathToUri($dstAbsPath));
+        $request->execute();
     }
 
     /**
@@ -845,12 +886,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function storeNode(Node $node)
+    public function storeNodes(array $operations)
     {
-        $path = $node->getPath();
-        $this->createNodeJsop($path, $node->getProperties());
+        foreach ($operations as $operation) {
+            $this->createNodeJsop($operation->srcPath, $operation->node->getProperties());
+        }
     }
-
 
     /**
      * {@inheritDoc}
