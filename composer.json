@@ -25,7 +25,7 @@
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "symfony/console": ">=2.0.0,<2.2.0-dev"
+        "symfony/console": ">=2.0.0,<2.3.0-dev"
     },
     "autoload": {
         "psr-0": { "Jackalope\\": "src/" }
