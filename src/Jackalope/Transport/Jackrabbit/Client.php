@@ -888,8 +888,14 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function storeNodes(array $operations)
     {
+        /** @var $operation \Jackalope\Transport\AddNodeOperation */
         foreach ($operations as $operation) {
-            $this->createNodeJsop($operation->srcPath, $operation->node->getProperties());
+            if ($operation->node->isDeleted()) {
+                $properties = $operation->node->getPropertiesForStoreDeletedNode();
+            } else {
+                $properties = $operation->node->getProperties();
+            }
+            $this->createNodeJsop($operation->srcPath, $properties);
         }
     }
 
