@@ -54,19 +54,11 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Writing\\SetPropertyMethodsTest::testSetPropertyNewExistingNode', // see http://www.mail-archive.com/dev@jackrabbit.apache.org/msg28035.html
             'Writing\\NamespaceRegistryTest::testRegisterUnregisterNamespace',
             'Writing\\CopyMethodsTest::testCopyUpdateOnCopy',
-            'Writing\\MoveMethodsTest::testSessionDeleteMoved', // TODO: enable and look at the exception you get as starting point
-            'Writing\\MoveMethodsTest::testSessionMoveReplace',
-            'Writing\\CombinedManipulationsTest::testAddAndChildAddAndMove',
+            'Writing\\CombinedManipulationsTest::testRemoveAndAddAndRemoveToplevelNode', // jackrabbit bug specific to top level node https://issues.apache.org/jira/browse/JCR-3508
 
             'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithSource',
             'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithInvalidSource',
             'WorkspaceManagement\\WorkspaceManagementTest::testDeleteWorkspace',
-
-            // Implemented bug jackrabbit bug prevents saving https://issues.apache.org/jira/browse/JCR-3279
-            'Import\\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingSession',
-            'Import\\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingWorkspace',
-            'Import\\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingSession',
-            'Import\\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingWorkspace',
         );
     }
 
