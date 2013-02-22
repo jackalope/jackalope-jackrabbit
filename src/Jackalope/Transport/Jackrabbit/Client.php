@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
+use PHPCR\Util\PathHelper;
 use LogicException;
 use InvalidArgumentException;
 
@@ -602,13 +603,36 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         foreach ($dom->getElementsByTagNameNS(self::NS_DCR, $identifier) as $node) {
             foreach ($node->getElementsByTagNameNS(self::NS_DAV, 'href') as $ref) {
                 $refpath = str_replace($this->workspaceUriRoot, '',  urldecode($ref->textContent));
-                if ($name === null || basename($refpath) === $name) {
-                    $references[] = str_replace($this->workspaceUriRoot, '',  urldecode($ref->textContent));
+                $refpath = $this->removeTrailingSlash($refpath);
+                if (null === $name || PathHelper::getNodeName($refpath) === $name) {
+                    $references[] = $refpath;
                 }
             }
         }
 
         return $references;
+    }
+
+    /**
+     * Remove the trailing slash if present. Used for backend responses when
+     * jackrabbit is sloppy
+     *
+     * @param string $path a path with potentially a trailing slash
+     *
+     * @return string the path guaranteed to not have a trailing slash
+     */
+    private function removeTrailingSlash($path)
+    {
+        if (strlen($path) <= 1) {
+            return '/';
+        }
+
+        if ('/' !== $path[strlen($path) - 1]) {
+            // no trailing slash
+            return $path;
+        }
+
+        return substr($path, 0, strlen($path) - 1);
     }
 
     // VersioningInterface //
@@ -623,7 +647,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $request = $this->getRequest(Request::CHECKIN, $path);
             $curl = $request->execute(true);
             if ($curl->getHeader("Location")) {
-                return $this->stripServerRootFromUri(urldecode($curl->getHeader("Location")));
+                return $this->removeTrailingSlash(
+                    $this->stripServerRootFromUri(urldecode($curl->getHeader("Location")))
+                );
             }
         } catch (HTTPErrorException $e) {
             if ($e->getCode() == 405) {
@@ -806,7 +832,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function deleteItem($path)
     {
-        $this->assertValidPath($path);
+        PathHelper::assertValidAbsolutePath($path);
 
         $this->setJsopBody("-" . $path . " : ");
     }
@@ -838,8 +864,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function moveNodes(array $operations)
     {
         foreach ($operations as $operation) {
-            $this->assertValidPath($operation->srcPath);
-            $this->assertValidPath($operation->dstPath);
+            PathHelper::assertValidAbsolutePath($operation->srcPath);
+            PathHelper::assertValidAbsolutePath($operation->dstPath);
 
             $this->setJsopBody(">" . $operation->srcPath . " : " . $operation->dstPath);
         }
@@ -924,7 +950,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * create the node markup and a list of value dispatches for multivalue properties
      *
-     * @param string $path path to the current node, basename is the name of the node
+     * @param string $path path to the current node with the last path segment
+     *      being the node name
      * @param array $properties of this node
      *
      * @return string the xml for the node
@@ -1439,7 +1466,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function encodeAndValidatePathForDavex($path)
     {
-        $this->assertValidPath($path);
+        PathHelper::assertValidAbsolutePath($path);
 
         // TODO: encode everything except for the regexp below.
         // the proper character list is http://stackoverflow.com/questions/1547899/which-characters-make-a-url-invalid
@@ -1475,7 +1502,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function addWorkspacePathToUri($uri)
     {
-        if (substr($uri, 0, 1) === '/' || $uri === "") {
+        if (empty($uri) || '/' === $uri[0]) {
             if (empty($this->workspaceUri)) {
                 throw new RepositoryException("Implementation error: Please login before accessing content");
             }
