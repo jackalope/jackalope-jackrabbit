@@ -38,6 +38,7 @@ $cli->setCatchExceptions(true);
 $cli->setHelperSet($helperSet);
 $cli->addCommands(array(
     new \PHPCR\Util\Console\Command\CreateWorkspaceCommand(),
+    new \PHPCR\Util\Console\Command\ListWorkspacesCommand(),
     new \PHPCR\Util\Console\Command\ImportXmlCommand(),
     new \PHPCR\Util\Console\Command\DumpCommand(),
     new \PHPCR\Util\Console\Command\PurgeCommand(),
