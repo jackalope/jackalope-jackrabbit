@@ -858,18 +858,23 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function reorderNodes($absPath, $reorders)
+    public function reorderChildren(Node $node)
     {
+        $reorders = $node->getOrderCommands();
+
         if (count($reorders) == 0) {
+            // should not happen but safe is safe
+
             return;
         }
 
         $body = '';
-        foreach ($reorders as $r) {
-            if (is_null($r[1])) {
-                $body .= '>'.$absPath.'/'.$r[0] . ' : #last'."\r";
+        $path = $node->getPath();
+        foreach ($reorders as $child => $destination) {
+            if (is_null($destination)) {
+                $body .= ">$path/$child : #last\r";
             } else {
-                $body .= '>'.$absPath.'/'.$r[0] . ' : '. $r[1] . '#before'."\r";
+                $body .= ">$path/$child : $destination#before\r";
             }
         }
         $this->setJsopBody(trim($body));
