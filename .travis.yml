@@ -5,9 +5,7 @@ php:
   - 5.4
 
 before_script:
-  # work around bug in composer: https://github.com/composer/composer/issues/789
-  - composer install --prefer-source
-  - composer install --prefer-source --dev
+  - composer update
   - ./bin/jackrabbit.sh
 
 script: phpunit -c tests/phpunit.xml.dist
