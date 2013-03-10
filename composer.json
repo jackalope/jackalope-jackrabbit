@@ -16,12 +16,12 @@
         "php": ">=5.3.2",
         "ext-libxml":"*",
         "ext-curl":"*",
-        "phpcr/phpcr": ">=2.1.0-beta8",
-        "phpcr/phpcr-utils": ">=1.0-beta4",
-        "jackalope/jackalope": ">=1.0.0-alpha1"
+        "phpcr/phpcr": "~2.1.0-beta9",
+        "phpcr/phpcr-utils": "~1.0-beta6",
+        "jackalope/jackalope": "~1.0.0-alpha2"
     },
     "provide": {
-        "jackalope/jackalope-transport": "1.0.0-alpha1"
+        "jackalope/jackalope-transport": "1.0.0-alpha2"
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
