@@ -3,7 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
-use PHPCR\Util\PathHelper;
 use LogicException;
 use InvalidArgumentException;
 
@@ -18,6 +17,8 @@ use PHPCR\PathNotFoundException;
 use PHPCR\LoginException;
 use PHPCR\Query\QueryInterface;
 use PHPCR\Observation\EventFilterInterface;
+
+use PHPCR\Util\PathHelper;
 
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\QueryInterface as QueryTransport;
@@ -305,7 +306,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function login(CredentialsInterface $credentials, $workspaceName)
+    public function login(CredentialsInterface $credentials = null, $workspaceName)
     {
         if ($this->credentials) {
             throw new RepositoryException(
@@ -314,7 +315,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             );
         }
         if (!$credentials instanceof SimpleCredentials) {
-            throw new LoginException('Unkown Credentials Type: '.get_class($credentials));
+            $hint = is_null($credentials)
+                ? 'jackalope-jackrabbit does not support "null" credentials'
+                : 'Only SimpleCredentials are supported. Unkown credentials type: '.get_class($credentials);
+            throw new LoginException($hint);
         }
 
         $this->credentials = $credentials;
