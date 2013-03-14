@@ -911,7 +911,15 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function cloneFrom($srcWorkspace, $srcAbsPath, $destAbsPath, $removeExisting)
     {
-        throw new NotImplementedException();
+        $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
+        $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
+        $body = urlencode(':clone') . '=' . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',true');
+
+        $request = $this->getRequest(Request::POST, $this->workspaceUri);
+        $request->setBody($body);
+        $request->setContentType('application/x-www-form-urlencoded');
+        $request->execute();
+        $request->execute();
     }
 
     /**
