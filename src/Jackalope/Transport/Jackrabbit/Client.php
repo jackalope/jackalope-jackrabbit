@@ -913,7 +913,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
-        $body = urlencode(':clone') . '=' . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',true');
+        $body = urlencode(':clone') . '='
+            . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . ($removeExisting ? 'true' : 'false'));
 
         $request = $this->getRequest(Request::POST, $this->workspaceUri);
         $request->setBody($body);

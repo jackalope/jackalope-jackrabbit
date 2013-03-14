@@ -95,7 +95,6 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
             throw new Exception('Fixture not found at: ' . $fixture);
         }
 
-
         //TODO fix the stderr redirect which doesn't work properly
         exec('java -jar ' . $this->jar . ' import ' . $fixture . " " . $this->getArguments($workspace) . " 2>&1", $output, $ret);
         if ($ret !== 0) {
