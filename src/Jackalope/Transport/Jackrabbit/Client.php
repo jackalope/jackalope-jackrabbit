@@ -920,7 +920,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
         $request->execute();
-        $request->execute();
     }
 
     /**
