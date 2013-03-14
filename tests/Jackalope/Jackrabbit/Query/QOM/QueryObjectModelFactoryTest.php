@@ -4,9 +4,10 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\Jackrabbit\Query\QOM\QueryObjectModelFactory;
 use Jackalope\Jackrabbit\Factory;
+use Jackalope\Query\QOM\EquiJoinCondition;
+
 use PHPCR\Util\QOM\QueryBuilder;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
-use Jackalope\Query\QOM\EquiJoinCondition;
 
 class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -37,9 +38,9 @@ class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame("SELECT s FROM nt:base WHERE jcr:path LIKE '/foo[%]/%'", $this->qb->getQuery()->getStatement());
 
         //joins are not supported by sql1
-        $this->qb->join($this->qf->selector("nt:unstructured"),new equiJoinCondition("foo", "data", "bar","data"));
+        $this->qb->join($this->qf->selector("nt:unstructured"), new EquiJoinCondition("nt:base", "data", "nt:unstructured", "data"));
         $this->assertSame($this->qb->getQuery()->getLanguage(),"JCR-SQL2");
-        $this->assertSame("SELECT * FROM [nt:base] INNER JOIN [nt:unstructured] ON foo.data=bar.data WHERE ISDESCENDANTNODE([/foo])",$this->qb->getQuery()->getStatement());
+        $this->assertSame("SELECT * FROM [nt:base] INNER JOIN [nt:unstructured] ON [nt:base].data=[nt:unstructured].data WHERE ISDESCENDANTNODE([/foo])", $this->qb->getQuery()->getStatement());
     }
 
 }
