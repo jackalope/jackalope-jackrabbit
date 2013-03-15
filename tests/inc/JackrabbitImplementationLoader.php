@@ -35,10 +35,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         );
 
         $this->unsupportedTests = array(
-            'Connecting\\RepositoryTest::testLoginException', //TODO: figure out what would be invalid credentials
-            'Connecting\\RepositoryTest::testNoLogin',
-            'Connecting\\RepositoryTest::testNoLoginAndWorkspace',
-
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
             'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes?
@@ -88,6 +84,11 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     public function getRestrictedCredentials()
     {
         return new \PHPCR\SimpleCredentials('anonymous', 'abc');
+    }
+
+    public function prepareAnonymousLogin()
+    {
+        return false;
     }
 
     public function getUserId()

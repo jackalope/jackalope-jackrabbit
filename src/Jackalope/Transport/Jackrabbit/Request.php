@@ -7,6 +7,7 @@ use DOMDocument;
 use PHPCR\CredentialsInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\RepositoryException;
+use PHPCR\LoginException;
 use PHPCR\NoSuchWorkspaceException;
 use PHPCR\ItemNotFoundException;
 use PHPCR\PathNotFoundException;
@@ -456,7 +457,7 @@ class Request
         $curl->setopt(CURLOPT_URL, reset($this->uri));
         $curl->setopt(CURLOPT_HTTPHEADER, $headers);
         $curl->setopt(CURLOPT_POSTFIELDS, $this->body);
-        // TODO: uncomment next line to get verbose information from CURL
+        // uncomment next line to get verbose information from CURL
         //$curl->setopt(CURLOPT_VERBOSE, 1);
         if ($getCurlObject) {
             $curl->parseResponseHeaders();
@@ -514,8 +515,6 @@ class Request
                 throw new NoSuchWorkspaceException($curl->error());
         }
 
-        // TODO extract HTTP status string from response, more descriptive about error
-
         // use XML error response if it's there
         if (substr($response, 0, 2) === '<?') {
             $dom = new DOMDocument();
@@ -558,11 +557,16 @@ class Request
                 }
             }
         }
+        if (401 == $httpCode) {
+            throw new LoginException("HTTP 401 Unauthorized\n" . $this->getShortErrorString());
+        }
         if (404 == $httpCode) {
             throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n" . $this->getShortErrorString());
-        } elseif (405 == $httpCode) {
+        }
+        if (405 == $httpCode) {
             throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
-        } elseif ($httpCode >= 500) {
+        }
+        if ($httpCode >= 500) {
             throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response));
         }
 
