@@ -925,6 +925,30 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
+    public function updateNode(Node $node, $srcWorkspace)
+    {
+        $path = $this->encodeAndValidatePathForDavex($node->getPath());
+        $srcWorkspaceUri = $this->server . $srcWorkspace;
+
+        $body = '
+            <D:update xmlns:D="DAV:">
+                <D:workspace>
+                    ' . $srcWorkspaceUri . '
+                    <D:href>
+                        ' . $srcWorkspaceUri . '
+                    </D:href>
+                </D:workspace>
+            </D:update>
+        ';
+
+        $request = $this->getRequest(Request::UPDATE, $path, true);
+        $request->setBody($body);
+        $request->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function storeNodes(array $operations)
     {
         /** @var $operation \Jackalope\Transport\AddNodeOperation */
