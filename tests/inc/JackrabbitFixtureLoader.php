@@ -44,13 +44,13 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
         }
     }
 
-    private function getArguments()
+    private function getArguments($workspace)
     {
         $args = array(
             'jackrabbit.uri' => 'storage',
             'phpcr.user' => 'username',
             'phpcr.pass' => 'password',
-            'phpcr.workspace' => 'workspace',
+            "phpcr.$workspace" => 'workspace',
             'phpcr.basepath' => 'repository-base-xpath',
         );
         $opts = "";
@@ -72,13 +72,31 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
      */
     public function import($fixture)
     {
-        $fixture = $this->fixturePath . $fixture . ".xml";
+        $this->importForWorkspace($fixture, 'workspace');
+        $this->importForWorkspace($fixture, 'additionalWorkspace');
+        return true;
+    }
+
+    /**
+     * @param $fixture
+     * @param $workspace
+     * @throws Exception
+     * @internal param $ret
+     * @internal param $output
+     */
+    private function importForWorkspace($fixture, $workspace)
+    {
+        if ('additionalWorkspace' == $workspace) {
+            $fixture = $this->fixturePath . "general/additionalWorkspace.xml";
+        } else {
+            $fixture = $this->fixturePath . $fixture . ".xml";
+        }
         if (!is_readable($fixture)) {
             throw new Exception('Fixture not found at: ' . $fixture);
         }
 
         //TODO fix the stderr redirect which doesn't work properly
-        exec('java -jar ' . $this->jar . ' import ' . $fixture . " " . $this->getArguments() . " 2>&1", $output, $ret);
+        exec('java -jar ' . $this->jar . ' import ' . $fixture . " " . $this->getArguments($workspace) . " 2>&1", $output, $ret);
         if ($ret !== 0) {
             $msg = '';
             foreach ($output as $line) {
@@ -86,7 +104,6 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
             }
             throw new Exception($msg);
         }
-        return true;
     }
 
     /**
@@ -104,7 +121,7 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
         }
 
         //TODO fix the stderr redirect which doesn't work properly
-        exec('java -jar ' . $this->jar . ' exportdocument ' . $fixture . " " . $this->getArguments() . " 2>&1", $output, $ret);
+        exec('java -jar ' . $this->jar . ' exportdocument ' . $fixture . " " . $this->getArguments('workspace') . " 2>&1", $output, $ret);
         if ($ret !== 0) {
             $msg = '';
             foreach ($output as $line) {
