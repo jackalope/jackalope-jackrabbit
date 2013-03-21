@@ -1062,8 +1062,14 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getNodePathForIdentifier($uuid)
+    public function getNodePathForIdentifier($uuid, $workspace = null)
     {
+        if (null !== $workspace && $workspace != $this->workspace) {
+            $client = new Client($this->factory, $this->server);
+            $client->login($this->credentials, $workspace);
+            return $client->getNodePathForIdentifier($uuid);
+        }
+
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildLocateRequest($uuid));
         $dom = $request->executeDom();
