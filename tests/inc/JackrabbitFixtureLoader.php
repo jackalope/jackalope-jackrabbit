@@ -15,7 +15,6 @@ require_once __DIR__.'/../../vendor/phpcr/phpcr-api-tests/inc/FixtureLoaderInter
  */
 class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
 {
-
     protected $fixturePath;
     protected $jar;
 
@@ -87,31 +86,5 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
             }
             throw new Exception($msg);
         }
-    }
-
-    /**
-     * export a document view to a file
-     *
-     * TODO: add path parameter so you can export just content parts (exporting / exports jcr:system too, which is huge and ugly)
-     * @param $file path to the file, relative to fixturePath. the file may not yet exist
-     * @throws Exception if the file already exists or if the export fails
-     */
-    public function exportdocument($file)
-    {
-        $fixture = $this->fixturePath . $file;
-        if (is_readable($fixture)) {
-            throw new Exception('File existing: ' . $fixture);
-        }
-
-        //TODO fix the stderr redirect which doesn't work properly
-        exec('java -jar ' . $this->jar . ' exportdocument ' . $fixture . " " . $this->getArguments('workspace') . " 2>&1", $output, $ret);
-        if ($ret !== 0) {
-            $msg = '';
-            foreach ($output as $line) {
-                $msg .= $line . "\n";
-            }
-            throw new Exception($msg);
-        }
-        return true;
     }
 }
