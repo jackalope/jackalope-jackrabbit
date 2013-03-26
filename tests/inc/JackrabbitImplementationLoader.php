@@ -9,7 +9,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 {
     private static $instance = null;
 
-    private $necessaryConfigValues = array('jackrabbit.uri', 'phpcr.user', 'phpcr.pass', 'phpcr.workspace');
+    private $necessaryConfigValues = array('jackrabbit.uri', 'phpcr.user', 'phpcr.pass', 'phpcr.workspace', 'phpcr.additionalWorkspace');
 
     protected function __construct()
     {
