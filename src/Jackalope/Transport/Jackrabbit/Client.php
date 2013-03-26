@@ -3,7 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
-use PHPCR\Util\PathHelper;
 use LogicException;
 use InvalidArgumentException;
 
@@ -18,6 +17,8 @@ use PHPCR\PathNotFoundException;
 use PHPCR\LoginException;
 use PHPCR\Query\QueryInterface;
 use PHPCR\Observation\EventFilterInterface;
+
+use PHPCR\Util\PathHelper;
 
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\QueryInterface as QueryTransport;
@@ -451,7 +452,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getNodes($paths)
+    public function getNodes($paths, $query = ':include')
     {
         if (count($paths) == 0) {
             return array();
@@ -469,9 +470,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $url = $this->encodeAndValidatePathForDavex("/").'.'.$this->getFetchDepth().'.json';
         foreach ($paths as $path) {
-            $body[] = http_build_query(array(":include" => $path));
+            $body[] = http_build_query(array($query => $path));
         }
         $body = implode("&",$body);
+
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
@@ -489,6 +491,66 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             throw $e;
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getNodesByIdentifier($identifiers)
+    {
+        // TODO get paths for UUID's via a single query
+        // or get the data directly
+        // return $this->getNodes($identifiers, ':id');
+
+        $paths = array();
+        foreach ($identifiers as $key => $identifier) {
+            try {
+                $paths[$key] = $this->getNodePathForIdentifier($identifier);
+            } catch (ItemNotFoundException $e) {
+                // ignore
+            }
+        }
+
+        return $this->getNodes($paths);
+    }
+
+    /**
+     * TODO: get rid of this method and get nodes directly by uuid from backend
+     * TODO: needs a patch to jackrabbit
+     *
+     * @param string $uuid
+     *
+     * @return string the path to the node identified by this uuid
+     *
+     * @throws \PHPCR\RepositoryException
+     */
+    private function getNodePathForIdentifier($uuid)
+    {
+        $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
+        $request->setBody($this->buildLocateRequest($uuid));
+        $dom = $request->executeDom();
+
+        /* answer looks like
+           <D:multistatus xmlns:D="DAV:">
+             <D:response>
+                 <D:href>http://localhost:8080/server/tests/jcr%3aroot/tests_level1_access_base/idExample/</D:href>
+             </D:response>
+         </D:multistatus>
+        */
+        $set = $dom->getElementsByTagNameNS(self::NS_DAV, 'href');
+        if ($set->length != 1) {
+            throw new RepositoryException('Unexpected answer from server: '.$dom->saveXML());
+        }
+        $fullPath = $set->item(0)->textContent;
+        if (strncmp($this->workspaceUriRoot, $fullPath, strlen($this->workspaceUri))) {
+            throw new RepositoryException(
+                "Server answered a path that is not in the current workspace: uuid=$uuid, path=$fullPath, workspace=".
+                    $this->workspaceUriRoot
+            );
+        }
+
+        return $this->stripServerRootFromUri(substr(urldecode($fullPath),0,-1));
+    }
+
 
     /**
      * {@inheritDoc}
@@ -1030,32 +1092,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getNodePathForIdentifier($uuid)
+    public function getNodeByIdentifier($uuid)
     {
-        $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
-        $request->setBody($this->buildLocateRequest($uuid));
-        $dom = $request->executeDom();
+        $path = $this->getNodePathForIdentifier($uuid);
+        $data = $this->getNode($path);
+        $data->{':jcr:path'} = $path;
 
-        /* answer looks like
-           <D:multistatus xmlns:D="DAV:">
-             <D:response>
-                 <D:href>http://localhost:8080/server/tests/jcr%3aroot/tests_level1_access_base/idExample/</D:href>
-             </D:response>
-         </D:multistatus>
-        */
-        $set = $dom->getElementsByTagNameNS(self::NS_DAV, 'href');
-        if ($set->length != 1) {
-            throw new RepositoryException('Unexpected answer from server: '.$dom->saveXML());
-        }
-        $fullPath = $set->item(0)->textContent;
-        if (strncmp($this->workspaceUriRoot, $fullPath, strlen($this->workspaceUri))) {
-            throw new RepositoryException(
-                "Server answered a path that is not in the current workspace: uuid=$uuid, path=$fullPath, workspace=".
-                $this->workspaceUriRoot
-            );
-        }
-
-        return $this->stripServerRootFromUri(substr(urldecode($fullPath),0,-1));
+        return $data;
     }
 
     /**

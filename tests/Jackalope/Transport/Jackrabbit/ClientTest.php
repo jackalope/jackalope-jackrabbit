@@ -320,66 +320,6 @@ class ClientTest extends JackrabbitTestCase
     }
 
     /**
-     * @covers \Jackalope\Transport\Jackrabbit\Client::getNodePathForIdentifier
-     * @expectedException \PHPCR\RepositoryException
-     */
-    public function testGetNodePathForIdentifierEmptyResponse()
-    {
-        $dom = new DOMDocument();
-        $dom->load(__DIR__.'/../../../fixtures/empty.xml');
-
-        $t = $this->getTransportMock('testuri');
-        $request = $this->getRequestMock($dom, array('setBody'));
-        $t->expects($this->once())
-            ->method('getRequest')
-            ->will($this->returnValue($request));
-        $t->getNodePathForIdentifier('test');
-    }
-
-    /**
-     * @covers \Jackalope\Transport\Jackrabbit\Client::getNodePathForIdentifier
-     * @expectedException \PHPCR\RepositoryException
-     */
-    public function testGetNodePathForIdentifierWrongWorkspace()
-    {
-        $locateRequest = $this->getTransportMock()->buildLocateRequestMock('test');
-        $dom = new DOMDocument();
-        $dom->load(__DIR__.'/../../../fixtures/locateRequest.xml');
-
-        $t = $this->getTransportMock('testuri');
-        $request = $this->getRequestMock($dom, array('setBody'));
-        $t->expects($this->once())
-            ->method('getRequest')
-            ->with(Request::REPORT, 'testWorkspaceUri')
-            ->will($this->returnValue($request));
-        $request->expects($this->once())
-            ->method('setBody')
-            ->with($locateRequest);
-        $t->getNodePathForIdentifier('test');
-    }
-
-    /**
-     * @covers \Jackalope\Transport\Jackrabbit\Client::getNodePathForIdentifier
-     */
-    public function testGetNodePathForIdentifier()
-    {
-        $locateRequest = $this->getTransportMock()->buildLocateRequestMock('test');
-        $dom = new DOMDocument();
-        $dom->load(__DIR__.'/../../../fixtures/locateRequestTests.xml');
-
-        $t = $this->getTransportMock('testuri');
-        $request = $this->getRequestMock($dom, array('setBody'));
-        $t->expects($this->once())
-            ->method('getRequest')
-            ->with(Request::REPORT, 'testWorkspaceUri')
-            ->will($this->returnValue($request));
-        $request->expects($this->once())
-            ->method('setBody')
-            ->with($locateRequest);
-        $this->assertSame('/tests_level1_access_base/idExample', $t->getNodePathForIdentifier('test'));
-    }
-
-    /**
      * @covers \Jackalope\Transport\Jackrabbit\Client::getNamespaces
      * @expectedException \PHPCR\RepositoryException
      */
@@ -394,7 +334,7 @@ class ClientTest extends JackrabbitTestCase
             ->method('getRequest')
             ->will($this->returnValue($request));
 
-        $ns = $t->getNamespaces();
+        $t->getNamespaces();
     }
 
     /**
