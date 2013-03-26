@@ -66,31 +66,14 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
     }
 
     /**
-     * import the jcr dump into jackrabbit
-     * @param string $fixture path to the fixture file, relative to fixturePath
-     * @throws Exception if anything fails
+     * Import the jcr dump into jackrabbit
+     *
+     * {@inheritDoc}
      */
-    public function import($fixture)
+    public function import($fixture, $workspace = 'workspace')
     {
-        $this->importForWorkspace($fixture, 'workspace');
-        $this->importForWorkspace($fixture, 'additionalWorkspace');
-        return true;
-    }
+        $fixture = $this->fixturePath . $fixture . ".xml";
 
-    /**
-     * @param $fixture
-     * @param $workspace
-     * @throws Exception
-     * @internal param $ret
-     * @internal param $output
-     */
-    private function importForWorkspace($fixture, $workspace)
-    {
-        if ('additionalWorkspace' == $workspace) {
-            $fixture = $this->fixturePath . "general/additionalWorkspace.xml";
-        } else {
-            $fixture = $this->fixturePath . $fixture . ".xml";
-        }
         if (!is_readable($fixture)) {
             throw new Exception('Fixture not found at: ' . $fixture);
         }

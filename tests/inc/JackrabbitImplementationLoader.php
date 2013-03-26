@@ -19,7 +19,17 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
                 die('Please set '.$val.' in your phpunit.xml.' . "\n");
             }
         }
-        parent::__construct('Jackalope\RepositoryFactoryJackrabbit', $GLOBALS['phpcr.workspace']);
+
+        parent::__construct('Jackalope\RepositoryFactoryJackrabbit', $GLOBALS['phpcr.workspace'], $GLOBALS['phpcr.additionalWorkspace']);
+
+        // ensure workspaces exist
+        $workspace = $this->getRepository()->login($this->getCredentials(), 'default')->getWorkspace();
+        if (! in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames())) {
+            $workspace->createWorkspace($GLOBALS['phpcr.workspace']);
+        }
+        if (! in_array($GLOBALS['phpcr.additionalWorkspace'], $workspace->getAccessibleWorkspaceNames())) {
+            $workspace->createWorkspace($GLOBALS['phpcr.additionalWorkspace']);
+        }
 
         $this->unsupportedChapters = array(
             'PermissionsAndCapabilities',

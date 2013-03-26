@@ -25,30 +25,25 @@ You should only see success or skipped tests, no failures or errors.
 # Setup
 
 **Careful: If you run the tests without changing the workspace in the phpunit.xml,
-the default workspace will be used and all content in that workspace is destroyed.**
+the default workspace will be used and all content in the default workspace is
+destroyed.**
 
 A second workspace is needed for some tests.
 
 To run the tests:
 
     cd /path/to/jackalope/tests
-    cp cli-config.php.dist cli-config.php
-    bin/jackalope phpcr:workspace:create testsAdditional
     cp phpunit.xml.dist phpunit.xml
     phpunit
 
 
 ## Use a non-default workspace
 
-If you want to run the tests against a non-default workspace, edit phpunit.xml
-and change the "default" in ``<var name="phpcr.workspace" value="default" />``
-to point to a different name, e.g. "tests". Then create that workspace once:
-
-    bin/jackalope phpcr:workspace:create tests
-
-The additional workspace (needed for cross-workspace tests) is "testsAdditional"
-by default. If you want to change it, repeat the above steps for the value
-``<var name="phpcr.additionalWorkspace" value="testsAdditional" />``.
+If you want to run the tests against something else than the default workspace,
+edit phpunit.xml and change the "default" in ``<var name="phpcr.workspace" value="default" />``
+to point to a different name, e.g. "tests". For cross-workspace tests, there is
+a similar setting ``<var name="phpcr.additionalWorkspace" value="testsAdditional" />``
+which you can change as well.
 
 
 ## Note on JCR
