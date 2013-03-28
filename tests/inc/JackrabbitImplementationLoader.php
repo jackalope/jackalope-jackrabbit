@@ -42,6 +42,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         );
 
         $this->unsupportedCases = array(
+            'NodeTypeManagement\NodeTypeTest', // TODO https://github.com/jackalope/jackalope/issues/138
         );
 
         $this->unsupportedTests = array(
