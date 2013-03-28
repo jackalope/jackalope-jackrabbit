@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
+use DOMElement;
 use LogicException;
 use InvalidArgumentException;
 
@@ -842,13 +843,23 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             foreach ($row->getElementsByTagName('column') as $column) {
                 $sets = array();
                 foreach ($column->childNodes as $childNode) {
-                    $sets[$childNode->tagName] = $childNode->nodeValue;
+                    if ('dcr:value' == $childNode->tagName) {
+                        $value = $this->getDcrValue($childNode);
+                        // TODO if this bug is fixed, spaces may be urlencoded instead of the escape sequence: https://issues.apache.org/jira/browse/JCR-2997
+                        // the following line fails for nodes with "_x0020 " in their name, changing that part to " x0020_"
+                        // other characters like < and > are urlencoded, which seems to be handled by dom already.
+                        if (is_string($value)) {
+                            $value = str_replace('_x0020_', ' ', $value);
+                        }
+                    } else {
+                        $value = $childNode->nodeValue;
+                    }
+                    $sets[$childNode->tagName] = $value;
                 }
 
-                // TODO if this bug is fixed, spaces may be urlencoded instead of the escape sequence: https://issues.apache.org/jira/browse/JCR-2997
-                // the following line fails for nodes with "_x0020 " in their name, changing that part to " x0020_"
-                // other characters like < and > are urlencoded, which seems to be handled by dom already.
-                $sets['dcr:value'] = isset($sets['dcr:value']) ? str_replace('_x0020_', ' ', $sets['dcr:value']) : null;
+                if (! isset($sets['dcr:value'])) {
+                    $sets['dcr:value'] = null;
+                }
 
                 $columns[] = $sets;
             }
@@ -858,6 +869,33 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         return $rows;
     }
+
+
+    /**
+     * Get the value of a dcr:value node in the right format specified by the
+     * dcr type.
+     *
+     * This uses PropertyType but takes into account the special case that
+     * boolean false is encoded as string "false" which is otherwise true in php.
+     *
+     * <dcr:value dcr:type="Boolean">false</dcr:value>
+     *
+     * @param DOMElement $node      a dcr:value xml element
+     * @param string     $attribute the attribute name
+     *
+     * @return mixed the node value converted to the specified type.
+     */
+    public static function getDcrValue(DOMElement $node)
+    {
+        $type = $node->getAttribute('dcr:type');
+        if (PropertyType::TYPENAME_BOOLEAN == $type && 'false' == $node->nodeValue) {
+
+            return false;
+        }
+
+        return PropertyType::convertType($node->nodeValue, PropertyType::valueFromName($type));
+    }
+
 
     // WritingInterface //
 
