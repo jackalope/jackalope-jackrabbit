@@ -38,11 +38,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'LifecycleManagement',
             'RetentionAndHold',
             'SameNameSiblings',
-            'Transactions'
+            'Transactions',
         );
 
         $this->unsupportedCases = array(
-            'NodeTypeManagement\NodeTypeTest', // TODO https://github.com/jackalope/jackalope/issues/138
         );
 
         $this->unsupportedTests = array(
