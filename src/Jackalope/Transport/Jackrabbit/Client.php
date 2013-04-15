@@ -8,6 +8,7 @@ use LogicException;
 use InvalidArgumentException;
 
 use PHPCR\CredentialsInterface;
+use PHPCR\RepositoryInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
 use PHPCR\SessionInterface;
@@ -402,6 +403,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                     $this->descriptors[$name] = $values;
                 }
             }
+
+            // Supported by Jackrabbit, but not supported by this client
+            $this->descriptors[RepositoryInterface::NODE_TYPE_MANAGEMENT_SAME_NAME_SIBLINGS_SUPPORTED] = false;
 
             if (! isset($this->descriptors['jcr.repository.version'])) {
                 throw new UnsupportedRepositoryOperationException("The backend at {$this->server} does not provide the jcr.repository.version descriptor");
