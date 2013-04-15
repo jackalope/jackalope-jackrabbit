@@ -30,7 +30,7 @@
     "autoload": {
         "psr-0": { "Jackalope\\": "src/" }
     },
-    "bin": ["bin/jackalope"],
+    "bin": ["bin/jackalope", "bin/jackrabbit.sh"],
     "extra": {
         "branch-alias": {
             "dev-master": "1.0-dev"
