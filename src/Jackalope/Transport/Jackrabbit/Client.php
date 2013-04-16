@@ -909,6 +909,28 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function deleteNodes(array $operations)
     {
+        // Reverse sort the batch; work-around for problem with
+        // deleting same-name siblings. Not guaranteed to work
+        // across multiple calls to deleteNodes().
+        usort($operations, function ($a, $b) {
+            $aParts = array();
+            $bParts = array();
+            $regex = '/^(.+?)(?:\[(\d+)])?$/';
+
+            preg_match($regex, $a->srcPath, $aParts);
+            preg_match($regex, $b->srcPath, $bParts);
+
+            $aName = $aParts[1];
+            $bName = $bParts[1];
+            if ($aName != $bName) {
+                return strcmp($bName, $aName);
+            } else {
+                $aIndex = isset($aParts[2]) ? $aParts[2] : 1;
+                $bIndex = isset($bParts[2]) ? $bParts[2] : 1;
+                return $bIndex - $aIndex;
+            }
+        });
+
         foreach ($operations as $operation) {
             $this->deleteItem($operation->srcPath);
         }
