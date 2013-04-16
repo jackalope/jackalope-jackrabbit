@@ -8,6 +8,7 @@ use LogicException;
 use InvalidArgumentException;
 
 use PHPCR\CredentialsInterface;
+use PHPCR\ItemExistsException;
 use PHPCR\RepositoryInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
@@ -1031,6 +1032,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
+
+        if ($removeExisting) {
+            $this->checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath);
+        }
+
         $body = urlencode(':clone') . '='
             . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . ($removeExisting ? 'true' : 'false'));
 
@@ -1038,6 +1044,42 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request->setBody($body);
         $request->setContentType('application/x-www-form-urlencoded');
         $request->execute();
+    }
+
+    /**
+     * Prevent accidental creation of same name siblings (which are not supported)
+     *
+     * @param $srcWorkspace
+     * @param $srcAbsPath
+     * @param $destAbsPath
+     *
+     * @throws \PHPCR\ItemExistsException
+     */
+    protected function checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath)
+    {
+        try {
+            $existingNode = $this->getNode($destAbsPath);
+        } catch (ItemNotFoundException $exception) {
+            return;
+        }
+
+        if (empty($existingNode->{'jcr:uuid'})) {
+            throw new ItemExistsException('A node already exists at the destination path');
+        } else {
+            $existingNodeUuid = $existingNode->{'jcr:uuid'};
+
+            try {
+                $correspondingPath = $this->getNodePathForIdentifier($existingNodeUuid, $srcWorkspace);
+            } catch (ItemNotFoundException $exception) {
+                $correspondingPath = null;
+            }
+
+            if ($correspondingPath != $srcAbsPath) {
+                throw new ItemExistsException(
+                    'A node already exists at the destination path that does not correspond to the source node'
+                );
+            }
+        }
     }
 
     /**
