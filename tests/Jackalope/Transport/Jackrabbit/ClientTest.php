@@ -523,12 +523,19 @@ class ClientTest extends JackrabbitTestCase
             ),
             array(
                 array(
-                    '/a/b',
+                    '/a/node[2]/node[3]',
+                    '/a/node[2]',
+                ),
+                "-/a/node[2]/node[3] : -/a/node[2] : ",
+            ),
+            array(
+                array(
                     '/a/b/c',
-                    '/a/b[2]',
                     '/a/b[2]/c',
                     '/a/b[2]/c[2]',
                     '/a/b[2]/c[3]',
+                    '/a/b[2]',
+                    '/a/b',
                 ),
                 "-/a/b[2]/c[3] : -/a/b[2]/c[2] : -/a/b[2]/c : -/a/b/c : -/a/b[2] : -/a/b : ",
             ),
