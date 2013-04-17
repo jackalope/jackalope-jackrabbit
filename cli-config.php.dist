@@ -18,7 +18,8 @@ function bootstrapJackrabbit()
     $jackrabbit_url = 'http://127.0.0.1:8080/server/';
 
     // bootstrap jackrabbit
-    $repository = \Jackalope\RepositoryFactoryJackrabbit::getRepository(array("jackalope.jackrabbit_uri" => $jackrabbit_url));
+    $factory = new \Jackalope\RepositoryFactoryJackrabbit;
+    $repository = $factory->getRepository(array("jackalope.jackrabbit_uri" => $jackrabbit_url));
 }
 
 /*
