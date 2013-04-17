@@ -23,7 +23,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryJackrabbit', $GLOBALS['phpcr.workspace'], $GLOBALS['phpcr.additionalWorkspace']);
 
         // ensure workspaces exist
-        $workspace = $this->getRepository()->login($this->getCredentials(), 'default')->getWorkspace();
+        $workspace = $this->getRepository()->login($this->getCredentials())->getWorkspace();
         if (! in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames())) {
             $workspace->createWorkspace($GLOBALS['phpcr.workspace']);
         }
