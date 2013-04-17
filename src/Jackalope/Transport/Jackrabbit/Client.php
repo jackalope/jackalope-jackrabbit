@@ -920,10 +920,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             preg_match($regex, $a->srcPath, $aParts);
             preg_match($regex, $b->srcPath, $bParts);
 
-            $aName = $aParts[1];
-            $bName = $bParts[1];
-            if ($aName != $bName) {
-                return strcmp($bName, $aName);
+            $aPath = $aParts[1];
+            $bPath = $bParts[1];
+            if ($aPath != $bPath) {
+                return strcmp($bPath, $aPath);
             } else {
                 $aIndex = isset($aParts[2]) ? $aParts[2] : 1;
                 $bIndex = isset($bParts[2]) ? $bParts[2] : 1;
