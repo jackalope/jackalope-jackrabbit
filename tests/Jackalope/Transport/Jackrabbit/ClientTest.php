@@ -480,6 +480,59 @@ class ClientTest extends JackrabbitTestCase
         $this->assertEquals('testWorkspaceUriRoot/foo', $transport->addWorkspacePathToUriMock('/foo'), 'Absolute uri was not prepended with workspaceUriRoot');
     }
 
+    /**
+     * @dataProvider deleteNodesProvider
+     */
+    public function testDeleteNodes($nodePaths, $expectedJsopString)
+    {
+        $t = $this->getTransportMock();
+
+        foreach ($nodePaths as $nodePath) {
+            $node = $this->getMockBuilder('Jackalope\Transport\RemoveNodeOperation')
+                ->disableOriginalConstructor()
+                ->getMock();
+            $node->srcPath = $nodePath;
+            $nodes[] = $node;
+        }
+
+        $t->deleteNodes($nodes);
+
+        $jsopBody = $t->getJsopBody();
+        $jsopBody[':diff'] = preg_replace('/\s+/', ' ', $jsopBody[':diff']);
+
+        $this->assertEquals($expectedJsopString, $jsopBody[':diff']);
+    }
+
+    public function deleteNodesProvider()
+    {
+        return array(
+            array(
+                array(
+                    '/a/b',
+                    '/z/y',
+                ),
+                "-/z/y : -/a/b : ",
+            ),
+            array(
+                array(
+                    '/a/b',
+                    '/a/b[2]',
+                    '/a/b[3]',
+                ),
+                "-/a/b[3] : -/a/b[2] : -/a/b : ",
+            ),
+            array(
+                array(
+                    '/a/b',
+                    '/a/b/c',
+                    '/a/b[2]',
+                    '/a/b[2]/c',
+                    '/a/b[2]/c[2]',
+                ),
+                "-/a/b[2]/c[2] : -/a/b[2]/c : -/a/b/c : -/a/b[2] : -/a/b : ",
+            ),
+        );
+    }
 }
 
 class falseCredentialsMock implements \PHPCR\CredentialsInterface
@@ -540,4 +593,10 @@ class ClientMock extends Client
     {
         return $this->addWorkspacePathToUri($uri);
     }
+
+    public function getJsopBody()
+    {
+        return $this->jsopBody;
+    }
+
 }
