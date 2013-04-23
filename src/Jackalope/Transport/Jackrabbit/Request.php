@@ -512,7 +512,8 @@ class Request
         switch ($curl->errno()) {
             case CURLE_COULDNT_RESOLVE_HOST:
             case CURLE_COULDNT_CONNECT:
-                throw new NoSuchWorkspaceException($curl->error());
+                $info = $curl->getinfo();
+                throw new NoSuchWorkspaceException($curl->error() . ' "' . $info['url'] . '"');
         }
 
         // use XML error response if it's there
