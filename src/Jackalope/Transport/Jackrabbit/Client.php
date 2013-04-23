@@ -1659,9 +1659,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         // TODO: encode everything except for the regexp below.
         // the proper character list is http://stackoverflow.com/questions/1547899/which-characters-make-a-url-invalid
         // use (raw)urlencode and then rebuild / and [] ?
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace(array(' ', '%'), array('%20', '%25'), $path);
         // sanity check (TODO if we use urlencode or similar, this is unnecessary)
-        if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%-]*$/i', $path)) {
+        if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%\\$-]*$/i', $path)) {
             throw new RepositoryException('Internal error: path valid but not properly encoded: '.$path);
         }
 
