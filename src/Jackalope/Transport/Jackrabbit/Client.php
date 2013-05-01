@@ -309,7 +309,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function login(CredentialsInterface $credentials = null, $workspaceName)
+    public function login(CredentialsInterface $credentials = null, $workspaceName = null)
     {
         if ($this->credentials) {
             throw new RepositoryException(
@@ -325,12 +325,21 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         $this->credentials = $credentials;
+
+        if (! $workspaceName) {
+            $request = $this->getRequest(Request::PROPFIND, $this->server);
+            $request->setBody($this->buildPropfindRequest(array('dcr:workspaceName')));
+            $dom = $request->executeDom();
+            $answer = $dom->getElementsByTagNameNS(self::NS_DCR, 'workspaceName');
+            $workspaceName = $answer->item(0)->textContent;
+        }
+
         $this->workspace = $workspaceName;
         $this->workspaceUri = $this->server . $workspaceName;
         $this->workspaceUriRoot = $this->workspaceUri . "/jcr:root";
 
         if (!$this->checkLoginOnServer ) {
-            return true;
+            return $workspaceName;
         }
 
         $request = $this->getRequest(Request::PROPFIND, $this->workspaceUri);
@@ -346,7 +355,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             throw new RepositoryException('Wrong workspace in answer from server: '.$dom->saveXML());
         }
 
-        return true;
+        return $workspaceName;
     }
 
     /**
@@ -1659,9 +1668,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         // TODO: encode everything except for the regexp below.
         // the proper character list is http://stackoverflow.com/questions/1547899/which-characters-make-a-url-invalid
         // use (raw)urlencode and then rebuild / and [] ?
-        $path = str_replace(array(' ', '%'), array('%20', '%25'), $path);
+        $path = str_replace(array('%', ' '), array('%25', '%20'), $path);
         // sanity check (TODO if we use urlencode or similar, this is unnecessary)
-        if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%\\$-]*$/i', $path)) {
+        if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%!\\$-]*$/i', $path)) {
             throw new RepositoryException('Internal error: path valid but not properly encoded: '.$path);
         }
 

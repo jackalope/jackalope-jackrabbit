@@ -490,7 +490,6 @@ class Request
      * @throws ItemNotFoundException if the object was not found
      * @throws RepositoryException on any other error.
      * @throws PathNotFoundException if the path was not found (server returned 404 without xml response)
-     *
      */
     protected function handleError(curl $curl, $response, $httpCode)
     {
