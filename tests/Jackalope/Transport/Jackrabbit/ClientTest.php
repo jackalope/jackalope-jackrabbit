@@ -256,7 +256,7 @@ class ClientTest extends JackrabbitTestCase
             ->with($propfindRequest);
 
         $x = $t->login($this->credentials, 'tests');
-        $this->assertTrue($x);
+        $this->assertSame('tests', $x);
         $this->assertSame('tests', $t->workspace);
         $this->assertSame('testuri/tests/jcr:root', $t->workspaceUriRoot);
 

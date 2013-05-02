@@ -11,7 +11,8 @@ use PHPCR\RepositoryFactoryInterface;
  *
  * <pre>
  *    $parameters = array('jackalope.jackrabbit_uri' => 'http://localhost:8080/server/');
- *    $repo = \Jackalope\RepositoryFactoryJackrabbit::getRepository($parameters);
+ *    $factory = new \Jackalope\RepositoryFactoryJackrabbit;
+ *    $repo = $factory->getRepository($parameters);
  * </pre>
  *
  * @api
@@ -49,7 +50,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
      *
      * @api
      */
-    static public function getRepository(array $parameters = null)
+    public function getRepository(array $parameters = null)
     {
         if (null === $parameters) {
             return null;
@@ -97,7 +98,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
      *
      * @api
      */
-    static public function getConfigurationKeys()
+    public function getConfigurationKeys()
     {
         return array_merge(self::$required, self::$optional);
     }

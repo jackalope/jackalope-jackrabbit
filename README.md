@@ -101,8 +101,9 @@ sample code to get a PHPCR session with the jackrabbit backend:
     $pass           = 'admin';
     $workspace      = 'default';
 
-    $repository = \Jackalope\RepositoryFactoryJackrabbit::getRepository(
-        array('jackalope.jackrabbit_uri' => $jackrabbit_url)
+    $factory = new \Jackalope\RepositoryFactoryJackrabbit;
+    $repository = $factory->getRepository(
+        array("jackalope.jackrabbit_uri" => $jackrabbit_url)
     );
     $credentials = new \PHPCR\SimpleCredentials($user, $pass);
     $session = $repository->login($credentials, $workspace);

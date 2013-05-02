@@ -16,8 +16,8 @@
         "php": ">=5.3.2",
         "ext-libxml":"*",
         "ext-curl":"*",
-        "phpcr/phpcr": "~2.1.0-beta9",
-        "phpcr/phpcr-utils": "~1.0-beta8",
+        "phpcr/phpcr": "~2.1.0-beta10",
+        "phpcr/phpcr-utils": "~1.0-beta9",
         "jackalope/jackalope": "1.0.0-alpha4"
     },
     "provide": {
