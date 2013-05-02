@@ -1468,19 +1468,27 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * {@inheritDoc}
      */
-    public function getEventJournal(SessionInterface $session, EventFilterInterface $filter)
+    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
     {
         $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
         $request = $this->getRequest(Request::GET, $path, false);
-        $data = $request->executeDom();
+        $request->addHeader(sprintf('If-None-Match: "%s"', base_convert($date, 10, 16)));
+        $curl = $request->execute(true);
+        // create new DOMDocument and load the response text.
+        $dom = new DOMDocument();
+        $dom->loadXML($curl->getResponse());
 
-        // The last parameter of the EventJournal constructor is used in the EventJournal to extract paths from
-        // full node URIs. Unfortunately the URIs returned by the backend are partially encoded which is not the
-        // case with the workspaceUriRoot value we have here. That's why we manually encode the workspace URI to
-        // fit what is needed in the journal. See EventJournal::constructEventJournal
-        return $this->factory->get(
-            'Observation\\EventJournal',
-            array($session, $data, $filter, str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot))
+        $next = base_convert(trim($curl->getHeader('ETag'), '"'), 16, 10);
+
+        if ($next == $date) {
+            // no more events
+            $next = false;
+        }
+
+        return array(
+            'data' => $dom,
+            'nextMillis' => $next,
+            'stripPath' => str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot)
         );
     }
 
