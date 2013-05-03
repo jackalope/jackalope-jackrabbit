@@ -362,7 +362,7 @@ class Request
      * @param bool $getCurlObject wheter to return the curl object instead of the response
      * @param bool $forceMultiple whether to force parallel requests or not
      *
-     * @return string|array of XML representation of the response.
+     * @return string|curl|array response string or the curl object.
      */
     public function execute($getCurlObject = false, $forceMultiple = false)
     {
@@ -428,7 +428,7 @@ class Request
      *
      * @param bool $getCurlObject whether to return the curl object instead of the response
      *
-     * @return string XML representation of a response or curl object.
+     * @return string|curl XML representation of a response or curl object.
      */
     protected function singleRequest($getCurlObject)
     {
