@@ -1470,6 +1470,28 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
     {
+        return $this->factory->get('Jackalope\Transport\Jackrabbit\EventBuffer', array(
+            $filter,
+            $session,
+            $this,
+            str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot),
+            $this->fetchEventData($date)
+        ));
+    }
+
+    /**
+     * Internal method to fetch event data.
+     *
+     * @param $date
+     *
+     * @return array hashmap with 'data' containing unfiltered DOM of xml atom
+     *      feed of events, 'nextMillis' is the next timestamp if there are
+     *      more events to be found, false otherwise.
+     *
+     * @private
+     */
+    public function fetchEventData($date)
+    {
         $path = $this->workspaceUri . self::JCR_JOURNAL_PATH;
         $request = $this->getRequest(Request::GET, $path, false);
         $request->addHeader(sprintf('If-None-Match: "%s"', base_convert($date, 10, 16)));
@@ -1488,15 +1510,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return array(
             'data' => $dom,
             'nextMillis' => $next,
-            'stripPath' => str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot)
         );
     }
 
     /**
-     * Set user data to be included with subsequent requests.
-     * Setting userData to null (which it is by default) will result in no user data header being sent.
-     *
-     * @param mixed $userData null or string
+     * {@inheritDoc}
      */
     public function setUserData($userData)
     {
