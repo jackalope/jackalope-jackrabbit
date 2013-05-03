@@ -12,7 +12,6 @@ use Jackalope\Observation\EventFilter;
 use Jackalope\Transport\ObservationInterface;
 use PHPCR\Observation\EventInterface;
 use PHPCR\RepositoryException;
-use PHPCR\SessionInterface;
 
 use Jackalope\FactoryInterface;
 
@@ -27,11 +26,6 @@ class EventBuffer implements \Iterator
      * @var FactoryInterface
      */
     protected $factory;
-
-    /**
-     * @var SessionInterface
-     */
-    protected $session;
 
     /**
      * @var EventFilter
@@ -78,14 +72,12 @@ class EventBuffer implements \Iterator
      * Actual data loading is deferred to when it is first requested.
      *
      * @param FactoryInterface $factory
-     * @param EventFilter      $filter        filter to apply.
-     * @param SessionInterface $session
+     * @param EventFilter      $filter    filter to apply.
      * @param Client           $transport
      */
     public function __construct(
         FactoryInterface $factory,
         EventFilter $filter,
-        SessionInterface $session,
         Client $transport,
         $workspaceRootUri,
         $rawData
@@ -93,7 +85,6 @@ class EventBuffer implements \Iterator
         $this->creationMillis = time() * 1000; // do this first
         $this->factory = $factory;
         $this->filter = $filter;
-        $this->session = $session;
         $this->transport = $transport;
         $this->workspaceRootUri = $workspaceRootUri;
         $this->setData($rawData);
@@ -182,7 +173,6 @@ class EventBuffer implements \Iterator
         $domEvents = $entry->getElementsByTagName('event');
 
         foreach ($domEvents as $domEvent) {
-
             $event = new Event();
             $event->setType($this->extractEventType($domEvent));
 
@@ -288,7 +278,6 @@ class EventBuffer implements \Iterator
 
         // Here we cannot simply take the first child as the <eventtype> tag might contain
         // text fragments (i.e. newlines) that will be returned as DOMText elements.
-        $type = null;
         foreach ($list->item(0)->childNodes as $el) {
             if ($el instanceof DOMElement) {
                 return $this->getEventTypeFromTagName($el->tagName);

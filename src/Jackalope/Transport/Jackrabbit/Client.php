@@ -1478,7 +1478,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         return $this->factory->get('Jackalope\Transport\Jackrabbit\EventBuffer', array(
             $filter,
-            $session,
             $this,
             str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot),
             $this->fetchEventData($date)
