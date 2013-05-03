@@ -39,6 +39,7 @@ use Jackalope\Query\Query;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
+use PHPCR\Util\ValueConverter;
 
 /**
  * Connection to one Jackrabbit server.
@@ -102,6 +103,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * @var FactoryInterface
      */
     protected $factory;
+
+    /** @var ValueConverter */
+    protected $valueConverter;
 
     /**
      * Server url including protocol.
@@ -211,6 +215,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function __construct(FactoryInterface $factory, $serverUri)
     {
         $this->factory = $factory;
+        $this->valueConverter = $this->factory->get('PHPCR\Util\ValueConverter');
+
         // append a slash if not there
         if ('/' !== substr($serverUri, -1)) {
             $serverUri .= '/';
@@ -899,7 +905,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * @return mixed the node value converted to the specified type.
      */
-    public static function getDcrValue(DOMElement $node)
+    public function getDcrValue(DOMElement $node)
     {
         $type = $node->getAttribute('dcr:type');
         if (PropertyType::TYPENAME_BOOLEAN == $type && 'false' == $node->nodeValue) {
@@ -907,7 +913,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             return false;
         }
 
-        return PropertyType::convertType($node->nodeValue, PropertyType::valueFromName($type));
+        return $this->valueConverter->convertType($node->nodeValue, PropertyType::valueFromName($type));
     }
 
 
@@ -1229,9 +1235,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             case PropertyType::DECIMAL:
                 return null;
             case PropertyType::DOUBLE:
-                return PropertyType::convertType($property->getValueForStorage(), PropertyType::DOUBLE);
+                return $this->valueConverter->convertType($property->getValueForStorage(), PropertyType::DOUBLE);
             case PropertyType::LONG:
-                return PropertyType::convertType($property->getValueForStorage(), PropertyType::LONG);
+                return $this->valueConverter->convertType($property->getValueForStorage(), PropertyType::LONG);
             case PropertyType::DATE:
             case PropertyType::WEAKREFERENCE:
             case PropertyType::REFERENCE:
@@ -1970,7 +1976,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $data .= 'Content-Transfer-Encoding: 8bit'. $eol.$eol;
                 switch ($value[1]) {
                     case PropertyType::DATE:
-                        $data .= PropertyType::convertType($value[0], PropertyType::STRING);
+                        $data .= $this->valueConverter->convertType($value[0], PropertyType::STRING);
                         break;
                     default:
                         $data .= $value[0];
