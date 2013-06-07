@@ -10,6 +10,8 @@ use ArrayIterator;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\Transport\ObservationInterface;
+use PHPCR\NamespaceRegistryInterface;
+use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 use PHPCR\RepositoryException;
 
@@ -45,6 +47,16 @@ class EventBuffer implements \Iterator
     protected $transport;
 
     /**
+     * @var NodeTypeManagerInterface
+     */
+    protected $nodeTypeManager;
+
+    /**
+     * @var NamespaceRegistryInterface
+     */
+    protected $namespaceRegistry;
+
+    /**
      * Timestamp in milliseconds when this buffer was created.
      * Never fetch any events newer than that.
      *
@@ -71,14 +83,18 @@ class EventBuffer implements \Iterator
      *
      * Actual data loading is deferred to when it is first requested.
      *
-     * @param FactoryInterface $factory
-     * @param EventFilter      $filter    filter to apply.
-     * @param Client           $transport
+     * @param FactoryInterface           $factory
+     * @param EventFilter                $filter           filter to apply.
+     * @param Client                     $transport
+     * @param NodeTypeManagerInterface   $ntm
+     * @param string                     $workspaceRootUri
+     * @param array                      $rawData
      */
     public function __construct(
         FactoryInterface $factory,
         EventFilter $filter,
         Client $transport,
+        NodeTypeManagerInterface $ntm,
         $workspaceRootUri,
         $rawData
     ) {
@@ -86,6 +102,7 @@ class EventBuffer implements \Iterator
         $this->factory = $factory;
         $this->filter = $filter;
         $this->transport = $transport;
+        $this->nodeTypeManager = $ntm;
         $this->workspaceRootUri = $workspaceRootUri;
         $this->setData($rawData);
     }
@@ -173,7 +190,7 @@ class EventBuffer implements \Iterator
         $domEvents = $entry->getElementsByTagName('event');
 
         foreach ($domEvents as $domEvent) {
-            $event = new Event();
+            $event = $this->factory->get('Jackalope\Observation\Event', array($this->nodeTypeManager));
             $event->setType($this->extractEventType($domEvent));
 
             $date = $this->getDomElement($domEvent, 'eventdate', 'The event date was not found while building the event journal:\n' . $this->getEventDom($domEvent));
@@ -198,9 +215,13 @@ class EventBuffer implements \Iterator
                 $event->setPath($path);
             }
 
-            $nodeType = $this->getDomElement($domEvent, 'eventprimarynodetype');
-            if ($nodeType) {
-                $event->setNodeType($nodeType->nodeValue);
+            $primaryNodeType = $this->getDomElement($domEvent, 'eventprimarynodetype');
+            if ($primaryNodeType) {
+                $event->setPrimaryNodeTypeName($primaryNodeType->nodeValue);
+            }
+            $mixinNodeTypes = $domEvent->getElementsByTagName('eventmixinnodetype');
+            foreach($mixinNodeTypes as $mixinNodeType) {
+                $event->addMixinNodeTypeName($mixinNodeType->nodeValue);
             }
 
             $userData = $this->getDomElement($domEvent, 'eventuserdata');
