@@ -522,7 +522,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNodesByIdentifier($identifiers)
     {
-        // TODO get paths for UUID's via a single query
+        // OPTIMIZE get paths for UUID's via a single query
         // or get the data directly
         // return $this->getNodes($identifiers, ':id');
 
@@ -543,7 +543,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNodeByIdentifier($uuid)
     {
-        // TODO: get nodes directly by uuid from backend. needs implementation on jackrabbit
+        // OPTIMIZE get nodes directly by uuid from backend. needs implementation on jackrabbit
         $path = $this->getNodePathForIdentifier($uuid);
         $data = $this->getNode($path);
         $data->{':jcr:path'} = $path;

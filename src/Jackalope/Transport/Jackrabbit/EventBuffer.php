@@ -20,6 +20,8 @@ use Jackalope\FactoryInterface;
 /**
  * This buffer parses the Jackrabbit atom xml feed.
  *
+ * A sample feed is provided at the bottom of this file.
+ *
  * @author David Buchmann <mail@davidbu.ch>
  */
 class EventBuffer implements \Iterator
@@ -374,3 +376,140 @@ class EventBuffer implements \Iterator
         return $event->ownerDocument->saveXML($event);
     }
 }
+
+/*
+Sample feed:
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>EventJournal for jackalope</title>
+    <author>
+        <name>Jackrabbit Event Journal Feed Generator</name>
+    </author>
+    <id>http://localhost/server/jackalope?type=journal</id>
+    <link self="http://localhost/server/jackalope?type=journal"/>
+    <updated>2013-06-09T12:02:38.705+02:00</updated>
+    <entry>
+        <title>operations: /tests_observation_manager/testGetUnfilteredEventJournal/child</title>
+        <id>http://localhost/server/jackalope?type=journal?type=journal&amp;ts=13f28633848-0</id>
+        <author>
+            <name>admin</name>
+        </author>
+        <updated>2013-06-09T12:02:38.536+02:00</updated>
+
+        <!-- add a node: adds the primaryType property and the node itself -->
+        <content type="application/vnd.apache.jackrabbit.event+xml">
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/child/jcr%3aprimaryType</href>
+                <eventtype>
+                    <propertyadded/>
+                </eventtype>
+                <eventdate>1370772158536</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/child/</href>
+                <eventtype>
+                    <nodeadded/>
+                </eventtype>
+                <eventdate>1370772158536</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+
+            <!-- change a property -->
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/child/prop</href>
+                <eventtype>
+                    <propertychanged/>
+                </eventtype>
+                <eventdate>1370772158607</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <eventtype>
+                    <persist/>
+                </eventtype>
+                <eventdate>1370772158536</eventdate>
+            </event>
+        </content>
+    </entry>
+
+    <!-- remove property event -->
+    <entry>
+        <title>operations: /tests_observation_manager/testGetUnfilteredEventJournal/child/prop</title>
+        <id>http://localhost/server/jackalope?type=journal?type=journal&amp;ts=13f286338aa-0</id>
+        <author>
+            <name>admin</name>
+        </author>
+        <updated>2013-06-09T12:02:38.634+02:00</updated>
+        <content type="application/vnd.apache.jackrabbit.event+xml">
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/child/prop</href>
+                <eventtype>
+                    <propertyremoved/>
+                </eventtype>
+                <eventdate>1370772158634</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <eventtype>
+                    <persist/>
+                </eventtype>
+                <eventdate>1370772158634</eventdate>
+            </event>
+        </content>
+    </entry>
+
+    <!-- move operation: remove from old parent, add to new parent, move event -->
+    <entry>
+        <title>operations: /tests_observation_manager/testGetUnfilteredEventJournal/child</title>
+        <id>http://localhost/server/jackalope?type=journal?type=journal&amp;ts=13f286338d6-0</id>
+        <author>
+            <name>admin</name>
+        </author>
+        <updated>2013-06-09T12:02:38.678+02:00</updated>
+        <content type="application/vnd.apache.jackrabbit.event+xml">
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/child/</href>
+                <eventtype>
+                    <noderemoved/>
+                </eventtype>
+                <eventdate>1370772158678</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/moved/</href>
+                <eventtype>
+                    <nodeadded/>
+                </eventtype>
+                <eventdate>1370772158678</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <href xmlns="DAV:">http://localhost:8080/server/jackalope/jcr%3aroot/tests_observation_manager/testGetUnfilteredEventJournal/moved</href>
+                <eventtype>
+                    <nodemoved/>
+                </eventtype>
+                <eventdate>1370772158678</eventdate>
+                <eventprimarynodetype>{http://www.jcp.org/jcr/nt/1.0}unstructured</eventprimarynodetype>
+                <eventidentifier>2054af10-0b33-4ac5-87b9-978d270cbb3b</eventidentifier>
+                <eventinfo>
+                    <destAbsPath>/tests_observation_manager/testGetUnfilteredEventJournal/moved</destAbsPath>
+                    <srcAbsPath>/tests_observation_manager/testGetUnfilteredEventJournal/child</srcAbsPath>
+                </eventinfo>
+            </event>
+            <event xmlns="http://www.day.com/jcr/webdav/1.0">
+                <eventtype>
+                    <persist/>
+                </eventtype>
+                <eventdate>1370772158678</eventdate>
+            </event>
+        </content>
+    </entry>
+</feed>
+ */
