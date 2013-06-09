@@ -422,6 +422,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
             // Supported by Jackrabbit, but not supported by this client
             $this->descriptors[RepositoryInterface::NODE_TYPE_MANAGEMENT_SAME_NAME_SIBLINGS_SUPPORTED] = false;
+            $this->descriptors[RepositoryInterface::QUERY_CANCEL_SUPPORTED] = false;
 
             if (! isset($this->descriptors['jcr.repository.version'])) {
                 throw new UnsupportedRepositoryOperationException("The backend at {$this->server} does not provide the jcr.repository.version descriptor");
@@ -521,7 +522,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNodesByIdentifier($identifiers)
     {
-        // TODO get paths for UUID's via a single query
+        // OPTIMIZE get paths for UUID's via a single query
         // or get the data directly
         // return $this->getNodes($identifiers, ':id');
 
@@ -542,7 +543,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNodeByIdentifier($uuid)
     {
-        // TODO: get nodes directly by uuid from backend. needs implementation on jackrabbit
+        // OPTIMIZE get nodes directly by uuid from backend. needs implementation on jackrabbit
         $path = $this->getNodePathForIdentifier($uuid);
         $data = $this->getNode($path);
         $data->{':jcr:path'} = $path;
@@ -1479,6 +1480,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $this->factory->get('Jackalope\Transport\Jackrabbit\EventBuffer', array(
             $filter,
             $this,
+            $this->nodeTypeManager,
             str_replace('jcr:root', 'jcr%3aroot', $this->workspaceUriRoot),
             $this->fetchEventData($date)
         ));
