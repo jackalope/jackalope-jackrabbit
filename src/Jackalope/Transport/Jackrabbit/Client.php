@@ -9,6 +9,7 @@ use InvalidArgumentException;
 
 use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
+use PHPCR\Query\InvalidQueryException;
 use PHPCR\RepositoryInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
@@ -824,15 +825,24 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $offset = $query->getOffset();
         $language = $query->getLanguage();
 
-        if ($language == QueryInterface::XPATH) {
-            $langElement = 'dcr:xpath';
-            $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
-        } else if ($language == QueryInterface::SQL) {
-            $langElement = 'dcr:sql';
-            $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
-        } else {
-            $ns = '';
-            $langElement = 'JCR-SQL2';
+        switch($language) {
+            case QueryInterface::JCR_JQOM:
+            // for JQOM, fall through to SQL2
+            case QueryInterface::JCR_SQL2:
+                $ns = '';
+                $langElement = 'JCR-SQL2';
+                break;
+            case QueryInterface::XPATH:
+                $langElement = 'dcr:xpath';
+                $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
+                break;
+            case QueryInterface::SQL:
+                $langElement = 'dcr:sql';
+                $ns = 'xmlns:dcr="http://www.day.com/jcr/webdav/1.0"';
+                break;
+            default:
+                // this should be impossible as we check on creation already
+                throw new InvalidQueryException("Unsupported query language: $language");
         }
         $body ='<D:searchrequest ' . $ns . ' xmlns:D="DAV:"><'.$langElement.'><![CDATA['.$querystring.']]></'.$langElement.'>';
 
@@ -891,6 +901,18 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $rows;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getSupportedQueryLanguages()
+    {
+        return array(
+            QueryInterface::JCR_SQL2,
+            QueryInterface::JCR_JQOM,
+            QueryInterface::XPATH,
+            QueryInterface::SQL,
+        );
+    }
 
     /**
      * Get the value of a dcr:value node in the right format specified by the
