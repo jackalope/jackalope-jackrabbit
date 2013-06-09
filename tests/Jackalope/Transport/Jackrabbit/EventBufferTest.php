@@ -8,6 +8,7 @@ use Jackalope\Observation\EventFilter;
 use Jackalope\TestCase;
 use Jackalope\Factory;
 
+use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 
 /**
@@ -20,6 +21,8 @@ class EventBufferTest extends TestCase
     protected $factory;
 
     protected $session;
+
+    protected $nodeTypeManager;
 
     /**
      * @var EventFilter
@@ -59,7 +62,13 @@ class EventBufferTest extends TestCase
             ->will($this->returnValue(array()));
         $this->filter = new EventFilter($this->factory, $this->session);
 
-        $this->buffer = new TestBuffer($this->factory, $this->filter, $this->transport, 'http://localhost:8080/server/tests/jcr%3aroot');
+        $this->nodeTypeManager = $this
+            ->getMockBuilder('Jackalope\NodeType\NodeTypeManager')
+            ->disableOriginalConstructor()
+            ->getMock()
+        ;
+
+        $this->buffer = new TestBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot');
 
         // XML for a single event
         $this->eventXml = <<<EOF
@@ -111,19 +120,20 @@ EOF;
         $this->entryXml .= '</content></entry>';
 
         // The object representation of the event defined above
-        $this->expectedEvent = new Event();
+        $this->expectedEvent = new Event($this->factory, $this->nodeTypeManager);
         $this->expectedEvent->setDate('1331652655');
         $this->expectedEvent->setIdentifier('8fe5b853-a657-4ee3-b626-ec3b5407dc13');
-        $this->expectedEvent->setNodeType('{http://www.jcp.org/jcr/nt/1.0}unstructured');
+        $this->expectedEvent->setPrimaryNodeTypeName('{http://www.jcp.org/jcr/nt/1.0}unstructured');
         $this->expectedEvent->setPath('/my_node%5b4%5d/jcr%3aprimaryType');
         $this->expectedEvent->setType(EventInterface::PROPERTY_ADDED);
         $this->expectedEvent->setUserData('somedifferentdata');
         $this->expectedEvent->setUserId('system');
 
-        $this->expectedEventWithInfo = new Event();
+        $this->expectedEventWithInfo = new Event($this->factory, $this->nodeTypeManager);
         $this->expectedEventWithInfo->setDate('1332163767');
         $this->expectedEventWithInfo->setIdentifier('1e80ac75-eff4-4350-bae6-7fae2a84e6f3');
-        $this->expectedEventWithInfo->setNodeType('{internal}root');
+        $this->expectedEventWithInfo->setPrimaryNodeTypeName('{internal}root');
+        $this->expectedEventWithInfo->setMixinNodeTypeNames(array('{internal}AccessControllable'));
         $this->expectedEventWithInfo->setPath('/my_other');
         $this->expectedEventWithInfo->setType(EventInterface::NODE_MOVED);
         $this->expectedEventWithInfo->setUserData('somedifferentdata');
@@ -165,7 +175,7 @@ EOF;
     {
         $this->filter->setAbsPath('/something-not-matching');
 
-        $buffer = new TestBuffer($this->factory, $this->filter, $this->transport, 'http://localhost:8080/server/tests/jcr%3aroot');
+        $buffer = new TestBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot');
 
         $events = $this->getAndCallMethod($buffer, 'extractEvents', array($this->getDomElement($this->eventXml), 'system'));
 
@@ -240,6 +250,22 @@ EOF;
             $value = $eventInfo[$key];
             $this->assertSame($expectedValue, $value);
         }
+
+        $this->nodeTypeManager
+            ->expects($this->at(0))
+            ->method('getNodeType')
+            ->with('{internal}root')
+            ->will($this->returnValue(true))
+        ;
+        $this->nodeTypeManager
+            ->expects($this->at(1))
+            ->method('getNodeType')
+            ->with('{internal}AccessControllable')
+            ->will($this->returnValue(true))
+        ;
+
+        $this->assertTrue($eventWithInfo->getPrimaryNodeType());
+        $this->assertEquals(array('{internal}AccessControllable' => true), $eventWithInfo->getMixinNodeTypes());
     }
 
     public function testEmptyEventInfo()
@@ -272,7 +298,7 @@ EOF;
             ->method('fetchEventData')
         ;
 
-        $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
+        $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
 
         $this->assertTrue($buffer->valid());
         $this->assertEquals($this->expectedEvent, $buffer->current());
@@ -310,7 +336,7 @@ EOF;
             )))
         ;
 
-        $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
+        $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
 
         $this->assertTrue($buffer->valid());
         $this->assertEquals($this->expectedEvent, $buffer->current());
@@ -344,12 +370,14 @@ class TestBuffer extends EventBuffer
         FactoryInterface $factory,
         EventFilter $filter,
         Client $transport,
+        NodeTypeManagerInterface $nodeTypeManager,
         $workspaceRootUri
     ) {
         $this->creationMillis = time() * 1000;
         $this->factory = $factory;
         $this->filter = $filter;
         $this->transport = $transport;
+        $this->nodeTypeManager = $nodeTypeManager;
         $this->workspaceRootUri = $workspaceRootUri;
     }
 }

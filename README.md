@@ -166,9 +166,16 @@ implementation chose the most efficient query language for your implementation.
 # Performance tweaks
 
 If you know that you will need many child nodes of a node you are about to
-request, you can use Session::setSessionOption with Session::OPTION_FETCH_DEPTH
-to something bigger than 1. This will prefetch the children to reduce the round
-trips to the database.
+request, use the depth hint on Session::getNode.  This will prefetch the
+children to reduce the round trips to the database. It is part of the PHPCR
+standard. You can also globally set a fetch depth, but that is Jackalope
+specific: Call Session::setSessionOption with Session::OPTION_FETCH_DEPTH
+to something bigger than 1.
+
+Use Node::getNodeNames if you only need to know the names of child nodes, but
+don't need the actual nodes. Note that you should not use the typeFilter on
+getNodeNames with jackalope. Using the typeFilter with getNodes to only fetch
+the nodes of types that interest you can make a lot of sense however.
 
 
 # Implementation notes
