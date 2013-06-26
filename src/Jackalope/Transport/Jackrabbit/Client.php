@@ -1720,14 +1720,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         PathHelper::assertValidAbsolutePath($path);
 
-        // TODO: encode everything except for the regexp below.
-        // the proper character list is http://stackoverflow.com/questions/1547899/which-characters-make-a-url-invalid
-        // use (raw)urlencode and then rebuild / and [] ?
-        $path = str_replace(array('%', ' '), array('%25', '%20'), $path);
-        // sanity check (TODO if we use urlencode or similar, this is unnecessary)
-        if (! preg_match('/^[\w{}\/\'""#:^+~*\[\]\(\)\.,;=@<>%!\\$-]*$/i', $path)) {
-            throw new RepositoryException('Internal error: path valid but not properly encoded: '.$path);
-        }
+        $path = rawurlencode($path);
+        // we encoded the whole path, need to rebuild slashes and parenthesis
+        // this will not collide with %2F as % was encoded by rawurlencode
+        $path = str_replace(array('%2F', '%5B', '%5D'), array('/', '[', ']'), $path);
 
         return $path;
     }
