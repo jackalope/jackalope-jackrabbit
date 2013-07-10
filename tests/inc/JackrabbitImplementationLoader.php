@@ -69,6 +69,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             // arrayiterator for the search result
             // https://github.com/phpcr/phpcr-api-tests/issues/22
             'Query\\NodeViewTest::testSeekable',
+            'Query\\CharacterTest::testPropertyWithQuotes',
 
             'Writing\\SetPropertyMethodsTest::testSetPropertyNewExistingNode', // see http://www.mail-archive.com/dev@jackrabbit.apache.org/msg28035.html
             'Writing\\NamespaceRegistryTest::testRegisterUnregisterNamespace',
