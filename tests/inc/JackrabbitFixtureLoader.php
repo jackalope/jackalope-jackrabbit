@@ -20,7 +20,7 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
 
     /**
      * @param string $fixturePath path to the fixtures directory. defaults to __DIR__ . '/suite/fixtures/'
-     * @param string $jackjar path to the jar file for import-export. defaults to __DIR__ . '/bin/jack.jar'
+     * @param string $jackjar     path to the jar file for import-export. defaults to __DIR__ . '/bin/jack.jar'
      */
     public function __construct($fixturePath = null, $jackjar = null)
     {
@@ -61,6 +61,7 @@ class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
                 $opts .= " " . $newArg . "=" . $GLOBALS[$arg];
             }
         }
+
         return $opts;
     }
 

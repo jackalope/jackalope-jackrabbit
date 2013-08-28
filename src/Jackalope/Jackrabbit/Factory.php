@@ -2,9 +2,6 @@
 
 namespace Jackalope\Jackrabbit;
 
-use InvalidArgumentException;
-use ReflectionClass;
-
 /**
  * Jackalope implementation factory.
  *
@@ -23,6 +20,7 @@ class Factory extends \Jackalope\Factory
                 $name = 'Jackrabbit\Query\QOM\QueryObjectModelFactory';
                 break;
         }
+
         return parent::get($name,$params);
     }
 }

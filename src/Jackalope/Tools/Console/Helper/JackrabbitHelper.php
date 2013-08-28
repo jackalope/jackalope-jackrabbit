@@ -18,7 +18,7 @@ class JackrabbitHelper
     /**
      * construct an instance of the helper.
      * @param string $jackrabbit_jar the path to the jackrabbit server jar file
-     * @param string $workspace_dir if provided this will be used as workspace directory, otherwise the directory of the jar file is used
+     * @param string $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
      */
     public function __construct($jackrabbit_jar, $workspace_dir = null)
     {

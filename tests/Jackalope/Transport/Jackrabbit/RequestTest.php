@@ -2,11 +2,9 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use Jackalope\TestCase;
 use Jackalope\Factory;
 
 use DOMDocument;
-use DOMXPath;
 
 class RequestTest extends JackrabbitTestCase
 {
@@ -36,6 +34,7 @@ class RequestTest extends JackrabbitTestCase
                 ->method('errno')
                 ->will($this->returnValue($errno));
         }
+
         return $curl;
     }
 
@@ -50,6 +49,7 @@ class RequestTest extends JackrabbitTestCase
     public function getRequest($fixture = null, $httpCode = 200, $errno = null)
     {
         $factory = new Factory;
+
         return new RequestMock($factory, $this->getClientMock(), $this->getCurlFixture($fixture, $httpCode, $errno), 'GET', 'http://foo/');
     }
 

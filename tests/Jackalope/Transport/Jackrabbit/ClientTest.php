@@ -2,11 +2,9 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use Jackalope\TestCase;
 use Jackalope\Factory;
 
 use DOMDocument;
-use DOMXPath;
 
 /**
  * TODO: this unit test contains some functional tests. we should separate functional and unit tests.
@@ -19,6 +17,7 @@ class ClientTest extends JackrabbitTestCase
         //Array XOR
         $defaultMockMethods = array('getRequest', '__destruct', '__construct');
         $mockMethods = array_merge(array_diff($defaultMockMethods, $changeMethods), array_diff($changeMethods, $defaultMockMethods));
+
         return $this->getMock(
             __NAMESPACE__.'\ClientMock',
             $mockMethods,
@@ -381,6 +380,7 @@ class ClientTest extends JackrabbitTestCase
         $request->expects($this->once())
             ->method('setBody')
             ->with($requestStr);
+
         return $t;
     }
 

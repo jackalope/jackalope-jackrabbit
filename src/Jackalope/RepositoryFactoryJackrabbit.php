@@ -26,7 +26,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
      * list of required parameters for jackrabbit
      * @var array
      */
-    static private $required = array(
+    private static $required = array(
         'jackalope.jackrabbit_uri' => 'string (required): Path to the jackrabbit server',
     );
 
@@ -34,7 +34,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
      * list of optional parameters for jackrabbit
      * @var array
      */
-    static private $optional = array(
+    private static $optional = array(
         'jackalope.factory' => 'string or object: Use a custom factory class for Jackalope objects',
         'jackalope.default_header' => 'string: Set a default header to send on each request to the backend (i.e. for load balancers to identify sessions)',
         'jackalope.jackrabbit_expect' => 'boolean: Send the "Expect: 100-continue" header on larger PUT and POST requests. Disabled by default to avoid issues with proxies and load balancers.',
@@ -93,6 +93,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         }
 
         $options['stream_wrapper'] = empty($parameters['jackalope.disable_stream_wrapper']);
+
         return new Repository($factory, $transport, $options);
     }
 

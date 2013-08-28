@@ -211,8 +211,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Create a transport pointing to a server url.
      *
-     * @param FactoryInterface $factory the object factory
-     * @param string $serverUri location of the server
+     * @param FactoryInterface $factory   the object factory
+     * @param string           $serverUri location of the server
      */
     public function __construct(FactoryInterface $factory, $serverUri)
     {
@@ -309,6 +309,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             // but do not re-connect, rather report the error if trying to access a closed connection
             throw new LogicException('Tried to start a request on a closed transport.');
         }
+
         return $this->curl;
     }
 
@@ -346,7 +347,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $this->workspaceUri = $this->server . $workspaceName;
         $this->workspaceUriRoot = $this->workspaceUri . "/jcr:root";
 
-        if (!$this->checkLoginOnServer ) {
+        if (!$this->checkLoginOnServer) {
             return $workspaceName;
         }
 
@@ -507,6 +508,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         try {
             $data = $request->executeJson();
+
             return $data->nodes;
         } catch (PathNotFoundException $e) {
             throw new ItemNotFoundException($e->getMessage(), $e->getCode(), $e);
@@ -561,6 +563,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (null !== $workspace && $workspace != $this->workspace) {
             $client = new Client($this->factory, $this->server);
             $client->login($this->credentials, $workspace);
+
             return $client->getNodePathForIdentifier($uuid);
         }
 
@@ -622,6 +625,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $stream = fopen('php://memory', 'rwb+');
                 fwrite($stream, $curl->getResponse());
                 rewind($stream);
+
                 return $stream;
         }
 
@@ -683,9 +687,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * @param string $path the path for which we need the references
-     * @param string $name the name of the referencing properties or null for all
-     * @param bool $weak_reference whether to get weak or strong references
+     * @param string $path           the path for which we need the references
+     * @param string $name           the name of the referencing properties or null for all
+     * @param bool   $weak_reference whether to get weak or strong references
      *
      * @return array list of paths to nodes that reference $path
      */
@@ -788,10 +792,12 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $path = $this->encodeAndValidatePathForDavex($path);
 
-        $body ='<D:update xmlns:D="DAV:">
-	<D:version>
-		<D:href>'.$this->addWorkspacePathToUri($versionPath).'</D:href>
-	</D:version>';
+        $body =
+'<D:update xmlns:D="DAV:">
+    <D:version>
+        <D:href>'.$this->addWorkspacePathToUri($versionPath).'</D:href>
+    </D:version>
+';
         if ($removeExisting) {
             $body .= '<dcr:removeexisting xmlns:dcr="http://www.day.com/jcr/webdav/1.0" />';
         }
@@ -810,6 +816,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($versionPath . '/' . $versionName);
         $request = $this->getRequest(Request::DELETE, $path);
         $resp = $request->execute();
+
         return $resp;
     }
 
@@ -826,7 +833,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $offset = $query->getOffset();
         $language = $query->getLanguage();
 
-        switch($language) {
+        switch ($language) {
             case QueryInterface::JCR_JQOM:
             // for JQOM, fall through to SQL2
             case QueryInterface::JCR_SQL2:
@@ -850,10 +857,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (null !== $limit || null !== $offset) {
             $body .= '<D:limit>';
             if (null !== $limit) {
-                $body .= '<D:nresults>'.(int)$limit.'</D:nresults>';
+                $body .= '<D:nresults>'.(int) $limit.'</D:nresults>';
             }
             if (null !== $offset) {
-                $body .= '<offset>'.(int)$offset.'</offset>';
+                $body .= '<offset>'.(int) $offset.'</offset>';
             }
             $body .= '</D:limit>';
         }
@@ -933,7 +940,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $type = $node->getAttribute('dcr:type');
         if (PropertyType::TYPENAME_BOOLEAN == $type && 'false' == $node->nodeValue) {
-
             return false;
         }
 
@@ -966,6 +972,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             } else {
                 $aIndex = isset($aParts[2]) ? $aParts[2] : 1;
                 $bIndex = isset($bParts[2]) ? $bParts[2] : 1;
+
                 return $bIndex - $aIndex;
             }
         });
@@ -1070,7 +1077,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         if (count($reorders) == 0) {
             // should not happen but safe is safe
-
             return;
         }
 
@@ -1457,6 +1463,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         try {
             $dom = $request->executeDom();
+
             return $this->generateLockFromDavResponse($dom, true, $absPath);
         } catch (\PHPCR\RepositoryException $ex) {
             // TODO: can we move that into the request handling code that determines the correct exception to throw?
@@ -1596,7 +1603,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Build the xml required to register node types
      *
-     * @param string $cnd the node type definition
+     * @param  string $cnd the node type definition
      * @return string XML with register request
      *
      * @author david at liip.ch
@@ -1605,6 +1612,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $cnd = '<dcr:cnd>'.str_replace(array('<','>'), array('&lt;','&gt;'), $cnd).'</dcr:cnd>';
         $cnd .= '<dcr:allowupdate>'.($allowUpdate ? 'true' : 'false').'</dcr:allowupdate>';
+
         return '<?xml version="1.0" encoding="UTF-8" standalone="no"?><D:propertyupdate xmlns:D="DAV:"><D:set><D:prop><dcr:nodetypes-cnd xmlns:dcr="http://www.day.com/jcr/webdav/1.0">'.$cnd.'</dcr:nodetypes-cnd></D:prop></D:set></D:propertyupdate>';
     }
 
@@ -1630,7 +1638,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Returns the XML required to request nodetypes
      *
-     * @param array $nodesType The list of nodetypes you want to request for.
+     * @param  array  $nodesType The list of nodetypes you want to request for.
      * @return string XML with the request information.
      */
     protected function buildNodeTypesRequest(array $nodeTypes)
@@ -1652,7 +1660,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Build PROPFIND request XML for the specified property names
      *
-     * @param array $properties names of the properties to search for
+     * @param  array  $properties names of the properties to search for
      * @return string XML to post in the body
      */
     protected function buildPropfindRequest($properties)
@@ -1673,7 +1681,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Build a REPORT XML request string
      *
-     * @param string $name Name of the resource to be requested.
+     * @param  string $name Name of the resource to be requested.
      * @return string XML string representing the head of the request.
      */
     protected function buildReportRequest($name)
@@ -1686,7 +1694,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Build REPORT XML request for locating a node path by uuid
      *
-     * @param string $uuid Unique identifier of the node to be asked for.
+     * @param  string $uuid Unique identifier of the node to be asked for.
      * @return string XML sring representing the content of the request.
      */
     protected function buildLocateRequest($uuid)
@@ -1745,9 +1753,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     /**
      * Prepends the workspace root to the uris that contain an absolute path
      *
-     * @param string $uri The absolute path in the current workspace or server uri
-     * @return string The server uri with this path
-     * @throws RepositoryException   If workspaceUri is missing (not logged in)
+     * @param  string              $uri The absolute path in the current workspace or server uri
+     * @return string              The server uri with this path
+     * @throws RepositoryException If workspaceUri is missing (not logged in)
      */
     protected function addWorkspacePathToUri($uri)
     {
@@ -1766,7 +1774,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * corresponding Lock object.
      *
      * @param \DOMElement $response
-     * @param bool $sessionOwning whether the current session is owning the lock (aka
+     * @param bool        $sessionOwning whether the current session is owning the lock (aka
      *      we created it in this request)
      * @param string $path the owning node path, if we created this node
      *
@@ -1836,10 +1844,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * @throws \PHPCR\RepositoryException When the element is not found and an $errorMessage is set
      *
-     * @param \DOMNode $dom The DOM element which content should be searched
-     * @param string $namespace The namespace of the searched element
-     * @param string $element The name of the searched element
-     * @param string $errorMessage The error message in case the element is not found
+     * @param  \DOMNode      $dom          The DOM element which content should be searched
+     * @param  string        $namespace    The namespace of the searched element
+     * @param  string        $element      The name of the searched element
+     * @param  string        $errorMessage The error message in case the element is not found
      * @return bool|\DOMNode
      */
     protected function getRequiredDomElementByTagNameNS($dom, $namespace, $element, $errorMessage = '')
@@ -1978,9 +1986,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $data .= '--' . $mime_boundary . $eol ;
         if (is_array($value)) {
             if (is_array($value[0])) {
-                foreach($value[0] as $v) {
+                foreach ($value[0] as $v) {
                     $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
                 }
+
                 return $data;
             }
 
@@ -2006,7 +2015,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         } else {
             if (is_array($value)) {
-                foreach($value as $v) {
+                foreach ($value as $v) {
                     $data .= $this->getMimePart($name,$v,$mime_boundary);
                 }
 

@@ -47,7 +47,7 @@ class curl
     /**
      * Sets the options to be used for the request.
      *
-     * @param int $option
+     * @param int   $option
      * @param mixed $value
      *
      * @see curl_setopt
@@ -108,7 +108,7 @@ class curl
     /**
      * Gets information regarding a specific transfer.
      *
-     * @param int $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
+     * @param  int          $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
      * @return string|array Returns a string if options is given otherwise associative array
      *
      * @see curl_getinfo
@@ -118,13 +118,12 @@ class curl
         if ($option === null) {
             return curl_getinfo($this->curl);
         }
+
         return curl_getinfo($this->curl, $option);
     }
 
     /**
      * Closes the current cUrl session.
-     *
-     * @return void
      *
      * @see curl_close
      */
@@ -142,6 +141,7 @@ class curl
             list($key,$value) = explode(":",$header,2);
             $this->headers[$key] = trim($value);
         }
+
         return strlen($header);
     }
 
@@ -155,6 +155,7 @@ class curl
         if (isset($this->headers[$key])) {
             return $this->headers[$key];
         }
+
         return null;
     }
 

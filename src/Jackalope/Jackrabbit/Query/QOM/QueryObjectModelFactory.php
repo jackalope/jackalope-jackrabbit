@@ -3,12 +3,10 @@
 namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\ObjectManager;
-use Jackalope\FactoryInterface;
 use Jackalope\Query\QOM\QueryObjectModelFactory as BaseQueryObjectModelFactory;
 
 use PHPCR\Query\QOM\JoinInterface;
 use PHPCR\Query\QOM\SelectorInterface;
-use PHPCR\Query\QOM\QueryObjectModelFactoryInterface;
 use PHPCR\Query\QOM\SourceInterface;
 use PHPCR\Query\QOM\ConstraintInterface;
 use PHPCR\Query\QOM\AndInterface;

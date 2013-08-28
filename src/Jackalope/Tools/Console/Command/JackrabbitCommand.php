@@ -74,6 +74,7 @@ EOF
 
         if (! in_array(strtolower($cmd), array('start', 'stop', 'status'))) {
             $output->writeln($this->asText());
+
             return 1;
         }
 

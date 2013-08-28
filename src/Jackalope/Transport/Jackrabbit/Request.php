@@ -96,7 +96,6 @@ class Request
      */
     const LOCK = 'LOCK';
 
-
     /**
      * Identifier of the 'UNLOCK' http request method
      * @var string
@@ -203,16 +202,16 @@ class Request
      *
      * @var bool
      */
-    static protected $versionChecked = false;
+    protected static $versionChecked = false;
 
     /**
      * Initiaties the NodeTypes request object.
      *
      * @param FactoryInterface $factory Ignored for now, as this class does not create objects
-     * @param Client $client The jackrabbit client instance
-     * @param curl $curl The cURL object to use in this request
-     * @param string $method the HTTP method to use, one of the class constants
-     * @param string|array $uri the remote url for this request, including protocol,
+     * @param Client           $client  The jackrabbit client instance
+     * @param curl             $curl    The cURL object to use in this request
+     * @param string           $method  the HTTP method to use, one of the class constants
+     * @param string|array     $uri     the remote url for this request, including protocol,
      *      host name, workspace and path to the object to manipulate. May be an array of uri
      */
     public function __construct(FactoryInterface $factory, Client $client, curl $curl, $method, $uri)
@@ -351,6 +350,7 @@ class Request
         if ($getCurlObject) {
             $curl->parseResponseHeaders();
         }
+
         return $curl;
     }
 
@@ -370,6 +370,7 @@ class Request
         if (!$forceMultiple && count($this->uri) === 1) {
             return $this->singleRequest($getCurlObject);
         }
+
         return $this->multiRequest($getCurlObject);
     }
 
@@ -421,6 +422,7 @@ class Request
             curl_multi_remove_handle($mh, $curl->getCurl());
         }
         curl_multi_close($mh);
+
         return $responses;
     }
 
@@ -472,6 +474,7 @@ class Request
             if ($getCurlObject) {
                 return $curl;
             }
+
             return $response;
         }
         $this->handleError($curl, $response, $httpCode);
@@ -483,14 +486,14 @@ class Request
      * For transport level errors, tries to figure out what went wrong to
      * throw the most appropriate exception.
      *
-     * @param curl $curl
+     * @param curl   $curl
      * @param string $response the response body
-     * @param int $httpCode the http response code
+     * @param int    $httpCode the http response code
      *
      * @throws NoSuchWorkspaceException if it was not possible to reach the server (resolve host or connect)
-     * @throws ItemNotFoundException if the object was not found
-     * @throws RepositoryException on any other error.
-     * @throws PathNotFoundException if the path was not found (server returned 404 without xml response)
+     * @throws ItemNotFoundException    if the object was not found
+     * @throws RepositoryException      on any other error.
+     * @throws PathNotFoundException    if the path was not found (server returned 404 without xml response)
      */
     protected function handleError(curl $curl, $response, $httpCode)
     {
@@ -597,8 +600,8 @@ class Request
      * plus the output of curl_getinfo
      * plus the response body including its size
      *
-     * @param curl $curl The curl object
-     * @param string $response the response body
+     * @param  curl   $curl     The curl object
+     * @param  string $response the response body
      * @return string the error message
      */
 
@@ -614,6 +617,7 @@ class Request
             $string .= $this->body . "\n";
         }
         $string .= "--response body (size: " . strlen($response) . " bytes): --\n$response\n--end response body--\n";
+
         return $string;
     }
 
@@ -669,6 +673,7 @@ class Request
         if (isset($reset)) {
             return reset($json);
         }
+
         return $json;
     }
 }

@@ -88,12 +88,12 @@ class EventBuffer implements \Iterator
      *
      * Actual data loading is deferred to when it is first requested.
      *
-     * @param FactoryInterface           $factory
-     * @param EventFilter                $filter           filter to apply.
-     * @param Client                     $transport
-     * @param NodeTypeManagerInterface   $ntm
-     * @param string                     $workspaceRootUri
-     * @param array                      $rawData
+     * @param FactoryInterface         $factory
+     * @param EventFilter              $filter           filter to apply.
+     * @param Client                   $transport
+     * @param NodeTypeManagerInterface $ntm
+     * @param string                   $workspaceRootUri
+     * @param array                    $rawData
      */
     public function __construct(
         FactoryInterface $factory,
@@ -183,8 +183,8 @@ class EventBuffer implements \Iterator
     /**
      * Parse the events in an <entry> section
      *
-     * @param  DOMElement $entry
-     * @param  string     $currentUserId The current user ID as extracted from
+     * @param DOMElement $entry
+     * @param string     $currentUserId The current user ID as extracted from
      *      the <entry> part
      *
      * @return Event[]
@@ -225,7 +225,7 @@ class EventBuffer implements \Iterator
                 $event->setPrimaryNodeTypeName($primaryNodeType->nodeValue);
             }
             $mixinNodeTypes = $domEvent->getElementsByTagName('eventmixinnodetype');
-            foreach($mixinNodeTypes as $mixinNodeType) {
+            foreach ($mixinNodeTypes as $mixinNodeType) {
                 $event->addMixinNodeTypeName($mixinNodeType->nodeValue);
             }
 

@@ -91,6 +91,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         if (null === self::$instance) {
             self::$instance = new ImplementationLoader();
         }
+
         return self::$instance;
     }
 
@@ -137,9 +138,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         return $GLOBALS['phpcr.user'];
     }
 
-    function getFixtureLoader()
+    public function getFixtureLoader()
     {
-        require_once "JackrabbitFixtureLoader.php";
+        require_once 'JackrabbitFixtureLoader.php';
+
         return new JackrabbitFixtureLoader(__DIR__.'/../../vendor/phpcr/phpcr-api-tests/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
     }
 }

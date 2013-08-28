@@ -311,7 +311,6 @@ EOF;
         $buffer->next();
         $this->assertFalse($buffer->valid());
 
-
         $buffer->rewind();
         $this->assertTrue($buffer->valid());
         $this->assertEquals($this->expectedEvent, $buffer->current());
