@@ -8,7 +8,8 @@ namespace Jackalope\Transport\Jackrabbit;
  *
  * @todo: TODO: Write phpunit tests
  *
- * @license http://www.apache.org/licenses/LICENSE-2.0  Apache License Version 2.0, January 2004
+ * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
+ * @license http://opensource.org/licenses/MIT MIT License
  */
 class curl
 {
@@ -116,7 +117,7 @@ class curl
     {
         if ($option === null) {
             return curl_getinfo($this->curl);
-        }   
+        }
         return curl_getinfo($this->curl, $option);
     }
 

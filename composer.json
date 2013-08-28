@@ -4,7 +4,10 @@
     "description": "Jackalope Transport library",
     "keywords": ["transport implementation", "jackrabbit"],
     "homepage": "http://jackalope.github.com",
-    "license": "Apache-2.0",
+    "license": [
+        "MIT",
+        "Apache-2.0"
+    ],
     "authors": [
         {
             "name": "Jackalope Community",

@@ -22,6 +22,9 @@ use Jackalope\FactoryInterface;
  *
  * A sample feed is provided at the bottom of this file.
  *
+ * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
+ * @license http://opensource.org/licenses/MIT MIT License
+ *
  * @author David Buchmann <mail@davidbu.ch>
  */
 class EventBuffer implements \Iterator

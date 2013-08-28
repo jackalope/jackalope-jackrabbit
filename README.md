@@ -7,8 +7,10 @@ Jackalope binding for the jackrabbit backend server.
 Discuss on jackalope-dev@googlegroups.com
 or visit #jackalope on irc.freenode.net
 
-License: This code is licenced under the apache license.
-Please see the file LICENSE in this folder.
+## License
+
+This code is dual licensed under the MIT license and the Apache License Version
+2.0. Please see the file LICENSE in this folder.
 
 
 # Preconditions
