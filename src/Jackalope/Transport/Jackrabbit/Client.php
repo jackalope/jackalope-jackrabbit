@@ -1190,9 +1190,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * {@inheritDoc}
+     * @param Property $property
      */
-    public function storeProperty(Property $property)
+    private function storeProperty(Property $property)
     {
         $path = $property->getPath();
         $typeid = $property->getType();
@@ -1208,6 +1208,19 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             }
         } else {
             $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateProperties(Node $node)
+    {
+        foreach ($node->getProperties() as $property) {
+            /** @var $property Property */
+            if ($property->isModified() || $property->isNew()) {
+                $this->storeProperty($property);
+            }
         }
     }
 
