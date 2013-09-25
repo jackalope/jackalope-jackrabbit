@@ -54,7 +54,7 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
             return false;
         }
 
-        if ($source instanceof SelectorInterface && $source->getSelectorName()) {
+        if ($source instanceof SelectorInterface && $source->getSelectorName() !== $source->getNodeTypeName()) {
             return false;
         }
 
