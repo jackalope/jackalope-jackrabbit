@@ -41,6 +41,7 @@ use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
 use PHPCR\Util\ValueConverter;
+use PHPCR\ValueFormatException;
 
 /**
  * Connection to one Jackrabbit server.
@@ -1197,6 +1198,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $property->getPath();
         $typeid = $property->getType();
         $nativeValue = $property->getValueForStorage();
+        if ($typeid === PropertyType::STRING) {
+            foreach ((array) $nativeValue as $string) {
+                if (!$this->isStringValid($string)) {
+                    throw new ValueFormatException('Invalid character found in property "'.$property->getName().'". Are you passing a valid string?');
+                }
+            }
+        }
 
         $value = $this->propertyToJsopString($property);
         if (!$value) {
@@ -1209,6 +1217,23 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         } else {
             $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
         }
+    }
+
+    /**
+     * Checks for occurrence of invalid UTF characters, that can not occur in valid XML document.
+     * If occurrence is found, returns false, otherwise true.
+     * Invalid characters were taken from this list: http://en.wikipedia.org/wiki/Valid_characters_in_XML#XML_1.0
+     *
+     * Uses regexp mentioned here: http://stackoverflow.com/a/961504
+     *
+     * @param $string string value
+     * @return bool true if string is OK, false otherwise.
+     */
+    protected function isStringValid($string)
+    {
+        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
+
+        return (preg_match($regex, $string, $matches) === 0);
     }
 
     /**
