@@ -106,7 +106,7 @@ EOF
             throw new \Exception("Could not find the specified directory'$workspace_dir'");
         }
 
-        $port = $input->getOption('port')?:$this->port?:null;
+        $port = $input->getOption('port')?:$this->port;
 
         $helper = new JackrabbitHelper($jar, $workspace_dir, $port);
 
