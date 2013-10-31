@@ -14,16 +14,19 @@ class JackrabbitHelper
 {
     protected $jackrabbit_jar;
     protected $workspace_dir;
+    protected $port;
 
     /**
      * construct an instance of the helper.
      * @param string $jackrabbit_jar the path to the jackrabbit server jar file
      * @param string $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
+     * @param integer $port          if provided this will be used as port for HTTP server, otherwise the default is used
      */
-    public function __construct($jackrabbit_jar, $workspace_dir = null)
+    public function __construct($jackrabbit_jar, $workspace_dir = null, $port = null)
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
         $this->workspace_dir = $workspace_dir ? $workspace_dir : dirname($jackrabbit_jar);
+        $this->port = $port;
     }
 
     /**
@@ -34,8 +37,9 @@ class JackrabbitHelper
         $pid = $this->getServerPid();
         if (! $pid) {
             chdir($this->workspace_dir);
+            $port_option = $this->port ? ' --port '.$this->port : '';
             // TODO: check java is executable
-            system("java -jar {$this->jackrabbit_jar} --repo {$this->workspace_dir}/jackrabbit -q > /dev/null &");
+            system("java -jar {$this->jackrabbit_jar} --repo {$this->workspace_dir}/jackrabbit -q {$port_option}> /dev/null &");
         }
     }
 
