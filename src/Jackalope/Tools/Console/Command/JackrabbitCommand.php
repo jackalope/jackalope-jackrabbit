@@ -31,6 +31,12 @@ class JackrabbitCommand extends Command
     protected $workspace_dir;
 
     /**
+     * TCP port of the Jackrabbit HTTP server
+     * @var integer
+     */
+    protected $port;
+
+    /**
      * Configures the current command.
      */
     protected function configure()
@@ -39,6 +45,7 @@ class JackrabbitCommand extends Command
             ->addArgument('cmd', InputArgument::REQUIRED, 'Command to execute (start | stop | status)')
             ->addOption('jackrabbit_jar', null, InputOption::VALUE_OPTIONAL, 'Path to the Jackrabbit jar file')
             ->addOption('workspace_dir', null, InputOption::VALUE_OPTIONAL, 'Path to the Jackrabbit workspace dir')
+            ->addOption('port', null, InputOption::VALUE_OPTIONAL, 'TCP port of the Jackrabbit HTTP server')
             ->setDescription('Start and stop the Jackrabbit server')
             ->setHelp(<<<EOF
 The <info>jackalope:run:jackrabbit</info> command allows to have a minimal
@@ -58,6 +65,11 @@ EOF
     protected function setWorkspaceDir($workspace_dir)
     {
         $this->workspace_dir = $workspace_dir;
+    }
+
+    protected function setPort($port)
+    {
+        $this->port = $port;
     }
 
     /**
@@ -94,7 +106,9 @@ EOF
             throw new \Exception("Could not find the specified directory'$workspace_dir'");
         }
 
-        $helper = new JackrabbitHelper($jar, $workspace_dir);
+        $port = $input->getOption('port')?:$this->port;
+
+        $helper = new JackrabbitHelper($jar, $workspace_dir, $port);
 
         switch (strtolower($cmd)) {
             case 'start':
