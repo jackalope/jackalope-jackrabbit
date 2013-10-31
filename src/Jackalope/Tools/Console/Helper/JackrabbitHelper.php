@@ -39,7 +39,7 @@ class JackrabbitHelper
             chdir($this->workspace_dir);
             $port_option = $this->port ? ' --port '.$this->port : '';
             // TODO: check java is executable
-            system("java -jar {$this->jackrabbit_jar} --repo {$this->workspace_dir}/jackrabbit -q {$port_option}> /dev/null &");
+            system("java -jar {$this->jackrabbit_jar} --repo {$this->workspace_dir}/jackrabbit {$port_option} -q> /dev/null &");
         }
     }
 
