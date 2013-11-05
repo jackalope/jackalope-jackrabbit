@@ -36,7 +36,7 @@
     "bin": ["bin/jackalope", "bin/jackrabbit.sh"],
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.1-dev"
         }
     }
 }
