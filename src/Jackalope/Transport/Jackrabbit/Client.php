@@ -937,7 +937,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      *
      * @return mixed the node value converted to the specified type.
      */
-    public function getDcrValue(DOMElement $node)
+    private function getDcrValue(DOMElement $node)
     {
         $type = $node->getAttribute('dcr:type');
         if (PropertyType::TYPENAME_BOOLEAN == $type && 'false' == $node->nodeValue) {

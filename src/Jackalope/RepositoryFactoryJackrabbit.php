@@ -40,6 +40,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         'jackalope.jackrabbit_expect' => 'boolean: Send the "Expect: 100-continue" header on larger PUT and POST requests. Disabled by default to avoid issues with proxies and load balancers.',
         'jackalope.check_login_on_server' => 'boolean: if set to empty or false, skip initial check whether repository exists. Enabled by default, disable to gain a few milliseconds off each repository instantiation.',
         'jackalope.disable_stream_wrapper' => 'boolean: if set and not empty, stream wrapper is disabled, otherwise the stream wrapper is enabled and streams are only fetched when reading from for the first time. If your code always uses all binary properties it reads, you can disable this for a small performance gain.',
+        'jackalope.logger' => 'Psr\Log\LoggerInterface: Use the LoggingClient to wrap the default transport Client',
     );
 
     /**
@@ -90,6 +91,9 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         }
         if (isset($parameters['jackalope.check_login_on_server'])) {
             $transport->setCheckLoginOnServer($parameters['jackalope.check_login_on_server']);
+        }
+        if (isset($parameters['jackalope.logger'])) {
+            $transport = $factory->get('Transport\Jackrabbit\LoggingClient', array($transport, $parameters['jackalope.logger']));
         }
 
         $options['stream_wrapper'] = empty($parameters['jackalope.disable_stream_wrapper']);
