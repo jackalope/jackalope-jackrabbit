@@ -495,6 +495,24 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 return array();
             }
         }
+
+        // if we have a fetchDepth, optimize by removing duplicated requests
+        // for paths that will be fetched through the depth
+        if ($this->getFetchDepth()) {
+            $sorted = $paths;
+            asort($sorted);
+            $prev = ':'; // init with something that never matches
+            foreach($sorted as $key => $path) {
+                if (strpos($path, $prev . '/')
+                    && $this->getFetchDepth() >= substr_count($path, '/', strlen($prev))
+                ) {
+                    unset($paths[$key]);
+                } else {
+                    $prev = $path;
+                }
+            }
+        }
+
         $body = array();
 
         $url = $this->encodeAndValidatePathForDavex("/").'.'.$this->getFetchDepth().'.json';
