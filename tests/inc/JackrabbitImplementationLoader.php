@@ -110,7 +110,19 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     }
     public function getRepositoryFactoryParameters()
     {
-        return array('jackalope.jackrabbit_uri' => $GLOBALS['jackrabbit.uri']);
+        return array(
+            'jackalope.jackrabbit_uri' => $GLOBALS['jackrabbit.uri'],
+            \Jackalope\Session::OPTION_AUTO_LASTMODIFIED => false,
+        );
+    }
+
+    public function getSessionWithLastModified()
+    {
+        /** @var $session \Jackalope\Session */
+        $session = $this->getSession();
+        $session->setSessionOption(\Jackalope\Session::OPTION_AUTO_LASTMODIFIED, true);
+
+        return $session;
     }
 
     public function getCredentials()
