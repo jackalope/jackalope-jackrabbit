@@ -103,7 +103,7 @@ sample code to get a PHPCR session with the jackrabbit backend:
     $pass           = 'admin';
     $workspace      = 'default';
 
-    $factory = new \Jackalope\RepositoryFactoryJackrabbit;
+    $factory = new \Jackalope\RepositoryFactoryJackrabbit();
     $repository = $factory->getRepository(
         array("jackalope.jackrabbit_uri" => $jackrabbit_url)
     );
@@ -180,6 +180,32 @@ getNodeNames with jackalope. Using the typeFilter with getNodes to only fetch
 the nodes of types that interest you can make a lot of sense however.
 
 
+# Logging
+
+Jackalope supports logging, for example to investigate the number and type of
+queries used. To enable logging, provide a logger instance to the repository
+factory:
+
+    $factory = new \Jackalope\RepositoryFactoryJackrabbit();
+    $logger = new Jackalope\Transport\Logging\DebugStack();
+    $options = array(
+        'jackalope.jackrabbit_uri' => $jackrabbit_url,
+        'jackalope.logger' => $logger,
+    );
+    $repository = $factory->getRepository($options);
+
+    ...
+
+    // at the end, output debug information
+    var_dump($logger->calls);
+
+You can also wrap a [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
+compatible logger like [monolog](https://github.com/Seldaek/monolog) with the
+Psr3Logger class.
+
+Note that when using jackalope in Symfony2, the logger is integrated in the
+debug toolbar.
+
 # Implementation notes
 
 See [doc/architecture.md](https://github.com/jackalope/jackalope/blob/master/doc/architecture.md)
@@ -187,7 +213,7 @@ for an introduction how Jackalope is built. Have a look at the source files and
 generate the phpdoc.
 
 
-# TODO
+# Not implemented features
 
 The best overview of what needs to be done are the skipped API tests.
 Have a look at [JackrabbitImplementationLoader](https://github.com/jackalope/jackalope-jackrabbit/blob/master/tests/inc/JackrabbitImplementationLoader.php) to
