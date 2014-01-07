@@ -20,7 +20,7 @@
 
     <testsuites>
         <testsuite name="Jackalope Jackrabbit Tests">
-            <directory>test/Jackalope</directory>
+            <directory>tests/Jackalope</directory>
             <directory>vendor/jackalope/jackalope/tests</directory>
             <directory>vendor/phpcr/phpcr/tests</directory>
             <directory>vendor/phpcr/phpcr-utils/tests</directory>
