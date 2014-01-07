@@ -557,22 +557,22 @@ class ClientTest extends JackrabbitTestCase
         $factory = new Factory;
         $session = $this->getMockBuilder('Jackalope\Session')->disableOriginalConstructor()->getMock();
         $workspace = $this->getMockBuilder('Jackalope\Workspace')->disableOriginalConstructor()->getMock();
-        $session->expects($this->once())
+        $session->expects($this->any())
             ->method('getWorkspace')
             ->with()
             ->will($this->returnValue($workspace));
         $repository = $this->getMockBuilder('Jackalope\Repository')->disableOriginalConstructor()->getMock();
-        $session->expects($this->once())
+        $session->expects($this->any())
             ->method('getRepository')
             ->with()
             ->will($this->returnValue($repository));
         $ntm = $this->getMockBuilder('Jackalope\NodeType\NodeTypeManager')->disableOriginalConstructor()->getMock();
-        $workspace->expects($this->once())
+        $workspace->expects($this->any())
             ->method('getNodeTypeManager')
             ->with()
             ->will($this->returnValue($ntm));
         $nt = $this->getMockBuilder('Jackalope\NodeType\NodeType')->disableOriginalConstructor()->getMock();
-        $ntm->expects($this->once())
+        $ntm->expects($this->any())
             ->method('getNodeType')
             ->with()
             ->will($this->returnValue($nt));
