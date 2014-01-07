@@ -1241,11 +1241,40 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function updateProperties(Node $node)
     {
+        $this->updateLastModified($node);
         foreach ($node->getProperties() as $property) {
             /** @var $property Property */
             if ($property->isModified() || $property->isNew()) {
                 $this->storeProperty($property);
             }
+        }
+    }
+
+    /**
+     * Update the lastModified fields if they where not set manually.
+     *
+     * Note that we can drop this if this jackrabbit issue ever gets
+     * implemented https://issues.apache.org/jira/browse/JCR-2233
+     *
+     * @param Node $node
+     */
+    protected function updateLastModified(Node $node)
+    {
+        if (!$this->getAutoLastModified() || !$node->isNodeType('mix:lastModified')) {
+            return;
+        }
+
+        if ($node->hasProperty('jcr:lastModified')
+            && !$node->getProperty('jcr:lastModified')->isModified()
+            && !$node->getProperty('jcr:lastModified')->isNew()
+        ) {
+            $node->setProperty('jcr:lastModified', new \DateTime());
+        }
+        if ($node->hasProperty('jcr:lastModifiedBy')
+            && !$node->getProperty('jcr:lastModifiedBy')->isModified()
+            && !$node->getProperty('jcr:lastModifiedBy')->isNew()
+        ) {
+            $node->setProperty('jcr:lastModifiedBy', new \DateTime());
         }
     }
 
