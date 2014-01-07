@@ -1231,7 +1231,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function isStringValid($string)
     {
-        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
+        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]+/u';
 
         return (preg_match($regex, $string, $matches) === 0);
     }

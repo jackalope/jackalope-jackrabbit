@@ -5,6 +5,7 @@ namespace Jackalope\Transport\Jackrabbit;
 use Jackalope\Factory;
 
 use DOMDocument;
+use Jackalope\Node;
 
 /**
  * TODO: this unit test contains some functional tests. we should separate functional and unit tests.
@@ -551,14 +552,39 @@ class ClientTest extends JackrabbitTestCase
             $this->setExpectedException('PHPCR\ValueFormatException', 'Invalid character found in property "test". Are you passing a valid string?');
         }
 
-        $root = $this->session->getNode('/');
-        $article = $root->addNode('article');
+        $t = $this->getTransportMock();
+
+        $factory = new Factory;
+        $session = $this->getMockBuilder('Jackalope\Session')->disableOriginalConstructor()->getMock();
+        $workspace = $this->getMockBuilder('Jackalope\Workspace')->disableOriginalConstructor()->getMock();
+        $session->expects($this->once())
+            ->method('getWorkspace')
+            ->with()
+            ->will($this->returnValue($workspace));
+        $repository = $this->getMockBuilder('Jackalope\Repository')->disableOriginalConstructor()->getMock();
+        $session->expects($this->once())
+            ->method('getRepository')
+            ->with()
+            ->will($this->returnValue($repository));
+        $ntm = $this->getMockBuilder('Jackalope\NodeType\NodeTypeManager')->disableOriginalConstructor()->getMock();
+        $workspace->expects($this->once())
+            ->method('getNodeTypeManager')
+            ->with()
+            ->will($this->returnValue($ntm));
+        $nt = $this->getMockBuilder('Jackalope\NodeType\NodeType')->disableOriginalConstructor()->getMock();
+        $ntm->expects($this->once())
+            ->method('getNodeType')
+            ->with()
+            ->will($this->returnValue($nt));
+        $objectManager = $this->getMockBuilder('Jackalope\ObjectManager')->disableOriginalConstructor()->getMock();
+        $article = new Node($factory, array(), '/jcr:root', $session, $objectManager, true);
         $article->setProperty('test', $string);
-        $this->session->save();
+        $t->updateProperties($article);
     }
 
     public function provideTestOutOfRangeCharacters()
     {
+        // use http://rishida.net/tools/conversion/ to convert problematic utf-16 strings to code points
         return array(
             array('This is valid too!'.$this->translateCharFromCode('\u0009'), true),
             array('This is valid', true),
@@ -571,6 +597,7 @@ class ClientTest extends JackrabbitTestCase
             array($this->translateCharFromCode('\u0003'), false),
             array($this->translateCharFromCode('\u0008'), false),
             array($this->translateCharFromCode('\uFFFF'), false),
+            array($this->translateCharFromCode('Sporty Spice at Sporty spice @ work \uD83D\uDCAA\uD83D\uDCAA\uD83D\uDCAA'), false),
         );
     }
 
