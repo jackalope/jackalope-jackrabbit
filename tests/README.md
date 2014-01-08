@@ -16,7 +16,7 @@ The phpunit.xml.dist is configured to run all tests. You can limit the tests
 to run by specifying the path to those tests to phpunit.
 
 Note that the phpcr-api tests are skipped for features not implemented in
-jackalope. Have a look at the tests/inc/JackrabbitImplementationLoader.php file
+jackalope. Have a look at the tests/inc/ImplementationLoader.php file
 to see which features are currently skipped.
 
 You should only see success or skipped tests, no failures or errors.

@@ -27,6 +27,7 @@
         "jackalope/jackalope-transport": "1.0.0"
     },
     "require-dev": {
+        "psr/log": "~1.0",
         "phpcr/phpcr-api-tests": "~2.1.0",
         "symfony/console": "~2.0"
     },

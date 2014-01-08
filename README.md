@@ -216,7 +216,7 @@ generate the phpdoc.
 # Not implemented features
 
 The best overview of what needs to be done are the skipped API tests.
-Have a look at [JackrabbitImplementationLoader](https://github.com/jackalope/jackalope-jackrabbit/blob/master/tests/inc/JackrabbitImplementationLoader.php) to
+Have a look at [ImplementationLoader](https://github.com/jackalope/jackalope-jackrabbit/blob/master/tests/inc/ImplementationLoader.php) to
 see what is currently not working and start hacking :-)
 
 

@@ -113,6 +113,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         return array(
             'jackalope.jackrabbit_uri' => $GLOBALS['jackrabbit.uri'],
             \Jackalope\Session::OPTION_AUTO_LASTMODIFIED => false,
+            'jackalope.logger' => new \Jackalope\Transport\Logging\Psr3Logger(new \Psr\Log\NullLogger()),
         );
     }
 
