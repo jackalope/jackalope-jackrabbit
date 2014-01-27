@@ -31,12 +31,14 @@ To install jackalope itselves, run the following in the parent directory of wher
 
     git clone git://github.com/jackalope/jackalope-jackrabbit.git
     cd jackalope-jackrabbit
-    php /usr/local/bin/composer.phar install --dev
+    php /usr/local/bin/composer.phar install
 
-Note that the --dev parameter is only needed if you want to be
-able to run the test suite. If you already installed jackalope without the test
-suite, you need to remove composer.lock before running composer again with the
---dev parameter.
+Note that this will also install the test suite. If you want to install jackalope without the test
+suite, you should run composer with the --no-dev parameter, ie
+
+    php /usr/local/bin/composer.phar install --no-dev
+    
+You can run this command whether or not you have already run it without the --no-dev parameter
 
 
 ## Jackrabbit storage server
