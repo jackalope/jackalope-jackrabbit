@@ -28,7 +28,7 @@ If you do not yet have composer, install it like this
 
     curl -s http://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin
 
-To install jackalope itselves, run the following in the parent directory of where you want jackalope
+To install jackalope itself, run the following in the parent directory of where you want jackalope
 
     git clone git://github.com/jackalope/jackalope-jackrabbit.git
     cd jackalope-jackrabbit
@@ -67,25 +67,18 @@ NOTE: If you are using PHPCR inside of **Symfony**, the DoctrinePHPCRBundle
 provides the commands inside the normal Symfony console and you don't need to
 prepare anything special.
 
-Jackalope specific commands:
+There is the Jackalope specific command ``jackalope:run:jackrabbit`` which you
+can use to start and stop a jackrabbit standalone server.
 
-* ``jackalope:run:jackrabbit [--jackrabbit_jar[="..."]] [start|stop|status]``:
-    Start and stop the Jackrabbit server
+You have many useful commands available from the phpcr-utils. To get a list of
+all commands, type:
 
-Commands available from the phpcr-utils:
+    ./bin/jackalope
 
-* ``phpcr:workspace:create <name>``: Create a workspace *name* in the repository
-* ``phpcr:register-node-types --allow-update [cnd-file]``: Register namespaces
-    and node types from a "Compact Node Type Definition" .cnd file
-* ``phpcr:dump [--sys_nodes[="..."]] [--props[="..."]] [path]``: Show the node
-    names under the specified path. If you set sys_nodes=yes you will also see
-    system nodes. If you set props=yes you will additionally see all properties
-    of the dumped nodes.
-* ``phpcr:purge``: Remove all content from the configured repository in the
-     configured workspace
-* ``phpcr:sql2``: Run a query in the JCR SQL2 language against the repository
-    and dump the resulting rows to the console.
+To get more information on a specific command, use the `help` command. To learn
+more about the `phpcr:workspace:export` command for example, you would type:
 
+    ./bin/jackalope help phpcr:workspace:export
 
 
 # Bootstrapping
@@ -155,14 +148,14 @@ They are built to use the best possible query language depending on the
 capabilities of the backend. A later switching to another PHPCR implementation
 shouldn't cause any issues then.
 
-Jackalope-Jackrabbit also supports the depricated SQL and XPath query languages
-from JCR 1.0. Those languages will be suported by Jackrabbit for the forseeable
+Jackalope-Jackrabbit also supports the deprecated SQL and XPath query languages
+from JCR 1.0. Those languages will be supported by Jackrabbit for the foreseeable
 future, but almost certainly won't be supported by other PHPCR implementations.
 So use them with care and only if you know what you are doing.
 
 One reason for using SQL or XPath is that the newer and more capable SQL2 is not
 as optimized as the older languages on the Jackrabbit side. Queries with large
-resultsets are much slower with SQL2 than with XPath or SQL.
+result sets are much slower with SQL2 than with XPath or SQL.
 
 However, the best is to use the QueryBuilder mentioned above to let the
 implementation chose the most efficient query language for your implementation.
