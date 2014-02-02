@@ -1,6 +1,6 @@
 # Jackalope [![Build Status](https://secure.travis-ci.org/jackalope/jackalope-jackrabbit.png?branch=master)](http://travis-ci.org/jackalope/jackalope-jackrabbit)
 
-Jackalope is a powerful implementation of the PHP Content Repository API ([PHPCR](http://phpcr.github.com)).
+Jackalope is a powerful implementation of the PHP Content Repository API ([PHPCR](http://phpcr.github.io)).
 
 Jackalope-Jackrabbit is using the jackrabbit JCR server as storage engine.
 
