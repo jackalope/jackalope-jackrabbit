@@ -1,11 +1,12 @@
 # Jackalope [![Build Status](https://secure.travis-ci.org/jackalope/jackalope-jackrabbit.png?branch=master)](http://travis-ci.org/jackalope/jackalope-jackrabbit)
 
-A powerful implementation of the [PHPCR API](http://phpcr.github.com).
+Jackalope is a powerful implementation of the PHP Content Repository API ([PHPCR](http://phpcr.github.com)).
 
-Jackalope binding for the jackrabbit backend server.
+Jackalope-Jackrabbit is using the jackrabbit JCR server as storage engine.
 
 Discuss on jackalope-dev@googlegroups.com
 or visit #jackalope on irc.freenode.net
+
 
 ## License
 
@@ -37,7 +38,7 @@ Note that this will also install the test suite. If you want to install jackalop
 suite, you should run composer with the --no-dev parameter, ie
 
     php /usr/local/bin/composer.phar install --no-dev
-    
+
 You can run this command whether or not you have already run it without the --no-dev parameter
 
 
