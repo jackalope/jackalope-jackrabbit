@@ -4,6 +4,7 @@ php:
   - 5.3
   - 5.4
   - 5.5
+  - hhvm
 
 before_script:
   - composer update
@@ -13,3 +14,8 @@ script: phpunit
 
 notifications:
   irc: "irc.freenode.org#jackalope"
+
+matrix:
+  allow_failures:
+    - php: hhvm
+# hhvm will fail until libxml support is added https://github.com/facebook/hhvm/issues/1194
