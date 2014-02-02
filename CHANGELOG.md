@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.1.0
+-----
+
+* Performance improvements: The fetchDepth feature is now fully supported.
+* Support for logging PHPCR database queries.
+* mix:lastModified fields can be handled automatically.
+* Commands cleanup, check cli-config.php.dist.
+
 1.1.0-RC1
 ---------
 
