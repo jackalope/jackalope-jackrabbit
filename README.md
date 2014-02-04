@@ -26,18 +26,24 @@ This code is dual licensed under the MIT license and the Apache License Version
 
 If you do not yet have composer, install it like this
 
-    curl -s http://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin
+```sh
+$ curl -s http://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin
+```
 
 To install jackalope itself, run the following in the parent directory of where you want jackalope
 
-    git clone git://github.com/jackalope/jackalope-jackrabbit.git
-    cd jackalope-jackrabbit
-    php /usr/local/bin/composer.phar install
+```sh
+$ git clone git://github.com/jackalope/jackalope-jackrabbit.git
+$ cd jackalope-jackrabbit
+$ php /usr/local/bin/composer.phar install
+```
 
 Note that this will also install the test suite. If you want to install jackalope without the test
 suite, you should run composer with the --no-dev parameter, ie
 
-    php /usr/local/bin/composer.phar install --no-dev
+```sh
+$ php /usr/local/bin/composer.phar install --no-dev
+```
 
 You can run this command whether or not you have already run it without the --no-dev parameter
 
@@ -94,17 +100,19 @@ own classloader, find the mapping in ``vendor/composer/autoload_namespaces.php``
 Once you have autoloading, you need to bootstrap the library. A minimalist
 sample code to get a PHPCR session with the jackrabbit backend:
 
-    $jackrabbit_url = 'http://127.0.0.1:8080/server/';
-    $user           = 'admin';
-    $pass           = 'admin';
-    $workspace      = 'default';
+```php
+$jackrabbit_url = 'http://127.0.0.1:8080/server/';
+$user           = 'admin';
+$pass           = 'admin';
+$workspace      = 'default';
 
-    $factory = new \Jackalope\RepositoryFactoryJackrabbit();
-    $repository = $factory->getRepository(
-        array("jackalope.jackrabbit_uri" => $jackrabbit_url)
-    );
-    $credentials = new \PHPCR\SimpleCredentials($user, $pass);
-    $session = $repository->login($credentials, $workspace);
+$factory = new \Jackalope\RepositoryFactoryJackrabbit();
+$repository = $factory->getRepository(
+    array("jackalope.jackrabbit_uri" => $jackrabbit_url)
+);
+$credentials = new \PHPCR\SimpleCredentials($user, $pass);
+$session = $repository->login($credentials, $workspace);
+```
 
 To use a workspace different than ``default`` you need to create it first. The
 easiest is to run the command ``bin/jackalope phpcr:workspace:create <myworkspace>``
@@ -117,22 +125,23 @@ The entry point is to create the repository factory. The factory specifies the
 storage backend as well. From this point on, there are no differences in the
 usage (except for supported features, that is).
 
-    // see Bootstrapping for how to get the session.
+```php
+// see Bootstrapping for how to get the session.
 
-    $rootNode = $session->getNode("/");
-    $whitewashing = $rootNode->addNode("www-whitewashing-de");
-    $session->save();
+$rootNode = $session->getNode("/");
+$whitewashing = $rootNode->addNode("www-whitewashing-de");
+$session->save();
 
-    $posts = $whitewashing->addNode("posts");
-    $session->save();
+$posts = $whitewashing->addNode("posts");
+$session->save();
 
-    $post = $posts->addNode("welcome-to-blog");
-    $post->addMixin("mix:title");
-    $post->setProperty("jcr:title", "Welcome to my Blog!");
-    $post->setProperty("jcr:description", "This is the first post on my blog! Do you like it?");
+$post = $posts->addNode("welcome-to-blog");
+$post->addMixin("mix:title");
+$post->setProperty("jcr:title", "Welcome to my Blog!");
+$post->setProperty("jcr:description", "This is the first post on my blog! Do you like it?");
 
-    $session->save();
-
+$session->save();
+```
 
 See [PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md)
 for a more detailed tutorial on how to use the PHPCR API.
@@ -182,18 +191,20 @@ Jackalope supports logging, for example to investigate the number and type of
 queries used. To enable logging, provide a logger instance to the repository
 factory:
 
-    $factory = new \Jackalope\RepositoryFactoryJackrabbit();
-    $logger = new Jackalope\Transport\Logging\DebugStack();
-    $options = array(
-        'jackalope.jackrabbit_uri' => $jackrabbit_url,
-        'jackalope.logger' => $logger,
-    );
-    $repository = $factory->getRepository($options);
+```php
+$factory = new \Jackalope\RepositoryFactoryJackrabbit();
+$logger = new Jackalope\Transport\Logging\DebugStack();
+$options = array(
+    'jackalope.jackrabbit_uri' => $jackrabbit_url,
+    'jackalope.logger' => $logger,
+);
+$repository = $factory->getRepository($options);
 
-    ...
+...
 
-    // at the end, output debug information
-    var_dump($logger->calls);
+// at the end, output debug information
+var_dump($logger->calls);
+```
 
 You can also wrap a [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
 compatible logger like [monolog](https://github.com/Seldaek/monolog) with the
