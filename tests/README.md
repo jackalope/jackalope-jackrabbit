@@ -32,9 +32,9 @@ A second workspace is needed for some tests.
 
 To run the tests:
 
-    cd /path/to/jackalope/tests
-    cp phpunit.xml.dist phpunit.xml
-    phpunit
+$ cd /path/to/jackalope/tests
+$ cp phpunit.xml.dist phpunit.xml
+$ phpunit
 
 
 ## Use a non-default workspace
