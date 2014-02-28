@@ -17,7 +17,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.3",
-        "ext-libxml":"*",
+        "ext-xml":"*",
         "ext-curl":"*",
         "phpcr/phpcr": "~2.1.0",
         "phpcr/phpcr-utils": "~1.1.0",
