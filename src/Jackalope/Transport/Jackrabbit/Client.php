@@ -517,7 +517,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         try {
             $data = $request->executeJson();
 
-            return $data->nodes;
+            return (array) $data->nodes;
         } catch (PathNotFoundException $e) {
             throw new ItemNotFoundException($e->getMessage(), $e->getCode(), $e);
         }
