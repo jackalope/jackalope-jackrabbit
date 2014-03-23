@@ -1101,7 +1101,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
 
-        if ($removeExisting) {
+        if (!$removeExisting) {
             $this->checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath);
         }
 
