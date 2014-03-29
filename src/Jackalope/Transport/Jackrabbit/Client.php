@@ -1106,7 +1106,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         $body = urlencode(':clone') . '='
-            . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . ($removeExisting ? 'true' : 'false'));
+            . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . 'true');
 
         $request = $this->getRequest(Request::POST, $this->workspaceUri);
         $request->setBody($body);
