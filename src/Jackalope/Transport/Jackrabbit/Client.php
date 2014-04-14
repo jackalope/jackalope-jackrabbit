@@ -497,11 +497,11 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
         $body = array();
 
-        $url = $this->encodeAndValidatePathForDavex("/").'.'.$this->getFetchDepth().'.json';
+        $url = '/.'.$this->getFetchDepth().'.json';
         foreach ($paths as $path) {
             $body[] = http_build_query(array($query => $path));
         }
-        $body = implode("&",$body);
+        $body = implode('&', $body);
 
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
@@ -1851,8 +1851,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     {
         $lock = new Lock();
         $lockDom = $this->getRequiredDomElementByTagNameNS($response, self::NS_DAV, 'activelock', "No lock received");
-
-        //var_dump($response->saveXML($lockDom));
 
         // Check this is not a transaction lock
         $type = $this->getRequiredDomElementByTagNameNS($lockDom, self::NS_DAV, 'locktype', 'No lock type received');
