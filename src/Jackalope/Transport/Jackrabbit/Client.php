@@ -1101,9 +1101,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
 
-        if (!$removeExisting) {
-            $this->checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath);
-        }
+        // avoid creating a same name sibling as we don't handle them but jackrabbit does
+        $this->checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath);
 
         $body = urlencode(':clone') . '='
             . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . ($removeExisting ? 'true' : 'false'));
@@ -1115,7 +1114,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Prevent accidental creation of same name siblings (which are not supported)
+     * Prevent accidental creation of same name siblings during clone operation.
+     *
+     * Jackrabbit supports them, but jackalope does not.
      *
      * @param $srcWorkspace
      * @param $srcAbsPath
