@@ -1037,7 +1037,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
 
         if ($srcWorkspace) {
-            $srcAbsPath = $this->server . $srcAbsPath;
+            $srcAbsPath = $this->server . $srcWorkspace . '/jcr:root' . $srcAbsPath;
         }
 
         $request = $this->getRequest(Request::COPY, $srcAbsPath);
