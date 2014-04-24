@@ -1275,7 +1275,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             && !$node->getProperty('jcr:lastModifiedBy')->isModified()
             && !$node->getProperty('jcr:lastModifiedBy')->isNew()
         ) {
-            $node->setProperty('jcr:lastModifiedBy', new \DateTime());
+            $node->setProperty('jcr:lastModifiedBy', $this->credentials->getUserID());
         }
     }
 
