@@ -1030,19 +1030,47 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function copyNode($srcAbsPath, $dstAbsPath, $srcWorkspace = null)
     {
-        /**
-         * No JSOP possible, is a workspace method
-         */
+        if ($srcWorkspace) {
+            $this->copyNodeOtherWorkspace($srcAbsPath, $dstAbsPath, $srcWorkspace);
+        } else {
+            $this->copyNodeSameWorkspace($srcAbsPath, $dstAbsPath);
+        }
+    }
+
+    /**
+     * For copy within the same workspace, this is a COPY request.
+     *
+     * @param string $srcAbsPath  Absolute source path to the node
+     * @param string $destAbsPath Absolute destination path including the new
+     *                            node name
+     */
+    private function copyNodeSameWorkspace($srcAbsPath, $dstAbsPath)
+    {
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $dstAbsPath = $this->encodeAndValidatePathForDavex($dstAbsPath);
-
-        if ($srcWorkspace) {
-            $srcAbsPath = $this->server . $srcAbsPath;
-        }
 
         $request = $this->getRequest(Request::COPY, $srcAbsPath);
         $request->setDepth(Request::INFINITY);
         $request->addHeader('Destination: '.$this->addWorkspacePathToUri($dstAbsPath));
+        $request->execute();
+    }
+
+    /**
+     * For copy from a different workspace, needs to be a JSOP.
+     *
+     * As seen with jackrabbit 2.6
+     *
+     * @param string $srcAbsPath   Absolute source path to the node
+     * @param string $destAbsPath  Absolute destination path including the new
+     *                             node name
+     * @param string $srcWorkspace The workspace where the source node can be
+     *                             found or null for current workspace
+     */
+    private function copyNodeOtherWorkspace($srcAbsPath, $dstAbsPath, $srcWorkspace)
+    {
+        $request = $this->getRequest(Request::POST, $this->workspaceUri);
+        $request->setContentType("application/x-www-form-urlencoded; charset=utf-8");
+        $request->setBody(urlencode(':copy') . '=' . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $dstAbsPath));
         $request->execute();
     }
 
