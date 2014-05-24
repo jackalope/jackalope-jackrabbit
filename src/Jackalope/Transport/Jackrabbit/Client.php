@@ -505,7 +505,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $request = $this->getRequest(Request::POST, $url);
         $request->setBody($body);
-        $request->setContentType('application/x-www-form-urlencoded');
+        $request->setContentType('application/x-www-form-urlencoded; charset=utf-8');
 
         try {
             $data = $request->executeJson();
