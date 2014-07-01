@@ -220,9 +220,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $this->factory = $factory;
         $this->valueConverter = $this->factory->get('PHPCR\Util\ValueConverter');
 
-        // append a slash if not there
-        if ('/' !== substr($serverUri, -1)) {
-            $serverUri .= '/';
+        // remove a slash if not there
+        if ('/' === substr($serverUri, -1)) {
+            $serverUri = substr($serverUri, 0, -1);
         }
 
         $this->server = $serverUri;
@@ -345,8 +345,8 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         $this->workspace = $workspaceName;
-        $this->workspaceUri = $this->server . $workspaceName;
-        $this->workspaceUriRoot = $this->workspaceUri . "/jcr:root";
+        $this->workspaceUri = $this->server;
+        $this->workspaceUriRoot = $this->workspaceUri;
 
         if (!$this->checkLoginOnServer) {
             return $workspaceName;
@@ -395,7 +395,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function getRepositoryDescriptors()
     {
         if (null == $this->descriptors) {
-            $request = $this->getRequest(Request::REPORT, $this->server);
+            $request = $this->getRequest(Request::GET, $this->server);
             $request->setBody($this->buildReportRequest('dcr:repositorydescriptors'));
             $dom = $request->executeDom();
 
@@ -468,7 +468,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     public function getNode($path)
     {
         $path = $this->encodeAndValidatePathForDavex($path);
-        $path .= '.'.$this->getFetchDepth().'.json';
 
         $request = $this->getRequest(Request::GET, $path);
         try {
@@ -495,9 +494,19 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 return array();
             }
         }
+
+        $nodes = array();
+        foreach ($paths as $path) {
+            if ($path) {
+                $nodes[$path] = $this->getNode($path);
+            }
+        }
+
+        return $nodes;
+
         $body = array();
 
-        $url = '/.'.$this->getFetchDepth().'.json';
+        $url = '/';
         foreach ($paths as $path) {
             $body[] = http_build_query(array($query => $path));
         }
@@ -568,7 +577,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             return $client->getNodePathForIdentifier($uuid);
         }
 
-        $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
+        $request = $this->getRequest(Request::GET, $this->workspaceUri);
         $request->setBody($this->buildLocateRequest($uuid));
         $dom = $request->executeDom();
 
@@ -1387,7 +1396,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNamespaces()
     {
-        $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
+        $request = $this->getRequest(Request::GET, $this->workspaceUri);
         $request->setBody($this->buildReportRequest('dcr:registerednamespaces'));
         $dom = $request->executeDom();
 
@@ -1467,7 +1476,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     public function getNodeTypes($nodeTypes = array())
     {
-        $request = $this->getRequest(Request::REPORT, $this->workspaceUriRoot);
+        $request = $this->getRequest(Request::GET, $this->workspaceUriRoot);
         $request->setBody($this->buildNodeTypesRequest($nodeTypes));
         $dom = $request->executeDom();
 
@@ -1515,7 +1524,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $result = array();
 
-        $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
+        $request = $this->getRequest(Request::GET, $this->workspaceUri);
         $request->setBody($body);
         $dom = $request->executeDom();
 
