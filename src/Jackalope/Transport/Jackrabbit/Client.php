@@ -272,10 +272,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function getRequest($method, $uri, $addWorkspacePathToUri = true)
     {
-        if (!is_array($uri)) {
-            $uri = array($uri => $uri);
-        }
-
+        $uri = (array) $uri;
         $curl = $this->getCurl();
 
         if ($addWorkspacePathToUri) {
@@ -513,12 +510,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             return $data->nodes;
         } catch (PathNotFoundException $e) {
             throw new ItemNotFoundException($e->getMessage(), $e->getCode(), $e);
-        } catch (RepositoryException $e) {
-            if ($e->getMessage() == 'HTTP 403: Prefix must not be empty (org.apache.jackrabbit.spi.commons.conversion.IllegalNameException)') {
-                throw new UnsupportedRepositoryOperationException("Jackalope currently needs a patched jackrabbit for Session->getNodes() to work. Until our patches make it into the official distribution, see https://github.com/jackalope/jackrabbit/blob/2.2-jackalope/README.jackalope.patches.md for details and downloads.");
-            }
-
-            throw $e;
         }
     }
 
@@ -1557,20 +1548,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             '  <D:owner>' . $ownerInfo . '</D:owner>' .
             '</D:lockinfo>');
 
-        try {
-            $dom = $request->executeDom();
+        $dom = $request->executeDom();
 
-            return $this->generateLockFromDavResponse($dom, true, $absPath);
-        } catch (\PHPCR\RepositoryException $ex) {
-            // TODO: can we move that into the request handling code that determines the correct exception to throw?
-            // Check if it's a 412 error, otherwise re-throw the same exception
-            if (preg_match('/Response \(HTTP 412\):/', $ex->getMessage())) {
-                throw new \PHPCR\Lock\LockException("Unable to lock the non-lockable node '$absPath': " . $ex->getMessage(), 412);
-            }
-
-            // Any other exception will simply be rethrown
-            throw $ex;
-        }
+        return $this->generateLockFromDavResponse($dom, true, $absPath);
     }
 
     /**
