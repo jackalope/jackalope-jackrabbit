@@ -314,6 +314,16 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         return $this->curl;
     }
 
+    /**
+     * Return the URL to the workspace determined during login
+     *
+     * @return null|string
+     */
+    public function getWorkspaceUri()
+    {
+        return $this->workspaceUri;
+    }
+
     // CoreInterface //
 
     /**

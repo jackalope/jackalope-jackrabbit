@@ -205,6 +205,12 @@ class Request
     protected static $versionChecked = false;
 
     /**
+     * Whether we are in error handling mode to prevent infinite recursion
+     * @var bool
+     */
+    protected $errorHandlingMode = false;
+
+    /**
      * Initiaties the NodeTypes request object.
      *
      * @param FactoryInterface $factory Ignored for now, as this class does not create objects
@@ -571,7 +577,23 @@ class Request
             throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
         }
         if ($httpCode >= 500) {
-            throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response));
+            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response);
+            try {
+                $workspaceUri = array($this->client->getWorkSpaceUri());
+                if (!$this->errorHandlingMode
+                    && ($workspaceUri !== $this->uri || self::GET !== $this->method)
+                ) {
+                    $this->errorHandlingMode = true;
+                    $this->setUri($workspaceUri);
+                    $this->setMethod(self::GET);
+                    $this->executeDom();
+                }
+            } catch (PathNotFoundException $e) {
+                $msg = "Error likely caused by incorrect server URL configuration '".reset($this->uri)."' resulted in:\n$msg";
+            }
+
+            $this->errorHandlingMode = false;
+            throw new RepositoryException($msg);
         }
 
         $curlError = $curl->error();
