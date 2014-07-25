@@ -6,6 +6,7 @@ use DOMDocument;
 
 use PHPCR\CredentialsInterface;
 use PHPCR\SimpleCredentials;
+use PHPCR\Lock\LockException;
 use PHPCR\RepositoryException;
 use PHPCR\LoginException;
 use PHPCR\NoSuchWorkspaceException;
@@ -281,11 +282,7 @@ class Request
      */
     public function setUri($uri)
     {
-        if (!is_array($uri)) {
-            $this->uri = array($uri => $uri);
-        } else {
-            $this->uri = $uri;
-        }
+        $this->uri = (array) $uri;
     }
 
     /**
@@ -570,6 +567,9 @@ class Request
         if (405 == $httpCode) {
             throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
         }
+        if (412 == $httpCode) {
+            throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n" . $this->getShortErrorString());
+        }
         if ($httpCode >= 500) {
             throw new RepositoryException("HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response));
         }
@@ -665,7 +665,7 @@ class Request
         foreach ($responses as $key => $response) {
             $json[$key] = json_decode($response);
             if (null === $json[$key] && 'null' !== strtolower($response)) {
-                $uri = reset($this->uri); // FIXME was $this->uri[$key]. at which point did we lose the right key?
+                $uri = reset($this->uri);
                 throw new RepositoryException("Not a valid json object: \nRequest: {$this->method} $uri \nResponse: \n$response");
             }
         }
