@@ -23,7 +23,7 @@
         "phpcr/phpcr-utils": "~1.1",
         "jackalope/jackalope": "~1.1.0"
     },
-	"conflict": {
+    "conflict": {
 	    "lib-curl": "7.35"
 	},
     "provide": {
