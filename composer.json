@@ -19,11 +19,13 @@
         "php": ">=5.3.3",
         "ext-xml":"*",
         "ext-curl":"*",
-        "lib-curl" : "<7.35|>7.35",
         "phpcr/phpcr": "~2.1.0",
         "phpcr/phpcr-utils": "~1.1",
         "jackalope/jackalope": "~1.1.0"
     },
+	"conflict": {
+	    "lib-curl": "7.35"
+	},
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
