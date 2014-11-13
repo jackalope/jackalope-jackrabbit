@@ -18,6 +18,7 @@ This code is dual licensed under the MIT license and the Apache License Version
 
 * php >= 5.3
 * libxml version >= 2.7.0 (due to a bug in libxml [http://bugs.php.net/bug.php?id=36501](http://bugs.php.net/bug.php?id=36501))
+* libcurl (if you get ``Problem (2) in the Chunked-Encoded data`` with version 7.35, try updating your curl version)
 * phpunit >= 3.6 (if you want to run the tests)
 * [composer](http://getcomposer.org/)
 
