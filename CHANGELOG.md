@@ -8,6 +8,9 @@ Changelog
   node was added to the property multiple times. This has the side effect that
   the array returned by this method is not indexed by uuid anymore. That index
   was never advertised but might have been used.
+* RepositoryFactoryJackrabbit::getRepository now throws a PHPCR\ConfigurationException
+  instead of silently returning null on invalid parameters or missing required
+  parameters.
 
 1.1.0
 -----
