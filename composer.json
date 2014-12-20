@@ -20,7 +20,7 @@
         "ext-xml":"*",
         "ext-curl":"*",
         "phpcr/phpcr": "~2.1.0",
-        "phpcr/phpcr-utils": "~1.1",
+        "phpcr/phpcr-utils": "1.*,>=1.1.2",
         "jackalope/jackalope": "~1.1.5"
     },
     "provide": {
