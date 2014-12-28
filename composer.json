@@ -20,15 +20,15 @@
         "ext-xml":"*",
         "ext-curl":"*",
         "phpcr/phpcr": "~2.1.0",
-        "phpcr/phpcr-utils": "~1.1",
-        "jackalope/jackalope": "~1.1.0"
+        "phpcr/phpcr-utils": "1.*,>=1.1.2",
+        "jackalope/jackalope": "~1.1.6"
     },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
         "psr/log": "~1.0",
-        "phpcr/phpcr-api-tests": "~2.1.0",
+        "phpcr/phpcr-api-tests": "2.1.2",
         "symfony/console": "~2.0"
     },
     "autoload": {
