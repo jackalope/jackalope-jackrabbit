@@ -1245,7 +1245,14 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 $this->setJsopBody('^' . $path . ' : ');
             }
         } else {
-            $this->setJsopBody('^' . $path . ' : ' . json_encode($value));
+            $encoded = json_encode($value);
+
+            if (PropertyType::DOUBLE == $property->getType()
+                && !strpos($encoded, '.')
+            ) {
+                $encoded .= '.0';
+            }
+            $this->setJsopBody('^' . $path . ' : ' . $encoded);
         }
     }
 
