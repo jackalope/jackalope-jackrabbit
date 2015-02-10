@@ -5,6 +5,7 @@ namespace Jackalope\Transport\Jackrabbit;
 use Jackalope\FactoryInterface;
 use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
 
+use Jackalope\Transport\AccessControlInterface;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\VersioningInterface;
@@ -27,7 +28,7 @@ use Jackalope\Transport\Logging\LoggerInterface;
  *
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  */
-class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTransport, PermissionInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
+class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTransport, PermissionInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface, AccessControlInterface
 {
     /**
      * @var Client
@@ -242,5 +243,16 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
     public function deleteWorkspace($name)
     {
         $this->transport->deleteWorkspace($name);
+    }
+
+
+    public function getPolicies($path)
+    {
+        return $this->transport->getPolicies($path);
+    }
+
+    public function getSupportedPrivileges($path = null)
+    {
+        return $this->transport->getSupportedPrivileges($path);
     }
 }

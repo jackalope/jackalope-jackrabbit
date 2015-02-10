@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<D:multistatus xmlns:D="DAV:">
+    <D:response>
+        <D:href>http://localhost:8080/server/testsWorkspace/jcr%3aroot/</D:href>
+        <D:propstat>
+            <D:prop>
+                <D:supported-privilege-set>
+                    <D:supported-privilege>
+                        <D:privilege>
+                            <jcr:all xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                        </D:privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:workspaceManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:lifecycleManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:versionManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:lockManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:read xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:modifyAccessControl xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <rep:write xmlns:rep="internal"/>
+                            </D:privilege>
+                            <D:supported-privilege>
+                                <D:privilege>
+                                    <jcr:nodeTypeManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                </D:privilege>
+                            </D:supported-privilege>
+                            <D:supported-privilege>
+                                <D:privilege>
+                                    <jcr:write xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                </D:privilege>
+                                <D:supported-privilege>
+                                    <D:privilege>
+                                        <jcr:removeNode xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                    </D:privilege>
+                                </D:supported-privilege>
+                                <D:supported-privilege>
+                                    <D:privilege>
+                                        <jcr:addChildNodes xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                    </D:privilege>
+                                </D:supported-privilege>
+                                <D:supported-privilege>
+                                    <D:privilege>
+                                        <jcr:modifyProperties xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                    </D:privilege>
+                                </D:supported-privilege>
+                                <D:supported-privilege>
+                                    <D:privilege>
+                                        <jcr:removeChildNodes xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                                    </D:privilege>
+                                </D:supported-privilege>
+                            </D:supported-privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <rep:privilegeManagement xmlns:rep="internal"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:namespaceManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:nodeTypeDefinitionManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:retentionManagement xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                        <D:supported-privilege>
+                            <D:privilege>
+                                <jcr:readAccessControl xmlns:jcr="http://www.jcp.org/jcr/1.0"/>
+                            </D:privilege>
+                        </D:supported-privilege>
+                    </D:supported-privilege>
+                </D:supported-privilege-set>
+            </D:prop>
+            <D:status>HTTP/1.1 200 OK</D:status>
+        </D:propstat>
+    </D:response>
+</D:multistatus>

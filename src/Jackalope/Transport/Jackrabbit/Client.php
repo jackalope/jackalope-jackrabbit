@@ -4,6 +4,7 @@ namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
 use DOMElement;
+use Jackalope\Security\Privilege;
 use LogicException;
 use InvalidArgumentException;
 
@@ -33,6 +34,7 @@ use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
+use Jackalope\Transport\AccessControlInterface;
 use Jackalope\NotImplementedException;
 use Jackalope\Node;
 use Jackalope\Property;
@@ -66,7 +68,18 @@ use PHPCR\ValueFormatException;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
+class Client
+    extends BaseTransport
+    implements
+        QueryTransport,
+        PermissionInterface,
+        WritingInterface,
+        VersioningInterface,
+        NodeTypeCndManagementInterface,
+        LockingInterface,
+        AccessControlInterface,
+        ObservationInterface,
+        WorkspaceManagementInterface
 {
     /**
      * minimal version needed for the backend server
@@ -2121,5 +2134,60 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         return $data;
+    }
+
+    public function getPolicies($path)
+    {
+        return $this->getNode($path . '/rep:policy');
+    }
+
+    public function getSupportedPrivileges($path = null)
+    {
+        // TODO: append $path if not null
+        $request = $this->getRequest(Request::PROPFIND, $this->workspaceUriRoot);
+        $request->setBody($this->buildPropfindRequest(array('D:supported-privilege-set')));
+        $dom = $request->executeDom();
+
+        return $this->parsePrivileges($dom);
+    }
+
+    protected function parsePrivileges($dom)
+    {
+        $set = $dom->getElementsByTagNameNS(self::NS_DAV, 'supported-privilege-set');
+        if ($set->length != 1) {
+            throw new RepositoryException('Unexpected answer from server: '.$dom->saveXML());
+        }
+
+        $privileges = array();
+        foreach ($set->item(0)->childNodes as $privilege) {
+            $privileges[] = $this->parseChildPrivileges($privilege);
+        }
+
+        return $privileges;
+    }
+
+    private function parseChildPrivileges(\DOMElement $node)
+    {
+        $privilege = null;
+        $children = array();
+
+        foreach ($node->childNodes as $child) {
+            switch($child->tagName) {
+                case 'D:privilege':
+                    $privilege = $child;
+                    break;
+                case 'D:supported-privilege':
+                    $children[] = $this->parseChildPrivileges($child);
+                    break;
+                default:
+                    // ignore
+            }
+        }
+
+        if (!$privilege) {
+            throw new \Exception('invalid stuff'.$node->tagName);
+        }
+
+        return new Privilege($privilege->firstChild->tagName, $children);
     }
 }
