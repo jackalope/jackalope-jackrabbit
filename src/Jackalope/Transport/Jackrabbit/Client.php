@@ -2142,11 +2142,6 @@ class Client
         return $data;
     }
 
-    public function getPolicies($path)
-    {
-        return $this->getNode($path . '/rep:policy');
-    }
-
     public function getSupportedPrivileges($path = null)
     {
         $path = $this->workspaceUriRoot . $path ?: '';
@@ -2196,10 +2191,12 @@ class Client
 
     public function setPolicy(array $operation)
     {
-        foreach ($operation as $op) $this->setPolicyss($op);
+        foreach ($operation as $op) {
+            $this->setPolicyJsop($op);
+        }
     }
 
-    private function setPolicyss($operation)
+    private function setPolicyJsop($operation)
     {
         if (!$operation->policy instanceof AccessControlList) {
             throw new \Exception('wrong class');

@@ -246,12 +246,6 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
         $this->transport->deleteWorkspace($name);
     }
 
-
-    public function getPolicies($path)
-    {
-        return $this->transport->getPolicies($path);
-    }
-
     public function getSupportedPrivileges($path = null)
     {
         return $this->transport->getSupportedPrivileges($path);
