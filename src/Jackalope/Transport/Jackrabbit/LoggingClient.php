@@ -257,7 +257,11 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
         return $this->transport->getSupportedPrivileges($path);
     }
 
-    public function setPolicy(SetPolicyOperation $operation)
+    /**
+     * @param SetPolicyOperation[] $operation
+     * @throws \Exception
+     */
+    public function setPolicy(array $operation)
     {
         $this->transport->setPolicy($operation);
     }

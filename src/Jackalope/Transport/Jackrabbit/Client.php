@@ -494,6 +494,7 @@ class Client
         $path = $this->encodeAndValidatePathForDavex($path);
         $path .= '.'.$this->getFetchDepth().'.json';
 
+        $path = str_replace('%3A', ':', $path);
         $request = $this->getRequest(Request::GET, $path);
         try {
             return $request->executeJson();
@@ -2089,6 +2090,7 @@ class Client
     protected function getMimePart($name, $value, $mime_boundary)
     {
         $data = '';
+        $name = $name ?: ':diff';
 
         $eol = "\r\n";
         $data .= '--' . $mime_boundary . $eol ;
@@ -2147,16 +2149,12 @@ class Client
 
     public function getSupportedPrivileges($path = null)
     {
-        // TODO: append $path if not null
-        $request = $this->getRequest(Request::PROPFIND, $this->workspaceUriRoot);
+        $path = $this->workspaceUriRoot . $path ?: '';
+
+        $request = $this->getRequest(Request::PROPFIND, $path);
         $request->setBody($this->buildPropfindRequest(array('D:supported-privilege-set')));
         $dom = $request->executeDom();
 
-        return $this->parsePrivileges($dom);
-    }
-
-    protected function parsePrivileges($dom)
-    {
         $set = $dom->getElementsByTagNameNS(self::NS_DAV, 'supported-privilege-set');
         if ($set->length != 1) {
             throw new RepositoryException('Unexpected answer from server: '.$dom->saveXML());
@@ -2164,13 +2162,13 @@ class Client
 
         $privileges = array();
         foreach ($set->item(0)->childNodes as $privilege) {
-            $privileges[] = $this->parseChildPrivileges($privilege);
+            $privileges[] = $this->parsePrivileges($privilege);
         }
 
         return $privileges;
     }
 
-    private function parseChildPrivileges(\DOMElement $node)
+    private function parsePrivileges(\DOMElement $node)
     {
         $privilege = null;
         $children = array();
@@ -2181,7 +2179,7 @@ class Client
                     $privilege = $child;
                     break;
                 case 'D:supported-privilege':
-                    $children[] = $this->parseChildPrivileges($child);
+                    $children[] = $this->parsePrivileges($child);
                     break;
                 default:
                     // ignore
@@ -2191,37 +2189,48 @@ class Client
         if (!$privilege) {
             throw new \Exception('invalid stuff'.$node->tagName);
         }
+        $name = '{'.$privilege->firstChild->namespaceURI.'}'.$privilege->firstChild->localName;
 
-        return new Privilege($privilege->firstChild->tagName, $children);
+        return new Privilege($name, $children);
     }
 
-    public function setPolicy(SetPolicyOperation $operation)
+    public function setPolicy(array $operation)
+    {
+        foreach ($operation as $op) $this->setPolicyss($op);
+    }
+
+    private function setPolicyss($operation)
     {
         if (!$operation->policy instanceof AccessControlList) {
             throw new \Exception('wrong class');
         }
 
-        $value = $operation->policy->getPath() . ' : {
+        $value = $operation->srcPath . '/rep:policy : {
            jcr:primaryType : "rep:ACL"';
+
+        $id = 0;
 
         foreach ($operation->policy->getAccessControlEntries() as $entry) {
             $value .= ",\n" .
-                $entry->getName() . ' : {
+                'entry' . $id++ . ' : {
                     jcr:primaryType : "rep:grantACE",
-                    rep:principalName : "' . $entry->getPrincipal()->getName() . '"
+                    rep:principalName : "' . $entry->getPrincipal()->getName() . '",
                     rep:privileges : [' . $this->buildPrivilegeList($entry) . ']
                 }';
         }
-        $value .= '}';
-var_dump($value);die;
-        $this->setJsopBody($value, $key, $type);
+        $value .= '
+}
+';
+//var_dump($value);die;
+
+        $this->setJsopBody("\n+".$value, '');
     }
 
     private function buildPrivilegeList(AccessControlEntryInterface $entry)
     {
         $privileges = array();
         foreach ($entry->getPrivileges() as $privilege) {
-            $privileges[] = $privilege->getName();
+            $privileges[] = str_replace('{http://www.jcp.org/jcr/1.0}', 'jcr:', $privilege->getName());
         }
 
         if (0 === count($privileges)) {
