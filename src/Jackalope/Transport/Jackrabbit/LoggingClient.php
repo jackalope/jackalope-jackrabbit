@@ -8,6 +8,7 @@ use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
 use Jackalope\Transport\AccessControlInterface;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\PermissionInterface;
+use Jackalope\Transport\SetPolicyOperation;
 use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
@@ -255,4 +256,10 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
     {
         return $this->transport->getSupportedPrivileges($path);
     }
+
+    public function setPolicy(SetPolicyOperation $operation)
+    {
+        $this->transport->setPolicy($operation);
+    }
+
 }

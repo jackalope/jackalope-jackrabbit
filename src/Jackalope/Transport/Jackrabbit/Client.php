@@ -4,7 +4,6 @@ namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
 use DOMElement;
-use Jackalope\Security\Privilege;
 use LogicException;
 use InvalidArgumentException;
 
@@ -12,6 +11,8 @@ use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\RepositoryInterface;
+use PHPCR\Security\AccessControlEntryInterface;
+use PHPCR\Security\AccessControlPolicyInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
 use PHPCR\SessionInterface;
@@ -35,6 +36,9 @@ use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\Transport\AccessControlInterface;
+use Jackalope\Transport\SetPolicyOperation;
+use Jackalope\Security\AccessControlList;
+use Jackalope\Security\Privilege;
 use Jackalope\NotImplementedException;
 use Jackalope\Node;
 use Jackalope\Property;
@@ -2172,7 +2176,7 @@ class Client
         $children = array();
 
         foreach ($node->childNodes as $child) {
-            switch($child->tagName) {
+            switch ($child->tagName) {
                 case 'D:privilege':
                     $privilege = $child;
                     break;
@@ -2189,5 +2193,41 @@ class Client
         }
 
         return new Privilege($privilege->firstChild->tagName, $children);
+    }
+
+    public function setPolicy(SetPolicyOperation $operation)
+    {
+        if (!$operation->policy instanceof AccessControlList) {
+            throw new \Exception('wrong class');
+        }
+
+        $value = $operation->policy->getPath() . ' : {
+           jcr:primaryType : "rep:ACL"';
+
+        foreach ($operation->policy->getAccessControlEntries() as $entry) {
+            $value .= ",\n" .
+                $entry->getName() . ' : {
+                    jcr:primaryType : "rep:grantACE",
+                    rep:principalName : "' . $entry->getPrincipal()->getName() . '"
+                    rep:privileges : [' . $this->buildPrivilegeList($entry) . ']
+                }';
+        }
+        $value .= '}';
+var_dump($value);die;
+        $this->setJsopBody($value, $key, $type);
+    }
+
+    private function buildPrivilegeList(AccessControlEntryInterface $entry)
+    {
+        $privileges = array();
+        foreach ($entry->getPrivileges() as $privilege) {
+            $privileges[] = $privilege->getName();
+        }
+
+        if (0 === count($privileges)) {
+            return '';
+        }
+
+        return '"' . implode('", "', $privileges) . '"';
     }
 }
