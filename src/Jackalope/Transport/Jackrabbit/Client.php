@@ -11,6 +11,8 @@ use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\RepositoryInterface;
+use PHPCR\Security\AccessControlEntryInterface;
+use PHPCR\Security\AccessControlPolicyInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\PropertyType;
 use PHPCR\SessionInterface;
@@ -33,6 +35,10 @@ use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
+use Jackalope\Transport\AccessControlInterface;
+use Jackalope\Transport\SetPolicyOperation;
+use Jackalope\Security\AccessControlList;
+use Jackalope\Security\Privilege;
 use Jackalope\NotImplementedException;
 use Jackalope\Node;
 use Jackalope\Property;
@@ -66,7 +72,18 @@ use PHPCR\ValueFormatException;
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
+class Client
+    extends BaseTransport
+    implements
+        QueryTransport,
+        PermissionInterface,
+        WritingInterface,
+        VersioningInterface,
+        NodeTypeCndManagementInterface,
+        LockingInterface,
+        AccessControlInterface,
+        ObservationInterface,
+        WorkspaceManagementInterface
 {
     /**
      * minimal version needed for the backend server
@@ -477,6 +494,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $path = $this->encodeAndValidatePathForDavex($path);
         $path .= '.'.$this->getFetchDepth().'.json';
 
+        $path = str_replace('%3A', ':', $path);
         $request = $this->getRequest(Request::GET, $path);
         try {
             return $request->executeJson();
@@ -2072,6 +2090,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     protected function getMimePart($name, $value, $mime_boundary)
     {
         $data = '';
+        $name = $name ?: ':diff';
 
         $eol = "\r\n";
         $data .= '--' . $mime_boundary . $eol ;
@@ -2121,5 +2140,100 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         }
 
         return $data;
+    }
+
+    public function getSupportedPrivileges($path = null)
+    {
+        $path = $this->workspaceUriRoot . $path ?: '';
+
+        $request = $this->getRequest(Request::PROPFIND, $path);
+        $request->setBody($this->buildPropfindRequest(array('D:supported-privilege-set')));
+        $dom = $request->executeDom();
+
+        $set = $dom->getElementsByTagNameNS(self::NS_DAV, 'supported-privilege-set');
+        if ($set->length != 1) {
+            throw new RepositoryException('Unexpected answer from server: '.$dom->saveXML());
+        }
+
+        $privileges = array();
+        foreach ($set->item(0)->childNodes as $privilege) {
+            $privileges[] = $this->parsePrivileges($privilege);
+        }
+
+        return $privileges;
+    }
+
+    private function parsePrivileges(\DOMElement $node)
+    {
+        $privilege = null;
+        $children = array();
+
+        foreach ($node->childNodes as $child) {
+            switch ($child->tagName) {
+                case 'D:privilege':
+                    $privilege = $child;
+                    break;
+                case 'D:supported-privilege':
+                    $children[] = $this->parsePrivileges($child);
+                    break;
+                default:
+                    // ignore
+            }
+        }
+
+        if (!$privilege) {
+            throw new \Exception('invalid stuff'.$node->tagName);
+        }
+        $name = '{'.$privilege->firstChild->namespaceURI.'}'.$privilege->firstChild->localName;
+
+        return new Privilege($name, $children);
+    }
+
+    public function setPolicy(array $operation)
+    {
+        foreach ($operation as $op) {
+            $this->setPolicyJsop($op);
+        }
+    }
+
+    private function setPolicyJsop($operation)
+    {
+        if (!$operation->policy instanceof AccessControlList) {
+            throw new \Exception('wrong class');
+        }
+
+        $value = $operation->srcPath . '/rep:policy : {
+           "jcr:primaryType" : "rep:ACL"';
+
+        $id = 0;
+
+        foreach ($operation->policy->getAccessControlEntries() as $entry) {
+            $value .= ",\n" .
+                '"entry' . $id++ . '" : {
+                    "jcr:primaryType" : "rep:GrantACE",
+                    "rep:principalName" : "' . $entry->getPrincipal()->getName() . '",
+                    "rep:privileges" : [' . $this->buildPrivilegeList($entry) . ']
+                }';
+        }
+        $value .= '
+}
+';
+//var_dump($value);die;
+
+        $this->setJsopBody("\n+".$value, '');
+    }
+
+    private function buildPrivilegeList(AccessControlEntryInterface $entry)
+    {
+        $privileges = array();
+        foreach ($entry->getPrivileges() as $privilege) {
+            $privileges[] = str_replace('{http://www.jcp.org/jcr/1.0}', 'jcr:', $privilege->getName());
+        }
+
+        if (0 === count($privileges)) {
+            return '';
+        }
+
+        return '"' . implode('", "', $privileges) . '"';
     }
 }
