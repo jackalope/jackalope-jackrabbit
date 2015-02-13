@@ -2203,16 +2203,16 @@ class Client
         }
 
         $value = $operation->srcPath . '/rep:policy : {
-           jcr:primaryType : "rep:ACL"';
+           "jcr:primaryType" : "rep:ACL"';
 
         $id = 0;
 
         foreach ($operation->policy->getAccessControlEntries() as $entry) {
             $value .= ",\n" .
-                'entry' . $id++ . ' : {
-                    jcr:primaryType : "rep:grantACE",
-                    rep:principalName : "' . $entry->getPrincipal()->getName() . '",
-                    rep:privileges : [' . $this->buildPrivilegeList($entry) . ']
+                '"entry' . $id++ . '" : {
+                    "jcr:primaryType" : "rep:GrantACE",
+                    "rep:principalName" : "' . $entry->getPrincipal()->getName() . '",
+                    "rep:privileges" : [' . $this->buildPrivilegeList($entry) . ']
                 }';
         }
         $value .= '
