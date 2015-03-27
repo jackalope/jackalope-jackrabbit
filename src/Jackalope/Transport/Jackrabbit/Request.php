@@ -212,6 +212,12 @@ class Request
     protected $errorHandlingMode = false;
 
     /**
+     * Force curl to use HTTP version 1.0
+     * @var bool
+     */
+    protected $forceHttpVersion10 = false;
+
+    /**
      * Initiaties the NodeTypes request object.
      *
      * @param FactoryInterface $factory Ignored for now, as this class does not create objects
@@ -227,6 +233,14 @@ class Request
         $this->curl = $curl;
         $this->setMethod($method);
         $this->setUri($uri);
+    }
+
+    /**
+     * Force curl to use HTTP version 1.0
+     */
+    public function forceHttpVersion10()
+    {
+        $this->forceHttpVersion10 = true;
     }
 
     /**
@@ -463,6 +477,10 @@ class Request
         $curl->setopt(CURLOPT_URL, reset($this->uri));
         $curl->setopt(CURLOPT_HTTPHEADER, $headers);
         $curl->setopt(CURLOPT_POSTFIELDS, $this->body);
+
+        if (true === $this->forceHttpVersion10) {
+            $curl->setopt(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        }
         // uncomment next line to get verbose information from CURL
         //$curl->setopt(CURLOPT_VERBOSE, 1);
         if ($getCurlObject) {
@@ -470,6 +488,7 @@ class Request
         }
 
         $response = $curl->exec();
+
         $curl->setResponse($response);
 
         $httpCode = $curl->getinfo(CURLINFO_HTTP_CODE);
@@ -520,6 +539,12 @@ class Request
             case CURLE_COULDNT_CONNECT:
                 $info = $curl->getinfo();
                 throw new NoSuchWorkspaceException($curl->error() . ' "' . $info['url'] . '"');
+            case CURLE_RECV_ERROR:
+                throw new RepositoryException(sprintf(
+                    'CURLE_RECV_ERROR (errno 56) encountered. This has been known to happen intermittently with ' .
+                    'some versions of libcurl (see https://github.com/jackalope/jackalope-jackrabbit/issues/89). ' .
+                    'You can use the "jackalope.jackrabbit_force_http_version_10" option to force HTTP 1.0 as a workaround'
+                ));
         }
 
         // use XML error response if it's there

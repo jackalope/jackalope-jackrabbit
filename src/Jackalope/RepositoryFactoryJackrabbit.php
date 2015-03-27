@@ -42,6 +42,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         'jackalope.disable_stream_wrapper' => 'boolean: if set and not empty, stream wrapper is disabled, otherwise the stream wrapper is enabled and streams are only fetched when reading from for the first time. If your code always uses all binary properties it reads, you can disable this for a small performance gain.',
         'jackalope.logger' => 'Psr\Log\LoggerInterface: Use the LoggingClient to wrap the default transport Client',
         Session::OPTION_AUTO_LASTMODIFIED => 'boolean: Whether to automatically update nodes having mix:lastModified. Defaults to true.',
+        'jackalope.jackrabbit_force_http_version_10' => 'boolean: Force HTTP version 1.0, this can in solving problems with curl such as https://github.com/jackalope/jackalope-jackrabbit/issues/89',
     );
 
     /**
@@ -92,6 +93,9 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         }
         if (isset($parameters['jackalope.check_login_on_server'])) {
             $transport->setCheckLoginOnServer($parameters['jackalope.check_login_on_server']);
+        }
+        if (isset($parameters['jackalope.jackrabbit_force_http_version_10'])) {
+            $transport->forceHttpVersion10($parameters['jackalope.jackrabbit_force_http_version_10']);
         }
         if (isset($parameters['jackalope.logger'])) {
             $transport = $factory->get('Transport\Jackrabbit\LoggingClient', array($transport, $parameters['jackalope.logger']));
