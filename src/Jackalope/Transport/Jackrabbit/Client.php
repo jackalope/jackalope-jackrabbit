@@ -166,17 +166,20 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     protected $curl = null;
 
     /**
-     *  A list of additional HTTP headers to be sent on each request
-     *  @var array[]string
+     * A list of additional HTTP headers to be sent on each request
+     * @var array[]string
      */
-
     protected $defaultHeaders = array();
 
     /**
-     *  @var bool Send Expect: 100-continue header
+     * @var bool Send Expect: 100-continue header
      */
-
     protected $sendExpect = false;
+
+    /**
+     * @var bool
+     */
+    protected $forceHttpVersion10 = false;
 
     /**
      * @var \Jackalope\NodeType\NodeTypeXmlConverter
@@ -266,6 +269,16 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
+     * Set to true to force HTTP version 1.0
+     *
+     * @param boolean
+     */
+    public function forceHttpVersion10($forceHttpVersion10 = true)
+    {
+        $this->forceHttpVersion10 = $forceHttpVersion10;
+    }
+
+    /**
      * Makes sure there is an open curl connection.
      *
      * @return Request The Request
@@ -293,6 +306,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         if (!$this->sendExpect) {
             $request->addHeader("Expect:");
+        }
+
+        if ($this->forceHttpVersion10) {
+            $request->forceHttpVersion10();
         }
 
         return $request;
