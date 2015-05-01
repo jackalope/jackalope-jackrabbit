@@ -19,7 +19,7 @@
         "php": ">=5.3.3",
         "ext-xml":"*",
         "ext-curl":"*",
-        "phpcr/phpcr": "dev-acl",
+        "phpcr/phpcr": "dev-acl as 2.1.0",
         "phpcr/phpcr-utils": "~1.1",
         "jackalope/jackalope": "dev-acl"
     },

@@ -2206,7 +2206,7 @@ class Client
            "jcr:primaryType" : "rep:ACL"';
 
         $id = 0;
-
+newline fuckup?
         foreach ($operation->policy->getAccessControlEntries() as $entry) {
             $value .= ",\n" .
                 '"entry' . $id++ . '" : {
@@ -2220,7 +2220,7 @@ class Client
 ';
 //var_dump($value);die;
 
-        $this->setJsopBody("\n+".$value, '');
+        $this->setJsopBody("+".$value, '');
     }
 
     private function buildPrivilegeList(AccessControlEntryInterface $entry)
