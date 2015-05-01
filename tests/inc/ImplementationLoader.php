@@ -52,6 +52,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         }
 
         $this->unsupportedCases = array(
+            'Versioning\\SimpleVersionTest'
         );
         if (! $this->multiWorkspaceSupported) {
             $this->unsupportedCases[] = 'Writing\\CloneMethodsTest';
