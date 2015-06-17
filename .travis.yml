@@ -17,11 +17,14 @@ matrix:
 
 before_script:
   - composer selfupdate
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.3" ]]; then composer remove phpcr/phpcr-benchmarks --dev; fi
   - if [[ "$PACKAGE_VERSION" == "high" ]]; then composer update; fi
   - if [[ "$PACKAGE_VERSION" == "low" ]]; then composer update --prefer-lowest; fi
   - ./bin/jackrabbit.sh
 
-script: phpunit
+script: 
+    - php vendor/bin/phpunit
+    - if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.3" ]]; then php vendor/bin/phpbench run --iterations=2; fi
 
 notifications:
   irc: "irc.freenode.org#jackalope"
