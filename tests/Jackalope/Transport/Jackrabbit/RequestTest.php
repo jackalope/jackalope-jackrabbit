@@ -3,7 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\Factory;
-
 use DOMDocument;
 
 class RequestTest extends JackrabbitTestCase
@@ -56,7 +55,7 @@ class RequestTest extends JackrabbitTestCase
     public function testExecuteDom()
     {
         $factory = new Factory;
-        $request = $this->getMock('Jackalope\\Transport\\Jackrabbit\\Request', array('execute'), array($factory, $this->getClientMock(), $this->getCurlFixture(),null, null));
+        $request = $this->getMock('Jackalope\\Transport\\Jackrabbit\\Request', array('execute'), array($factory, $this->getClientMock(), $this->getCurlFixture(), null, null));
         $request->expects($this->once())
             ->method('execute')
             ->will($this->returnValue('<xml/>'));

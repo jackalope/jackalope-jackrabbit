@@ -5,7 +5,6 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 use Jackalope\Jackrabbit\Query\QOM\QueryObjectModelFactory;
 use Jackalope\Jackrabbit\Factory;
 use Jackalope\Query\QOM\EquiJoinCondition;
-
 use PHPCR\Util\QOM\QueryBuilder;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
 
@@ -48,5 +47,4 @@ class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('JCR-SQL2', $this->qb->getQuery()->getLanguage());
         $this->assertSame("SELECT * FROM [nt:base] INNER JOIN [nt:unstructured] ON [nt:base].data=[nt:unstructured].data WHERE ISDESCENDANTNODE([nt:base], [/foo])", $this->qb->getQuery()->getStatement());
     }
-
 }

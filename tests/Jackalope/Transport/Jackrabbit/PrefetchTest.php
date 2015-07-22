@@ -25,7 +25,7 @@ class PrefetchTest extends TestCase
     /**
      * @var \ImplementationLoader
      */
-    static protected $loader;
+    protected static $loader;
 
     public static function setUpBeforeClass()
     {
