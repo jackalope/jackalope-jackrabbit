@@ -1,6 +1,6 @@
 <?php
 
-/** make sure we get ALL infos from php */
+/** Make sure we get ALL infos from php */
 error_reporting(E_ALL | E_STRICT);
 
 if (!$loader = @include __DIR__.'/../vendor/autoload.php') {
@@ -9,14 +9,14 @@ if (!$loader = @include __DIR__.'/../vendor/autoload.php') {
         'php composer.phar install'.PHP_EOL);
 }
 
-$loader->add('Jackalope\\Test', __DIR__);
+/** Make Jackalope base tests autoloadable */
 $loader->add('Jackalope', __DIR__.'/../vendor/jackalope/jackalope/tests');
 
-### Load the implementation loader class ###
+/** Load the implementation loader class */
 require_once __DIR__ . '/ImplementationLoader.php';
 require_once __DIR__ . '/JackrabbitFixtureLoader.php';
 
-/*
+/**
  * constants for the repository descriptor test for JCR 1.0/JSR-170 and JSR-283 specs
  */
 
