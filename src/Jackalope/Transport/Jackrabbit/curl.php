@@ -137,8 +137,8 @@ class curl
 
     public function readHeader($ch, $header)
     {
-        if (strpos($header,":") !== false) {
-            list($key,$value) = explode(":",$header,2);
+        if (strpos($header, ":") !== false) {
+            list($key, $value) = explode(":", $header, 2);
             $this->headers[$key] = trim($value);
         }
 
@@ -162,7 +162,7 @@ class curl
     public function parseResponseHeaders()
     {
         $this->setopt(CURLOPT_HEADER, false);
-        $this->setopt(CURLOPT_HEADERFUNCTION, array(&$this,'readHeader'));
+        $this->setopt(CURLOPT_HEADERFUNCTION, array(&$this, 'readHeader'));
     }
 
     public function setResponse($r)
@@ -179,5 +179,4 @@ class curl
     {
         return $this->curl;
     }
-
 }

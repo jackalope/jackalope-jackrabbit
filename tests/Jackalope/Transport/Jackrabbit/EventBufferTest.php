@@ -7,7 +7,6 @@ use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\TestCase;
 use Jackalope\Factory;
-
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 

@@ -3,7 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\Factory;
-
 use DOMDocument;
 use Jackalope\Node;
 
@@ -259,7 +258,6 @@ class ClientTest extends JackrabbitTestCase
         $this->assertSame('tests', $x);
         $this->assertSame('tests', $t->workspace);
         $this->assertSame('testuri/tests/jcr:root', $t->workspaceUriRoot);
-
     }
 
     /**

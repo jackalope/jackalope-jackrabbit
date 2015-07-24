@@ -6,7 +6,6 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use ArrayIterator;
-
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\Transport\ObservationInterface;
@@ -14,7 +13,6 @@ use PHPCR\NamespaceRegistryInterface;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 use PHPCR\RepositoryException;
-
 use Jackalope\FactoryInterface;
 
 /**

@@ -3,7 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
-
 use PHPCR\CredentialsInterface;
 use PHPCR\SimpleCredentials;
 use PHPCR\Lock\LockException;
@@ -15,7 +14,6 @@ use PHPCR\PathNotFoundException;
 use PHPCR\ReferentialIntegrityException;
 use PHPCR\NodeType\ConstraintViolationException;
 use PHPCR\NodeType\NoSuchNodeTypeException;
-
 use Jackalope\FactoryInterface;
 
 /**
@@ -579,7 +577,7 @@ class Request
                         // try to generically "guess" the right exception class name
                         $class = substr($errClass, strlen('javax.jcr.'));
                         $class = explode('.', $class);
-                        array_walk($class, function(&$ns) { $ns = ucfirst(str_replace('nodetype', 'NodeType', $ns)); });
+                        array_walk($class, function (&$ns) { $ns = ucfirst(str_replace('nodetype', 'NodeType', $ns)); });
                         $class = '\\PHPCR\\'.implode('\\', $class);
 
                         if (class_exists($class)) {
@@ -602,7 +600,7 @@ class Request
             throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n" . $this->getShortErrorString());
         }
         if ($httpCode >= 500) {
-            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl,$response);
+            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl, $response);
             try {
                 $workspaceUri = array($this->client->getWorkSpaceUri());
                 if (!$this->errorHandlingMode
@@ -623,7 +621,7 @@ class Request
 
         $curlError = $curl->error();
 
-        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl,$response);
+        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl, $response);
         throw new RepositoryException($msg);
     }
 
@@ -655,10 +653,10 @@ class Request
     protected function getLongErrorString($curl, $response)
     {
         $string = $this->getShortErrorString();
-        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(),true) . "\n" ;
+        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(), true) . "\n" ;
         $string .= "--request body (size: " . strlen($this->body) . " bytes): --\n";
         if (strlen($this->body) > 2000) {
-            $string .= substr($this->body,0,2000);
+            $string .= substr($this->body, 0, 2000);
             $string .= "\n (truncated)\n";
         } else {
             $string .= $this->body . "\n";

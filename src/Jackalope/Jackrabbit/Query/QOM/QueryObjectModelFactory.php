@@ -4,7 +4,6 @@ namespace Jackalope\Jackrabbit\Query\QOM;
 
 use Jackalope\ObjectManager;
 use Jackalope\Query\QOM\QueryObjectModelFactory as BaseQueryObjectModelFactory;
-
 use PHPCR\Query\QOM\JoinInterface;
 use PHPCR\Query\QOM\SelectorInterface;
 use PHPCR\Query\QOM\SourceInterface;

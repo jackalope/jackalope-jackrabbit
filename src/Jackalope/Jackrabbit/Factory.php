@@ -1,6 +1,7 @@
 <?php
 
 namespace Jackalope\Jackrabbit;
+
 use Jackalope\Jackrabbit\Util\ValueConverter;
 
 /**
@@ -24,6 +25,6 @@ class Factory extends \Jackalope\Factory
                 return new ValueConverter();
         }
 
-        return parent::get($name,$params);
+        return parent::get($name, $params);
     }
 }

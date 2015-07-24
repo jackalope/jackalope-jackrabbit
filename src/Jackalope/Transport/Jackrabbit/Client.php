@@ -6,7 +6,6 @@ use DOMDocument;
 use DOMElement;
 use LogicException;
 use InvalidArgumentException;
-
 use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
 use PHPCR\Query\InvalidQueryException;
@@ -21,9 +20,7 @@ use PHPCR\PathNotFoundException;
 use PHPCR\LoginException;
 use PHPCR\Query\QueryInterface;
 use PHPCR\Observation\EventFilterInterface;
-
 use PHPCR\Util\PathHelper;
-
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\PermissionInterface;
@@ -609,7 +606,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             );
         }
 
-        return $this->stripServerRootFromUri(substr(urldecode($fullPath),0,-1));
+        return $this->stripServerRootFromUri(substr(urldecode($fullPath), 0, -1));
     }
 
     /**
@@ -1720,7 +1717,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function buildRegisterNodeTypeRequest($cnd, $allowUpdate)
     {
-        $cnd = '<dcr:cnd>'.str_replace(array('<','>'), array('&lt;','&gt;'), $cnd).'</dcr:cnd>';
+        $cnd = '<dcr:cnd>'.str_replace(array('<', '>'), array('&lt;', '&gt;'), $cnd).'</dcr:cnd>';
         $cnd .= '<dcr:allowupdate>'.($allowUpdate ? 'true' : 'false').'</dcr:allowupdate>';
 
         return '<?xml version="1.0" encoding="UTF-8" standalone="no"?><D:propertyupdate xmlns:D="DAV:"><D:set><D:prop><dcr:nodetypes-cnd xmlns:dcr="http://www.day.com/jcr/webdav/1.0">'.$cnd.'</dcr:nodetypes-cnd></D:prop></D:set></D:propertyupdate>';
@@ -1857,7 +1854,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      */
     protected function stripServerRootFromUri($uri)
     {
-        return substr($uri,strlen($this->workspaceUriRoot));
+        return substr($uri, strlen($this->workspaceUriRoot));
     }
 
     /**
@@ -2015,7 +2012,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     protected function setJsopBody($value, $key = ":diff", $type = null)
     {
         if ($type) {
-             $this->jsopBody[$key] = array($value,$type);
+            $this->jsopBody[$key] = array($value,$type);
         } else {
             if (!isset($this->jsopBody[$key])) {
                 $this->jsopBody[$key] = "";
@@ -2095,7 +2092,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         if (is_array($value)) {
             if (is_array($value[0])) {
                 foreach ($value[0] as $v) {
-                    $data .= $this->getMimePart($name, array($v,$value[1]), $mime_boundary);
+                    $data .= $this->getMimePart($name, array($v, $value[1]), $mime_boundary);
                 }
 
                 return $data;
@@ -2120,11 +2117,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
                 }
                 $data .= $eol;
             }
-
         } else {
             if (is_array($value)) {
                 foreach ($value as $v) {
-                    $data .= $this->getMimePart($name,$v,$mime_boundary);
+                    $data .= $this->getMimePart($name, $v, $mime_boundary);
                 }
 
                 return $data;
@@ -2134,7 +2130,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $data .= 'Content-Transfer-Encoding: 8bit'. $eol. $eol;
             //$data .= '--' . $mime_boundary . $eol;
             $data .= $value . $eol;
-
         }
 
         return $data;

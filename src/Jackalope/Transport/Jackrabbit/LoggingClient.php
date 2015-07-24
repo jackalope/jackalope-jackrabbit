@@ -4,7 +4,6 @@ namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\FactoryInterface;
 use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
-
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\VersioningInterface;
@@ -12,11 +11,9 @@ use Jackalope\Transport\NodeTypeCndManagementInterface;
 use Jackalope\Transport\LockingInterface;
 use Jackalope\Transport\ObservationInterface;
 use Jackalope\Transport\WorkspaceManagementInterface;
-
 use Jackalope\Query\Query;
 use PHPCR\Observation\EventFilterInterface;
 use PHPCR\SessionInterface;
-
 use Jackalope\Transport\Logging\LoggerInterface;
 
 /**
