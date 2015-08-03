@@ -722,7 +722,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         foreach ($dom->getElementsByTagNameNS(self::NS_DCR, $identifier) as $node) {
             foreach ($node->getElementsByTagNameNS(self::NS_DAV, 'href') as $ref) {
-                $refpath = str_replace($this->workspaceUriRoot, '',  urldecode($ref->textContent));
+                $refpath = str_replace($this->workspaceUriRoot, '', urldecode($ref->textContent));
                 $refpath = $this->removeTrailingSlash($refpath);
                 if (null === $name || PathHelper::getNodeName($refpath) === $name) {
                     $references[] = $refpath;

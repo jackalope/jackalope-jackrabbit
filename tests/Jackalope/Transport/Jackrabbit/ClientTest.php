@@ -629,7 +629,7 @@ class ClientMock extends Client
         }
         $this->server = $serverUri;
     }
-    public function buildNodeTypesRequestMock(Array $params)
+    public function buildNodeTypesRequestMock(array $params)
     {
         return $this->buildNodeTypesRequest($params);
     }
