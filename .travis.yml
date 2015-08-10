@@ -12,6 +12,11 @@ env:
 
 sudo: false
 
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
 matrix:
   include:
     - php: 5.3.3
@@ -19,8 +24,8 @@ matrix:
 
 before_script:
   - composer selfupdate
-  - if [[ "$PACKAGE_VERSION" == "high" ]]; then composer update; fi
-  - if [[ "$PACKAGE_VERSION" == "low" ]]; then composer update --prefer-lowest; fi
+  - if [[ "$PACKAGE_VERSION" == "high" ]]; then composer update --prefer-dist; fi
+  - if [[ "$PACKAGE_VERSION" == "low" ]]; then composer update --prefer-lowest --prefer-dist; fi
   - ./bin/jackrabbit.sh
 
 script: phpunit
