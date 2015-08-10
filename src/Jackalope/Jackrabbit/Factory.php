@@ -2,8 +2,6 @@
 
 namespace Jackalope\Jackrabbit;
 
-use Jackalope\Jackrabbit\Util\ValueConverter;
-
 /**
  * Jackalope implementation factory.
  *
@@ -21,8 +19,6 @@ class Factory extends \Jackalope\Factory
             case 'Query\QOM\QueryObjectModelFactory':
                 $name = 'Jackrabbit\Query\QOM\QueryObjectModelFactory';
                 break;
-            case 'PHPCR\Util\ValueConverter':
-                return new ValueConverter();
         }
 
         return parent::get($name, $params);
