@@ -3,8 +3,9 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\Factory;
-use DOMDocument;
 use Jackalope\Node;
+use Jackalope\Test\JackrabbitTestCase;
+use DOMDocument;
 
 /**
  * TODO: this unit test contains some functional tests. we should separate functional and unit tests.

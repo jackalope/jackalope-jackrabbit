@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\Factory;
+use Jackalope\Test\JackrabbitTestCase;
 use DOMDocument;
 
 class RequestTest extends JackrabbitTestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackalope\Transport\Jackrabbit;
+namespace Jackalope\Test;
 
 use Jackalope\TestCase;
 
