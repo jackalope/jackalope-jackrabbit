@@ -2088,7 +2088,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $data = '';
 
         $eol = "\r\n";
-        $data .= '--' . $mime_boundary . $eol ;
         if (is_array($value)) {
             if (is_array($value[0])) {
                 foreach ($value[0] as $v) {
@@ -2097,6 +2096,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
                 return $data;
             }
+            $data .= '--' . $mime_boundary . $eol ;
 
             if (is_resource(($value[0]))) {
                 $data .= 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $name . '"' . $eol;
@@ -2125,6 +2125,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
                 return $data;
             }
+            $data .= '--' . $mime_boundary . $eol ;
             $data .= 'Content-Disposition: form-data; name="'.$name.'"'. $eol;
             $data .= 'Content-Type: text/plain; charset=UTF-8'. $eol;
             $data .= 'Content-Transfer-Encoding: 8bit'. $eol. $eol;
