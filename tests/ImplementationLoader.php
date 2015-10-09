@@ -60,6 +60,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
             'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes?
+            'Reading\\BinaryReadMethodsTest::testReadEmptyBinaryMultivalue', // bug in jackrabbit import: 0 values loses type
+            'Reading\\BinaryReadMethodsTest::testReadSingleBinaryMultivalue', // bug in jackrabbit import: 1 value ignores multivalue
 
             'Query\\QueryManagerTest::testGetQuery',
             'Query\\QueryManagerTest::testGetQueryInvalid',
