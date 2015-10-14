@@ -153,7 +153,7 @@ for a more detailed tutorial on how to use the PHPCR API.
 Jackalope supports the PHPCR standard query language SQL2 as well as the Query
 Object Model (QOM) to build queries programmatically. We recommend using the
 QOM or the QueryBuilder mentioned in the
-[PHPCR Tutorial](https://github.com/phpcr/phpcr-docs/blob/master/tutorial/Tutorial.md).
+[PHPCR Tutorial](http://phpcr.readthedocs.org/en/latest/book/index.html).
 They are built to use the best possible query language depending on the
 capabilities of the backend. A later switching to another PHPCR implementation
 shouldn't cause any issues then.
