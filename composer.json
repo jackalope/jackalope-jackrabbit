@@ -21,14 +21,14 @@
         "ext-curl":"*",
         "phpcr/phpcr": "~2.1.2",
         "phpcr/phpcr-utils": "^1.2.8",
-        "jackalope/jackalope": "~1.2.4"
+        "jackalope/jackalope": "~1.2.5"
     },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
         "psr/log": "~1.0",
-        "phpcr/phpcr-api-tests": "2.1.10",
+        "phpcr/phpcr-api-tests": "2.1.11",
         "symfony/console": "~2.0"
     },
     "autoload": {
