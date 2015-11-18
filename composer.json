@@ -21,14 +21,14 @@
         "ext-curl":"*",
         "phpcr/phpcr": "~2.1.2",
         "phpcr/phpcr-utils": "^1.2.8",
-        "jackalope/jackalope": "~1.2.5"
+        "jackalope/jackalope": "~1.3.0"
     },
     "provide": {
-        "jackalope/jackalope-transport": "1.1.0"
+        "jackalope/jackalope-transport": "1.3.0"
     },
     "require-dev": {
         "psr/log": "~1.0",
-        "phpcr/phpcr-api-tests": "2.1.11",
+        "phpcr/phpcr-api-tests": "2.1.12",
         "symfony/console": "~2.0"
     },
     "autoload": {
@@ -40,7 +40,7 @@
     "bin": ["bin/jackalope", "bin/jackrabbit.sh"],
     "extra": {
         "branch-alias": {
-            "dev-master": "1.2-dev"
+            "dev-master": "1.3-dev"
         }
     }
 }

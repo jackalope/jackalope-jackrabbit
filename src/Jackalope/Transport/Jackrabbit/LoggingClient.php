@@ -85,6 +85,22 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
     // VersioningInterface //
 
     /**
+     * @inheritDoc
+     */
+    public function addVersionLabel($versionPath, $label, $moveLabel)
+    {
+        $this->transport->addVersionLabel($versionPath, $label, $moveLabel);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeVersionLabel($versionPath, $label)
+    {
+        $this->transport->removeVersionLabel($versionPath, $label);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function checkinItem($path)

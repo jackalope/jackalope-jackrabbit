@@ -39,6 +39,7 @@ use Jackalope\Lock\Lock;
 use Jackalope\FactoryInterface;
 use PHPCR\Util\ValueConverter;
 use PHPCR\ValueFormatException;
+use PHPCR\Version\LabelExistsVersionException;
 
 /**
  * Connection to one Jackrabbit server.
@@ -62,6 +63,7 @@ use PHPCR\ValueFormatException;
  * @author Uwe Jäger <uwej711@googlemail.com>
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
+ * @author Markus Schmucker <markus.sr@gmx.net>
  */
 class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
 {
@@ -756,6 +758,51 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     // VersioningInterface //
+
+    /**
+     * @inheritDoc
+     */
+    public function addVersionLabel($versionPath, $label, $moveLabel)
+    {
+        $versionPath = $this->encodeAndValidatePathForDavex($versionPath);
+
+        $action = 'add';
+        if ($moveLabel) {
+            $action = 'set';
+        }
+
+        $body = '<D:label xmlns:D="DAV:"><D:'.$action.'><D:label-name>'.$label.'</D:label-name></D:'.$action.'></D:label>';
+
+        $request = $this->getRequest(Request::LABEL, $versionPath);
+        $request->setBody($body);
+        try {
+            $request->execute(); // errors are checked in request
+        } catch (HTTPErrorException $e) {
+            if ($e->getCode() == 409) {
+                throw new LabelExistsVersionException($e->getMessage());
+            } else {
+                throw new RepositoryException($e->getMessage());
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function removeVersionLabel($versionPath, $label)
+    {
+        $versionPath = $this->encodeAndValidatePathForDavex($versionPath);
+
+        $body = '<D:label xmlns:D="DAV:"><D:remove><D:label-name>'.$label.'</D:label-name></D:remove></D:label>';
+
+        $request = $this->getRequest(Request::LABEL, $versionPath);
+        $request->setBody($body);
+        $request->execute();
+
+        return;
+    }
 
     /**
      * {@inheritDoc}
