@@ -27,6 +27,7 @@ use Jackalope\FactoryInterface;
  * @author Roland Schilter <roland.schilter@liip.ch>
  * @author Jordi Boggiano <j.boggiano@seld.be>
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
+ * @author Markus Schmucker <markus.sr@gmx.net>
  */
 class Request
 {
@@ -136,6 +137,12 @@ class Request
      * @var string
      */
     const UPDATE = 'UPDATE';
+
+    /**
+     * Identifier of the 'LABEL' http request method.
+     * @var string
+     */
+    const LABEL = 'LABEL';
 
     /** @var string     Possible argument for {@link setDepth()} */
     const INFINITY = 'infinity';
