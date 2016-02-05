@@ -346,7 +346,7 @@ class Request
      * @param curl $curl
      * @param bool $getCurlObject whether to return the curl object instead of the response
      */
-    protected function prepareCurl(curl $curl, $getCurlObject)
+    protected function prepareCurl(curl $curl, $getCurlObject, $accept = null)
     {
         if ($this->credentials instanceof SimpleCredentials) {
             $curl->setopt(CURLOPT_USERPWD, $this->credentials->getUserID().':'.$this->credentials->getPassword());
@@ -358,6 +358,11 @@ class Request
             'Content-Type: '.$this->contentType,
             'User-Agent: '.self::USER_AGENT
         );
+
+        if ($accept) {
+            $headers[] = 'Accept: '.$accept;
+        }
+
         $headers = array_merge($headers, $this->additionalHeaders);
 
         if ($this->lockToken) {
@@ -387,13 +392,13 @@ class Request
      *
      * @return string|curl|array response string or the curl object.
      */
-    public function execute($getCurlObject = false, $forceMultiple = false)
+    public function execute($getCurlObject = false, $forceMultiple = false, $accept = null)
     {
         if (!$forceMultiple && count($this->uri) === 1) {
-            return $this->singleRequest($getCurlObject);
+            return $this->singleRequest($getCurlObject, $accept);
         }
 
-        return $this->multiRequest($getCurlObject);
+        return $this->multiRequest($getCurlObject, $accept);
     }
 
     /**
@@ -403,14 +408,14 @@ class Request
      *
      * @return array of XML representations of responses or curl objects.
      */
-    protected function multiRequest($getCurlObject = false)
+    protected function multiRequest($getCurlObject = false, $accept = null)
     {
         $mh = curl_multi_init();
 
         $curls = array();
         foreach ($this->uri as $absPath => $uri) {
             $tempCurl = new curl($uri);
-            $tempCurl = $this->prepareCurl($tempCurl, $getCurlObject);
+            $tempCurl = $this->prepareCurl($tempCurl, $getCurlObject, $accept);
             $curls[$absPath] = $tempCurl;
             curl_multi_add_handle($mh, $tempCurl->getCurl());
         }
@@ -455,7 +460,7 @@ class Request
      *
      * @return string|curl XML representation of a response or curl object.
      */
-    protected function singleRequest($getCurlObject)
+    protected function singleRequest($getCurlObject, $accept)
     {
         if ($this->credentials instanceof SimpleCredentials) {
             $this->curl->setopt(CURLOPT_USERPWD, $this->credentials->getUserID().':'.$this->credentials->getPassword());
@@ -469,8 +474,13 @@ class Request
         $headers = array(
             'Depth: ' . $this->depth,
             'Content-Type: '.$this->contentType,
-            'User-Agent: '.self::USER_AGENT
+            'User-Agent: '.self::USER_AGENT,
         );
+
+        if ($accept) {
+            $headers[] = 'Accept: '.$accept;
+        }
+
         $headers = array_merge($headers, $this->additionalHeaders);
 
         if ($this->lockToken) {
@@ -487,7 +497,7 @@ class Request
             $curl->setopt(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
         }
         // uncomment next line to get verbose information from CURL
-        //$curl->setopt(CURLOPT_VERBOSE, 1);
+        $curl->setopt(CURLOPT_VERBOSE, 1);
         if ($getCurlObject) {
             $curl->parseResponseHeaders();
         }
@@ -685,7 +695,7 @@ class Request
      */
     public function executeDom($forceMultiple = false)
     {
-        $xml = $this->execute(null, $forceMultiple);
+        $xml = $this->execute(null, $forceMultiple, 'application/xml');
 
         // create new DOMDocument and load the response text.
         $dom = new DOMDocument();
@@ -707,7 +717,7 @@ class Request
      */
     public function executeJson($forceMultiple = false)
     {
-        $responses = $this->execute(null, $forceMultiple);
+        $responses = $this->execute(null, $forceMultiple, 'application/json');
         if (!is_array($responses)) {
             $responses = array($responses);
             $reset = true;
