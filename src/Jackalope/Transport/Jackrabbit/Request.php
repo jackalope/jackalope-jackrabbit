@@ -217,10 +217,11 @@ class Request
     protected $errorHandlingMode = false;
 
     /**
-     * Force curl to use HTTP version 1.0
-     * @var bool
+     * Global curl-options used in this request.
+     *
+     * @var array
      */
-    protected $forceHttpVersion10 = false;
+    private $curlOptions = array();
 
     /**
      * Initiaties the NodeTypes request object.
@@ -242,10 +243,22 @@ class Request
 
     /**
      * Force curl to use HTTP version 1.0
+     *
+     * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
      */
     public function forceHttpVersion10()
     {
-        $this->forceHttpVersion10 = true;
+        $this->addCurlOptions(array(CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0));
+    }
+
+    /**
+     * Add curl-options for this request.
+     *
+     * @param array $options
+     */
+    public function addCurlOptions(array $options)
+    {
+        $this->curlOptions += $options;
     }
 
     /**
@@ -364,6 +377,10 @@ class Request
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
+        foreach ($this->curlOptions as $option => $optionValue) {
+            $curl->setopt($option, $optionValue);
+        }
+
         $curl->setopt(CURLOPT_RETURNTRANSFER, true);
         $curl->setopt(CURLOPT_CUSTOMREQUEST, $this->method);
 
@@ -477,17 +494,16 @@ class Request
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
+        foreach ($this->curlOptions as $option => $optionValue) {
+            $curl->setopt($option, $optionValue);
+        }
+
         $curl->setopt(CURLOPT_RETURNTRANSFER, true);
         $curl->setopt(CURLOPT_CUSTOMREQUEST, $this->method);
         $curl->setopt(CURLOPT_URL, reset($this->uri));
         $curl->setopt(CURLOPT_HTTPHEADER, $headers);
         $curl->setopt(CURLOPT_POSTFIELDS, $this->body);
 
-        if (true === $this->forceHttpVersion10) {
-            $curl->setopt(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-        }
-        // uncomment next line to get verbose information from CURL
-        //$curl->setopt(CURLOPT_VERBOSE, 1);
         if ($getCurlObject) {
             $curl->parseResponseHeaders();
         }

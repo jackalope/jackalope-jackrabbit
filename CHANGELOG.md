@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.3
+---
+
+* Added function to set global curl-options
+
 1.2
 ---
 
