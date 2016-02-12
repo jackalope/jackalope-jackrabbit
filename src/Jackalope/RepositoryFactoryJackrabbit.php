@@ -44,6 +44,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         'jackalope.logger' => 'Psr\Log\LoggerInterface: Use the LoggingClient to wrap the default transport Client',
         Session::OPTION_AUTO_LASTMODIFIED => 'boolean: Whether to automatically update nodes having mix:lastModified. Defaults to true.',
         'jackalope.jackrabbit_force_http_version_10' => 'boolean: Force HTTP version 1.0, this can in solving problems with curl such as https://github.com/jackalope/jackalope-jackrabbit/issues/89',
+        'jackalope.jackrabbit_curl_options' => 'array: Additional global curl-options',
     );
 
     /**
@@ -67,6 +68,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         if (count(array_diff_key(self::$required, $parameters))) {
             throw new ConfigurationException('A required parameter is missing: ' . implode(', ', array_keys(array_diff_key(self::$required, $parameters))));
         }
+
         // check if we have any unknown parameters
         if (count(array_diff_key($parameters, self::$required, self::$optional))) {
             throw new ConfigurationException('Additional unknown parameters found: ' . implode(', ', array_keys(array_diff_key($parameters, self::$required, self::$optional))));
@@ -94,11 +96,22 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         if (isset($parameters['jackalope.check_login_on_server'])) {
             $transport->setCheckLoginOnServer($parameters['jackalope.check_login_on_server']);
         }
-        if (isset($parameters['jackalope.jackrabbit_force_http_version_10'])) {
-            $transport->forceHttpVersion10($parameters['jackalope.jackrabbit_force_http_version_10']);
-        }
         if (isset($parameters['jackalope.logger'])) {
-            $transport = $factory->get('Transport\Jackrabbit\LoggingClient', array($transport, $parameters['jackalope.logger']));
+            $transport = $factory->get(
+                'Transport\Jackrabbit\LoggingClient',
+                array($transport, $parameters['jackalope.logger'])
+            );
+        }
+
+        $curlOptions = array_key_exists('jackalope.jackrabbit_curl_options', $parameters) ?
+            $parameters['jackalope.jackrabbit_curl_options'] : array();
+
+        if (isset($parameters['jackalope.jackrabbit_force_http_version_10'])) {
+            $curlOptions[CURLOPT_HTTP_VERSION] = true;
+        }
+
+        if (count($curlOptions)) {
+            $transport->addCurlOptions($curlOptions);
         }
 
         $options['stream_wrapper'] = empty($parameters['jackalope.disable_stream_wrapper']);

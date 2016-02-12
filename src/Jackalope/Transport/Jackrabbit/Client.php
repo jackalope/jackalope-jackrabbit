@@ -176,11 +176,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     protected $sendExpect = false;
 
     /**
-     * @var bool
-     */
-    protected $forceHttpVersion10 = false;
-
-    /**
      * @var \Jackalope\NodeType\NodeTypeXmlConverter
      */
     protected $typeXmlConverter;
@@ -210,6 +205,13 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     protected $jsopBody = array();
 
     protected $userData;
+
+    /**
+     * Global curl-options used in each request.
+     *
+     * @var array
+     */
+    private $curlOptions = array();
 
     /**
      * Create a transport pointing to a server url.
@@ -271,10 +273,30 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
      * Set to true to force HTTP version 1.0
      *
      * @param boolean
+     *
+     * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
      */
     public function forceHttpVersion10($forceHttpVersion10 = true)
     {
-        $this->forceHttpVersion10 = $forceHttpVersion10;
+        if ($forceHttpVersion10) {
+            $this->addCurlOptions(array(CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0));
+        } else {
+            unset($this->curlOptions[CURLOPT_HTTP_VERSION]);
+        }
+    }
+
+    /**
+     * Add global curl-options.
+     *
+     * This options will be used foreach curl-request.
+     *
+     * @param array $options
+     *
+     * @return array all curl-options
+     */
+    public function addCurlOptions(array $options)
+    {
+        return $this->curlOptions += $options;
     }
 
     /**
@@ -307,9 +329,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $request->addHeader("Expect:");
         }
 
-        if ($this->forceHttpVersion10) {
-            $request->forceHttpVersion10();
-        }
+        $request->addCurlOptions($this->curlOptions);
 
         return $request;
     }
