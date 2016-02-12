@@ -1,10 +1,11 @@
 Changelog
 =========
 
-1.3
----
+1.3 (unreleased)
+----------------
 
-* Added function to set global curl-options
+* Added function to client to set global curl-options. With the factory, you can use
+  the parameter `jackalope.jackrabbit_curl_options` to set curl options as hashmap.
 
 1.2
 ---
