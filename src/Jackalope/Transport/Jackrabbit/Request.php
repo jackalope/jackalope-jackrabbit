@@ -377,6 +377,15 @@ class Request
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
+        if ($this->method == self::POST) {
+            /*
+               Jackrabbit's CSRF protection affects any write request that could come from an HTML form
+               The simplest possible fix probably is to include a Referer header field (referencing the server itself)
+               see https://github.com/jackalope/jackalope-jackrabbit/issues/138
+            */
+            $headers[] = 'Referer: '.$this->client->getWorkspaceUri();
+        }
+
         foreach ($this->curlOptions as $option => $optionValue) {
             $curl->setopt($option, $optionValue);
         }
@@ -492,6 +501,15 @@ class Request
 
         if ($this->lockToken) {
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
+        }
+
+        if ($this->method == self::POST) {
+            /*
+               Jackrabbit's CSRF protection affects any write request that could come from an HTML form
+               The simplest possible fix probably is to include a Referer header field (referencing the server itself)
+               see https://github.com/jackalope/jackalope-jackrabbit/issues/138
+            */
+            $headers[] = 'Referer: '.$this->client->getWorkspaceUri();
         }
 
         foreach ($this->curlOptions as $option => $optionValue) {
