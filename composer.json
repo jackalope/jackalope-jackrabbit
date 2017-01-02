@@ -28,7 +28,7 @@
     },
     "require-dev": {
         "psr/log": "~1.0",
-        "phpcr/phpcr-api-tests": "2.1.15",
+        "phpcr/phpcr-api-tests": "dev-opv_initialize",
         "symfony/console": "~2.0"
     },
     "autoload": {
@@ -42,5 +42,11 @@
         "branch-alias": {
             "dev-master": "1.3-dev"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:danrot/phpcr-api-tests.git"
+        }
+    ]
 }
