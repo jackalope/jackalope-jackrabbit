@@ -618,7 +618,9 @@ class Request
                         // try to generically "guess" the right exception class name
                         $class = substr($errClass, strlen('javax.jcr.'));
                         $class = explode('.', $class);
-                        array_walk($class, function (&$ns) { $ns = ucfirst(str_replace('nodetype', 'NodeType', $ns)); });
+                        array_walk($class, function (&$ns) {
+                            $ns = ucfirst(str_replace('nodetype', 'NodeType', $ns));
+                        });
                         $class = '\\PHPCR\\'.implode('\\', $class);
 
                         if (class_exists($class)) {
