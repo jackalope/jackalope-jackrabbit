@@ -4,6 +4,7 @@ namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
 use DOMElement;
+use DOMXPath;
 use LogicException;
 use InvalidArgumentException;
 use PHPCR\CredentialsInterface;
@@ -958,9 +959,10 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
         $dom = new DOMDocument();
         $dom->loadXML($rawData);
+        $domXpath = new DOMXPath($dom);
 
         $rows = array();
-        foreach ($dom->getElementsByTagName('response') as $row) {
+        foreach ($domXpath->query('D:response') as $row) {
             $columns = array();
             foreach ($row->getElementsByTagName('column') as $column) {
                 $sets = array();
