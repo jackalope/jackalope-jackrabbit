@@ -1,11 +1,14 @@
 Changelog
 =========
 
-1.3 (unreleased)
-----------------
+1.3
+---
 
-* Added function to client to set global curl-options. With the factory, you can use
+* performance #145 improve XML parsing
+* bugfix #142 Add referrer in requests to jackrabbit to avoid CSRF errors on jackrabbit 2.12.4 and newer
+* feature #130 Added function to client to set global curl-options. With the factory, you can use
   the parameter `jackalope.jackrabbit_curl_options` to set curl options as hashmap.
+* feature #128 Version label support
 
 1.2
 ---
