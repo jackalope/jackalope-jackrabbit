@@ -24,7 +24,7 @@ use Jackalope\Transport\Logging\LoggerInterface;
  *
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  */
-class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTransport, PermissionInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
+class LoggingClient extends AbstractReadWriteLoggingWrapper implements JackrabbitClientInterface
 {
     /**
      * @var Client
@@ -255,5 +255,29 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements QueryTran
     public function deleteWorkspace($name)
     {
         $this->transport->deleteWorkspace($name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function forceHttpVersion10($forceHttpVersion10 = true)
+    {
+        $this->transport->forceHttpVersion10($forceHttpVersion10);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function addCurlOptions(array $options)
+    {
+        return $this->transport->addCurlOptions($options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getWorkspaceUri()
+    {
+        return $this->transport->getWorkspaceUri();
     }
 }
