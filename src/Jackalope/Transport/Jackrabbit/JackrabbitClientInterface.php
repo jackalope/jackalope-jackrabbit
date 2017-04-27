@@ -12,7 +12,9 @@ use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\Transport\WritingInterface;
 
 /**
- * Internal interface for jackrabbit client.
+ * Collect all interfaces the jackrabbit client implements and define the additional jackrabbit specific methods.
+ *
+ * @internal
  */
 interface JackrabbitClientInterface extends QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
 {
