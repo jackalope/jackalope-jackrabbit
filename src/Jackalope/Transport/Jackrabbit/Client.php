@@ -66,7 +66,7 @@ use PHPCR\Version\LabelExistsVersionException;
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  * @author Markus Schmucker <markus.sr@gmx.net>
  */
-class Client extends BaseTransport implements QueryTransport, PermissionInterface, WritingInterface, VersioningInterface, NodeTypeCndManagementInterface, LockingInterface, ObservationInterface, WorkspaceManagementInterface
+class Client extends BaseTransport implements JackrabbitClientInterface
 {
     /**
      * minimal version needed for the backend server
@@ -242,15 +242,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Add a HTTP header which is sent on each Request.
-     *
-     * This is used for example for a session identifier header to help a proxy
-     * to route all requests from the same session to the same server.
-     *
-     * This is a Jackrabbit Davex specific option called from the repository
-     * factory.
-     *
-     * @param string $header a valid HTTP header to add to each request
+     * {@inheritDoc}
      */
     public function addDefaultHeader($header)
     {
@@ -258,12 +250,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * If you want to send the "Expect: 100-continue" header on larger
-     * PUT and POST requests, set this to true.
-     *
-     * This is a Jackrabbit Davex specific option.
-     *
-     * @param bool $send Whether to send the header or not
+     * {@inheritDoc}
      */
     public function sendExpect($send = true)
     {
@@ -271,11 +258,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Set to true to force HTTP version 1.0
-     *
-     * @param boolean
-     *
-     * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
+     * {@inheritDoc}
      */
     public function forceHttpVersion10($forceHttpVersion10 = true)
     {
@@ -287,13 +270,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Add global curl-options.
-     *
-     * This options will be used foreach curl-request.
-     *
-     * @param array $options
-     *
-     * @return array all curl-options
+     * {@inheritDoc}
      */
     public function addCurlOptions(array $options)
     {
@@ -349,9 +326,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Return the URL to the workspace determined during login
-     *
-     * @return null|string
+     * {@inheritDoc}
      */
     public function getWorkspaceUri()
     {
@@ -424,9 +399,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Configure whether to check if we are logged in before doing a request.
-     *
-     * Will improve error reporting at the cost of some round trips.
+     * {@inheritDoc}
      */
     public function setCheckLoginOnServer($bool)
     {
@@ -781,7 +754,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     // VersioningInterface //
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function addVersionLabel($versionPath, $label, $moveLabel)
     {
@@ -810,7 +783,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function removeVersionLabel($versionPath, $label)
     {
@@ -1170,6 +1143,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
             $this->setJsopBody(">" . $operation->srcPath . " : " . $operation->dstPath);
         }
     }
+
     /**
      * {@inheritDoc}
      */
@@ -1499,9 +1473,6 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
 
     /**
      * {@inheritDoc}
-     *
-     * @throws UnsupportedRepositoryOperationException if trying to
-     *      overwrite existing prefix to new uri, as jackrabbit can not do this
      */
     public function registerNamespace($prefix, $uri)
     {
@@ -1693,15 +1664,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * Internal method to fetch event data.
-     *
-     * @param $date
-     *
-     * @return array hashmap with 'data' containing unfiltered DOM of xml atom
-     *      feed of events, 'nextMillis' is the next timestamp if there are
-     *      more events to be found, false otherwise.
-     *
-     * @private
+     * {@inheritDoc}
      */
     public function fetchEventData($date)
     {
@@ -1735,7 +1698,7 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
     }
 
     /**
-     * @return mixed null or string
+     * {@inheritDoc}
      */
     public function getUserData()
     {
@@ -1768,6 +1731,9 @@ class Client extends BaseTransport implements QueryTransport, PermissionInterfac
         $request->execute();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function deleteWorkspace($name)
     {
         // https://issues.apache.org/jira/browse/JCR-3144
