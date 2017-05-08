@@ -1191,7 +1191,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         $this->checkForExistingNode($srcWorkspace, $srcAbsPath, $destAbsPath);
 
         $body = urlencode(':clone') . '='
-            . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . ($removeExisting ? 'true' : 'false'));
+            . urlencode($srcWorkspace . ',' . $srcAbsPath . ',' . $destAbsPath . ',' . 'true');
 
         $request = $this->getRequest(Request::POST, $this->workspaceUri);
         $request->setBody($body);
