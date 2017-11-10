@@ -235,9 +235,9 @@ class ClientTest extends JackrabbitTestCase
         $t->login($this->credentials, 'tests');
     }
 
-     /**
-     * @covers \Jackalope\Transport\Jackrabbit\Client::login
-     */
+    /**
+    * @covers \Jackalope\Transport\Jackrabbit\Client::login
+    */
     public function testLogin()
     {
         $propfindRequest = $this->getTransportMock()->buildPropfindRequestMock(array('D:workspace', 'dcr:workspaceName'));
