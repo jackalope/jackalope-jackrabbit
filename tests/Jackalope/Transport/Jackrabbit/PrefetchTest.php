@@ -76,11 +76,13 @@ class PrefetchTest extends TestCase
 
         $list = $transport->getNodes(array('/node-a', '/node-b'));
 
-        list($key, $raw) = each($list);
+        $raw = current($list);
+        $key = key($list);
         $this->assertEquals('/node-a', $key);
         $this->assertNode($raw, 'a');
 
-        list($key, $raw) = each($list);
+        $raw = next($list);
+        $key = key($list);
         $this->assertEquals('/node-b', $key);
         $this->assertNode($raw, 'b');
     }
