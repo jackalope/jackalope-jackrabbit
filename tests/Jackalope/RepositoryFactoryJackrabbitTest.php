@@ -2,7 +2,9 @@
 
 namespace Jackalope;
 
-class RepositoryFactoryJackrabbitTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class RepositoryFactoryJackrabbitTest extends TestCase
 {
     /**
      * @expectedException \PHPCR\ConfigurationException
