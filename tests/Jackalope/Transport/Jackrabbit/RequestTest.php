@@ -10,7 +10,10 @@ class RequestTest extends JackrabbitTestCase
 {
     protected function getCurlFixture($fixture = null, $httpCode = 200, $errno = null)
     {
-        $curl =  $this->getMock('Jackalope\\Transport\\Jackrabbit\\curl', array('exec', 'getinfo', 'errno', 'setopt'));
+        $curl =  $this
+                    ->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\curl')
+                    ->setMethods(array('exec', 'getinfo', 'errno', 'setopt'))
+                    ->getMock();
 
         if ($fixture) {
             if (is_file($fixture)) {
@@ -56,7 +59,11 @@ class RequestTest extends JackrabbitTestCase
     public function testExecuteDom()
     {
         $factory = new Factory;
-        $request = $this->getMock('Jackalope\\Transport\\Jackrabbit\\Request', array('execute'), array($factory, $this->getClientMock(), $this->getCurlFixture(), null, null));
+        $request = $this
+                    ->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\Request')
+                    ->setMethods(array('execute'))
+                    ->setConstructorArgs(array($factory, $this->getClientMock(), $this->getCurlFixture(), null,null))
+                    ->getMock();
         $request->expects($this->once())
             ->method('execute')
             ->will($this->returnValue('<xml/>'));

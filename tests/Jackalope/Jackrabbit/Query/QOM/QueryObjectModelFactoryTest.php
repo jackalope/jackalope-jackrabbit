@@ -7,8 +7,9 @@ use Jackalope\Jackrabbit\Factory;
 use Jackalope\Query\QOM\EquiJoinCondition;
 use PHPCR\Util\QOM\QueryBuilder;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as Constants;
+use PHPUnit\Framework\TestCase;
 
-class QueryObjectModelFactoryTest extends \PHPUnit_Framework_TestCase
+class QueryObjectModelFactoryTest extends TestCase
 {
     /**
      * @var QueryObjectModelFactory

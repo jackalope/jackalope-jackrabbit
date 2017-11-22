@@ -19,11 +19,11 @@ class ClientTest extends JackrabbitTestCase
         $defaultMockMethods = array('getRequest', '__destruct', '__construct');
         $mockMethods = array_merge(array_diff($defaultMockMethods, $changeMethods), array_diff($changeMethods, $defaultMockMethods));
 
-        return $this->getMock(
-            __NAMESPACE__.'\ClientMock',
-            $mockMethods,
-            array($factory, $args)
-        );
+        return $this
+                ->getMockBuilder(__NAMESPACE__.'\ClientMock')
+                ->setMethods($mockMethods)
+                ->setConstructorArgs(array($factory, $args))
+                ->getMock();
     }
 
     public function getRequestMock($response = '', $changeMethods = array())
