@@ -9,6 +9,9 @@ use Jackalope\TestCase;
 use Jackalope\Factory;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
+use Jackalope\Transport\Jackrabbit\Client;
+use Jackalope\NodeType\NodeTypeManager;
+use PHPCR\RepositoryException;
 
 /**
  * Unit tests for the EventJournal
@@ -45,27 +48,17 @@ class EventBufferTest extends TestCase
     public function setUp()
     {
         $this->factory = new Factory();
-        $this->transport = $this
-            ->getMockBuilder('\Jackalope\Transport\Jackrabbit\Client')
-            ->disableOriginalConstructor()
-            ->getMock('fetchEventData')
-        ;
+        $this->transport = $this->createMock(Client::class);
         $this->session = $this->getSessionMock(array('getNode', 'getNodesByIdentifier'));
         $this->session
-            ->expects($this->any())
             ->method('getNode')
-            ->will($this->returnValue(null));
+            ->willReturn(null);
         $this->session
-            ->expects($this->any())
             ->method('getNodesByIdentifier')
-            ->will($this->returnValue(array()));
+            ->willReturn([]);
         $this->filter = new EventFilter($this->factory, $this->session);
 
-        $this->nodeTypeManager = $this
-            ->getMockBuilder('Jackalope\NodeType\NodeTypeManager')
-            ->disableOriginalConstructor()
-            ->getMock()
-        ;
+        $this->nodeTypeManager = $this->createMock(NodeTypeManager::class);
 
         $this->buffer = new TestBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot');
 
@@ -152,21 +145,18 @@ EOF;
         $this->assertEquals('', $res);
     }
 
-    /**
-     * @expectedException \PHPCR\RepositoryException
-     */
     public function testExtractUserIdNoAuthor()
     {
         $xml = '<artist><name>admin</name></artist>';
+
+        $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
     }
 
-    /**
-     * @expectedException \PHPCR\RepositoryException
-     */
     public function testExtractUserIdNoName()
     {
         $xml = '<author>admin</author>';
+        $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
     }
 
@@ -200,30 +190,24 @@ EOF;
         }
     }
 
-    /**
-     * @expectedException \PHPCR\RepositoryException
-     */
     public function testExtractEventTypeInvalidType()
     {
         $xml = '<eventtype><invalidType/></eventtype>';
+        $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
-    /**
-     * @expectedException \PHPCR\RepositoryException
-     */
     public function testExtractEventTypeNoType()
     {
         $xml = '<invalid><persist/></invalid>';
+        $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
-    /**
-     * @expectedException \PHPCR\RepositoryException
-     */
     public function testExtractEventTypeMalformed()
     {
         $xml = '<eventtype>some string</eventtype>';
+        $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
@@ -233,7 +217,7 @@ EOF;
         $this->assertCount(1, $events);
         $eventWithInfo = $events[0];
 
-        $this->assertInstanceOf('Jackalope\Observation\Event', $eventWithInfo);
+        $this->assertInstanceOf(Event::class, $eventWithInfo);
         /** @var $eventWithInfo Event */
         $eventInfo = $eventWithInfo->getInfo();
         $this->assertEquals($this->expectedEventWithInfo->getInfo(), $eventInfo);
@@ -243,7 +227,7 @@ EOF;
             'srcAbsPath' => '/my_node'
         );
 
-        $this->assertEquals(count($expectedInfo), count($eventInfo));
+        $this->assertCount(count($expectedInfo), $eventInfo);
 
         foreach ($expectedInfo as $key => $expectedValue) {
             $value = $eventInfo[$key];
@@ -254,13 +238,13 @@ EOF;
             ->expects($this->at(0))
             ->method('getNodeType')
             ->with('{internal}root')
-            ->will($this->returnValue(true))
+            ->willReturn(true)
         ;
         $this->nodeTypeManager
             ->expects($this->at(1))
             ->method('getNodeType')
             ->with('{internal}AccessControllable')
-            ->will($this->returnValue(true))
+            ->willReturn(true)
         ;
 
         $this->assertTrue($eventWithInfo->getPrimaryNodeType());
@@ -328,10 +312,10 @@ EOF;
             ->expects($this->once())
             ->method('fetchEventData')
             ->with(7)
-            ->will($this->returnValue(array(
+            ->willReturn(array(
                 'data' => $dom,
                 'nextMillis' => false,
-            )))
+            ))
         ;
 
         $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
