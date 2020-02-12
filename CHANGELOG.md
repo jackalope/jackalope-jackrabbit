@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.4 (unreleased)
-----------------
+1.4
+---
 
 * PHP requirement bumped to 7.2, tested with up to 7.4.
 
