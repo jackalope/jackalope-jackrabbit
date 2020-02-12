@@ -5,6 +5,9 @@ namespace Jackalope\Transport\Jackrabbit;
 use Jackalope\Factory;
 use Jackalope\Test\JackrabbitTestCase;
 use DOMDocument;
+use Jackalope\Transport\Jackrabbit\Client;
+use Jackalope\Transport\Jackrabbit\Request;
+use PHPCR\SimpleCredentials;
 
 class RequestTest extends JackrabbitTestCase
 {
@@ -20,22 +23,19 @@ class RequestTest extends JackrabbitTestCase
                 $fixture = file_get_contents($fixture);
             }
             $curl
-                ->expects($this->any())
                 ->method('exec')
-                ->will($this->returnValue($fixture));
+                ->willReturn($fixture);
 
             $curl
-                ->expects($this->any())
                 ->method('getinfo')
                 ->with($this->equalTo(CURLINFO_HTTP_CODE))
-                ->will($this->returnValue($httpCode));
+                ->willReturn($httpCode);
         }
 
         if (null !== $errno) {
             $curl
-                ->expects($this->any())
                 ->method('errno')
-                ->will($this->returnValue($errno));
+                ->willReturn($errno);
         }
 
         return $curl;
@@ -43,10 +43,7 @@ class RequestTest extends JackrabbitTestCase
 
     public function getClientMock()
     {
-        return $this->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\Client')
-            ->disableOriginalConstructor()
-            ->getMock()
-        ;
+        return $this->createMock(Client::class);
     }
 
     public function getRequest($fixture = null, $httpCode = 200, $errno = null)
@@ -60,15 +57,15 @@ class RequestTest extends JackrabbitTestCase
     {
         $factory = new Factory;
         $request = $this
-                    ->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\Request')
+                    ->getMockBuilder(Request::class)
                     ->setMethods(array('execute'))
                     ->setConstructorArgs(array($factory, $this->getClientMock(), $this->getCurlFixture(), null,null))
                     ->getMock();
         $request->expects($this->once())
             ->method('execute')
-            ->will($this->returnValue('<xml/>'));
+            ->willReturn('<xml/>');
 
-        $this->assertInstanceOf('DOMDocument', $request->executeDom());
+        $this->assertInstanceOf(DOMDocument::class, $request->executeDom());
     }
 
     /**
@@ -77,7 +74,7 @@ class RequestTest extends JackrabbitTestCase
     public function testPrepareRequestWithCredentials()
     {
         $request = $this->getRequest('fixtures/empty.xml');
-        $request->setCredentials(new \PHPCR\SimpleCredentials('foo', 'bar'));
+        $request->setCredentials(new SimpleCredentials('foo', 'bar'));
         $request->getCurl()->expects($this->at(0))
             ->method('setopt')
             ->with(CURLOPT_USERPWD, 'foo:bar');

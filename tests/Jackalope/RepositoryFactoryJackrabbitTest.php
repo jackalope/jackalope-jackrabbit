@@ -2,29 +2,26 @@
 
 namespace Jackalope;
 
+use PHPCR\ConfigurationException;
 use PHPUnit\Framework\TestCase;
 
 class RepositoryFactoryJackrabbitTest extends TestCase
 {
-    /**
-     * @expectedException \PHPCR\ConfigurationException
-     * @expectedExceptionMessage missing
-     */
-    public function testMissingRequired()
+    public function testMissingRequired(): void
     {
         $factory = new RepositoryFactoryJackrabbit();
 
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('missing');
         $factory->getRepository(array());
     }
 
-    /**
-     * @expectedException \PHPCR\ConfigurationException
-     * @expectedExceptionMessage unknown
-     */
-    public function testExtraParameter()
+    public function testExtraParameter(): void
     {
         $factory = new RepositoryFactoryJackrabbit();
 
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('unknown');
         $factory->getRepository(array(
             'jackalope.jackrabbit_uri' => 'http://localhost',
             'unknown' => 'garbage',
