@@ -45,7 +45,7 @@ class EventBufferTest extends TestCase
     /** @var Event */
     protected $expectedEventWithInfo;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->factory = new Factory();
         $this->transport = $this->createMock(Client::class);
@@ -134,7 +134,7 @@ EOF;
         $this->expectedEventWithInfo->addInfo('srcAbsPath', '/my_node');
     }
 
-    public function testExtractUserId()
+    public function testExtractUserId(): void
     {
         $xml = '<author><name>admin</name></author>';
         $res = $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
@@ -145,7 +145,7 @@ EOF;
         $this->assertEquals('', $res);
     }
 
-    public function testExtractUserIdNoAuthor()
+    public function testExtractUserIdNoAuthor(): void
     {
         $xml = '<artist><name>admin</name></artist>';
 
@@ -153,14 +153,14 @@ EOF;
         $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
     }
 
-    public function testExtractUserIdNoName()
+    public function testExtractUserIdNoName(): void
     {
         $xml = '<author>admin</author>';
         $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
     }
 
-    public function testFiltering()
+    public function testFiltering(): void
     {
         $this->filter->setAbsPath('/something-not-matching');
 
@@ -171,7 +171,7 @@ EOF;
         $this->assertEquals(array(), $events);
     }
 
-    public function testExtractEventType()
+    public function testExtractEventType(): void
     {
         $validEventTypes = array(
             'nodeadded' => EventInterface::NODE_ADDED,
@@ -190,28 +190,28 @@ EOF;
         }
     }
 
-    public function testExtractEventTypeInvalidType()
+    public function testExtractEventTypeInvalidType(): void
     {
         $xml = '<eventtype><invalidType/></eventtype>';
         $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
-    public function testExtractEventTypeNoType()
+    public function testExtractEventTypeNoType(): void
     {
         $xml = '<invalid><persist/></invalid>';
         $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
-    public function testExtractEventTypeMalformed()
+    public function testExtractEventTypeMalformed(): void
     {
         $xml = '<eventtype>some string</eventtype>';
         $this->expectException(RepositoryException::class);
         $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
     }
 
-    public function testEventInfo()
+    public function testEventInfo(): void
     {
         $events = $this->getAndCallMethod($this->buffer, 'extractEvents', array($this->getDomElement($this->eventWithInfoXml), 'system'));
         $this->assertCount(1, $events);
@@ -235,39 +235,30 @@ EOF;
         }
 
         $this->nodeTypeManager
-            ->expects($this->at(0))
             ->method('getNodeType')
-            ->with('{internal}root')
-            ->willReturn(true)
-        ;
-        $this->nodeTypeManager
-            ->expects($this->at(1))
-            ->method('getNodeType')
-            ->with('{internal}AccessControllable')
-            ->willReturn(true)
+            ->withConsecutive(['{internal}root'], ['{internal}AccessControllable'])
+            ->willReturnOnConsecutiveCalls(true, true)
         ;
 
         $this->assertTrue($eventWithInfo->getPrimaryNodeType());
         $this->assertEquals(array('{internal}AccessControllable' => true), $eventWithInfo->getMixinNodeTypes());
     }
 
-    public function testEmptyEventInfo()
+    public function testEmptyEventInfo(): void
     {
-        // get an event that has no eventinfo
+        /** @var Event[] $events */
         $events = $this->getAndCallMethod($this->buffer, 'extractEvents', array($this->getDomElement($this->eventXml), 'system'));
         $this->assertCount(1, $events);
         $event = $events[0];
-
         $this->assertInstanceOf('Jackalope\Observation\Event', $event);
-        /** @var $event Event */
 
         $eventInfo = $event->getInfo();
 
-        $this->assertInternalType('array', $eventInfo);
-        $this->assertEquals(0, count($eventInfo));
+        $this->assertIsArray($eventInfo);
+        $this->assertCount(0, $eventInfo);
     }
 
-    public function testIterator()
+    public function testIterator(): void
     {
         $dom = new \DOMDocument();
         $dom->loadXML($this->entryXml);
@@ -299,7 +290,7 @@ EOF;
         $this->assertEquals($this->expectedEvent, $buffer->current());
     }
 
-    public function testFetchPage()
+    public function testFetchPage(): void
     {
         $dom = new \DOMDocument();
         $dom->loadXML($this->entryXml);

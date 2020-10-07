@@ -8,6 +8,7 @@ use DOMDocument;
 use Jackalope\Transport\Jackrabbit\Client;
 use Jackalope\Transport\Jackrabbit\Request;
 use PHPCR\SimpleCredentials;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class RequestTest extends JackrabbitTestCase
 {
@@ -75,15 +76,36 @@ class RequestTest extends JackrabbitTestCase
     {
         $request = $this->getRequest('fixtures/empty.xml');
         $request->setCredentials(new SimpleCredentials('foo', 'bar'));
-        $request->getCurl()->expects($this->at(0))
+        $passwordParam = false;
+        $passwordCorrect = false;
+        $request->getCurl()
             ->method('setopt')
-            ->with(CURLOPT_USERPWD, 'foo:bar');
+            ->with(
+                $this->callback(static function ($name) use (&$passwordParam): bool {
+                    if (CURLOPT_USERPWD === $name) {
+                        $passwordParam = true;
+                    }
+                    return true;
+                }),
+                $this->callback(static function ($value) use (&$passwordCorrect): bool {
+                    if ('foo:bar' === $value) {
+                        $passwordCorrect = true;
+                    }
+                    return true;
+                })
+            )
+        ;
         $request->execute();
+        $this->assertTrue($passwordParam);
+        $this->assertTrue($passwordCorrect);
     }
 }
 
 class RequestMock extends Request
 {
+    /**
+     * @return curl|MockObject
+     */
     public function getCurl()
     {
         return $this->curl;

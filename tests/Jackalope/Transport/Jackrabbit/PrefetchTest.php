@@ -27,7 +27,7 @@ class PrefetchTest extends TestCase
      */
     protected static $loader;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         self::$loader = \ImplementationLoader::getInstance();
@@ -51,7 +51,7 @@ class PrefetchTest extends TestCase
         $session->save();
     }
 
-    protected function getTransport()
+    protected function getTransport(): Client
     {
         $transport = new \Jackalope\Transport\Jackrabbit\Client(new \Jackalope\Factory(), $GLOBALS['jackrabbit.uri']);
         $transport->login(self::$loader->getCredentials(), self::$loader->getWorkspaceName());
@@ -59,7 +59,7 @@ class PrefetchTest extends TestCase
         return $transport;
     }
 
-    public function testGetNode()
+    public function testGetNode(): void
     {
         $transport = $this->getTransport();
         $transport->setFetchDepth(1);
@@ -69,7 +69,7 @@ class PrefetchTest extends TestCase
         $this->assertNode($raw, 'a');
     }
 
-    public function testGetNodes()
+    public function testGetNodes(): void
     {
         $transport = $this->getTransport();
         $transport->setFetchDepth(1);
@@ -87,7 +87,7 @@ class PrefetchTest extends TestCase
         $this->assertNode($raw, 'b');
     }
 
-    protected function assertNode($raw, $parent)
+    protected function assertNode($raw, $parent): void
     {
         $this->assertInstanceOf('\stdClass', $raw);
         $name = "child-a";
