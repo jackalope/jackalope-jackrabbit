@@ -46,14 +46,15 @@ class JackrabbitCommand extends Command
             ->addOption('workspace_dir', null, InputOption::VALUE_OPTIONAL, 'Path to the Jackrabbit workspace dir')
             ->addOption('port', null, InputOption::VALUE_OPTIONAL, 'TCP port of the Jackrabbit HTTP server')
             ->setDescription('Start and stop the Jackrabbit server')
-            ->setHelp(<<<EOF
+            ->setHelp(
+                <<<EOF
 The <info>jackalope:run:jackrabbit</info> command allows to have a minimal
 control on the Jackrabbit server from within a command.
 
 If the <info>jackrabbit_jar</info> option is set, it will be used as the
 Jackrabbit server jar file.
 EOF
-);
+            );
     }
 
     protected function setJackrabbitPath($jackrabbit_jar)

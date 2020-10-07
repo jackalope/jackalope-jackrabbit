@@ -35,11 +35,12 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
      *
      * @api
      */
-    public function createQuery(SourceInterface $source,
-                         ConstraintInterface $constraint = null,
-                         array $orderings = array(),
-                         array $columns = array(),
-                         $simpleQuery = false
+    public function createQuery(
+        SourceInterface $source,
+        ConstraintInterface $constraint = null,
+        array $orderings = array(),
+        array $columns = array(),
+        $simpleQuery = false
     ) {
         $className = $this->isSimple($source, $constraint)
             ? 'Query\QOM\QueryObjectModelSql1' : 'Query\QOM\QueryObjectModel';
