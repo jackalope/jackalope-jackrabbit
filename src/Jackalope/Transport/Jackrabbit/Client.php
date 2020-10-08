@@ -167,7 +167,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
 
     /**
      * A list of additional HTTP headers to be sent on each request
-     * @var array[]string
+     * @var string[]
      */
     protected $defaultHeaders = array();
 
@@ -199,7 +199,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      *
      * This is our exception to the rule that nothing may be cached in transport.
      *
-     * @var array of strings as returned by getRepositoryDescriptors
+     * @var string[] as returned by getRepositoryDescriptors
      */
     protected $descriptors = null;
 
@@ -293,6 +293,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
             }
         }
 
+        /** @var Request $request */
         $request = $this->factory->get('Transport\\Jackrabbit\\Request', array($this, $curl, $method, $uri));
 
         $request->setCredentials($this->credentials);

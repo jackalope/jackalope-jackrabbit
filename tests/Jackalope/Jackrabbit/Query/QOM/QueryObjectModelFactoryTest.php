@@ -20,13 +20,13 @@ class QueryObjectModelFactoryTest extends TestCase
      */
     protected $qb;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->qf = new QueryObjectModelFactory(new Factory());
         $this->qb = new QueryBuilder($this->qf);
     }
 
-    public function testStatements()
+    public function testStatements(): void
     {
         //simple query, should be sql
         $this->qb->from($this->qf->selector('nt:base', "nt:base"));

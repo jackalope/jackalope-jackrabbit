@@ -6,7 +6,7 @@ use Jackalope\TestCase;
 
 abstract class JackrabbitTestCase extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
