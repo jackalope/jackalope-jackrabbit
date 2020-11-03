@@ -1319,14 +1319,14 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      * If occurrence is found, returns false, otherwise true.
      * Invalid characters were taken from this list: http://en.wikipedia.org/wiki/Valid_characters_in_XML#XML_1.0
      *
-     * Uses regexp mentioned here: http://stackoverflow.com/a/961504
+     * Uses regexp built upon: http://stackoverflow.com/a/961504, https://stackoverflow.com/a/30240915
      *
      * @param $string string value
      * @return bool true if string is OK, false otherwise.
      */
     protected function isStringValid($string)
     {
-        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]+/u';
+        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
 
         return (preg_match($regex, $string, $matches) === 0);
     }
