@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.4.2
+-----
+
+* Added the repository factory option `jackalope.jackrabbit_version` to allow
+  specifying the version of the Jackrabbit backend. The version is used to
+  decide if the backend supports full UTF-8 for node names (so you can use
+  emojis in node and property names). The minimum Jackrabbit version supporting
+  emojis is 2.18.0.
+
 1.4.1
 -----
 

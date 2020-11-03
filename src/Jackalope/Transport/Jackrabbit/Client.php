@@ -69,9 +69,18 @@ use PHPCR\Version\LabelExistsVersionException;
 class Client extends BaseTransport implements JackrabbitClientInterface
 {
     /**
-     * minimal version needed for the backend server
+     * Minimal version requirement for the Jackrabbit backend server.
      */
     const VERSION = "2.3.6";
+
+    /**
+     * Minimal version of the Jackrabbit backend server known to support
+     * storing unicode symbols outside of UTF-8 basic multilingual plane.
+     *
+     * Note: We are sure which exact version of Jackrabbit introduced support
+     * for full UTF-8 symbols. This is the lowest version known to work.
+     */
+    const UTF8_SUPPORT_MINIMAL_VERSION = "2.18.0";
 
     /**
      * Description of the namspace to be used for communication with the server.
@@ -213,6 +222,13 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      * @var array
      */
     private $curlOptions = array();
+
+    /**
+     * Version of the Jackrabbit server as declared in the configuration.
+     *
+     * @var string|null
+     */
+    private $version = null;
 
     /**
      * Create a transport pointing to a server url.
@@ -454,6 +470,25 @@ class Client extends BaseTransport implements JackrabbitClientInterface
                 throw new UnsupportedRepositoryOperationException("The backend at {$this->server} is an unsupported version of jackrabbit: \"".
                     $this->descriptors['jcr.repository.version'].
                     '". Need at least "'.self::VERSION.'"');
+            }
+
+
+            if ($this->version) {
+                // Sanity check if the configured version has the same major and minor number as the version reported by the backend.
+                $serverVersion = implode('.', array_slice(explode('.', $this->descriptors['jcr.repository.version']), 0, 2));
+                $configuredVersion = implode('.', array_slice(explode('.', $this->version), 0, 2));
+
+                if (!version_compare($serverVersion, $configuredVersion, '==')) {
+                    trigger_error(
+                        sprintf(
+                            'Version mismatch between configured version %s and version %s reported by the backend at %s.',
+                            $this->version,
+                            $this->descriptors['jcr.repository.version'],
+                            $this->server
+                        ),
+                        E_USER_NOTICE
+                    );
+                }
             }
         }
 
@@ -1319,7 +1354,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      * If occurrence is found, returns false, otherwise true.
      * Invalid characters were taken from this list: http://en.wikipedia.org/wiki/Valid_characters_in_XML#XML_1.0
      *
-     * Uses regexp mentioned here: http://stackoverflow.com/a/961504
+     * Uses regexp built upon: http://stackoverflow.com/a/961504, https://stackoverflow.com/a/30240915
      *
      * @param $string string value
      * @return bool true if string is OK, false otherwise.
@@ -1327,6 +1362,11 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     protected function isStringValid($string)
     {
         $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]+/u';
+
+        if ($this->version && version_compare($this->version, self::UTF8_SUPPORT_MINIMAL_VERSION, '>=')) {
+            // unicode symbols outside of bmp such as emojis are supported only by recent jackrabbit versions
+            $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
+        }
 
         return (preg_match($regex, $string, $matches) === 0);
     }
@@ -2170,5 +2210,10 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         }
 
         return $data;
+    }
+
+    public function setVersion($version)
+    {
+        $this->version = $version;
     }
 }
