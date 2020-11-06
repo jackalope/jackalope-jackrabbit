@@ -87,6 +87,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         if ('/' !== substr($uri, -1, 1)) {
             $uri .= '/';
         }
+
         $transport = $factory->get('Transport\Jackrabbit\Client', array($uri));
         if (isset($parameters['jackalope.default_header'])) {
             $transport->addDefaultHeader($parameters['jackalope.default_header']);
