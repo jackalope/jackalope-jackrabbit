@@ -215,6 +215,11 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     private $curlOptions = array();
 
     /**
+     * @var string|null
+     */
+    protected $version = null;
+
+    /**
      * Create a transport pointing to a server url.
      *
      * @param FactoryInterface $factory   the object factory
@@ -1326,7 +1331,12 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      */
     protected function isStringValid($string)
     {
-        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
+        $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]+/u';
+
+        if ($this->version && version_compare($this->version, '2.18.0', '>=')) {
+            // unicode symbols outside of bmp such as emojis are supported only by recent jackrabbit versions
+            $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
+        }
 
         return (preg_match($regex, $string, $matches) === 0);
     }
@@ -2170,5 +2180,10 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         }
 
         return $data;
+    }
+
+    public function setVersion($version)
+    {
+        $this->version = $version;
     }
 }
