@@ -2,7 +2,6 @@
 
 namespace Jackalope;
 
-use Jackalope\Transport\Jackrabbit\Client;
 use PHPCR\ConfigurationException;
 use PHPCR\RepositoryFactoryInterface;
 
@@ -46,7 +45,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         Session::OPTION_AUTO_LASTMODIFIED => 'boolean: Whether to automatically update nodes having mix:lastModified. Defaults to true.',
         'jackalope.jackrabbit_force_http_version_10' => 'boolean: Force HTTP version 1.0, this can in solving problems with curl such as https://github.com/jackalope/jackalope-jackrabbit/issues/89',
         'jackalope.jackrabbit_curl_options' => 'array: Additional global curl-options',
-        'jackalope.jackrabbit_version' => 'string: Set the version of the jackrabbit for additional support',
+        'jackalope.jackrabbit_version' => 'string: Set the version of the jackrabbit server to allow the client to offer better functionality if possible',
     );
 
     /**

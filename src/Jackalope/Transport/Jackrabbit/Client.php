@@ -215,9 +215,11 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     private $curlOptions = array();
 
     /**
+     * Version of the jackrabbit server as configured.
+     *
      * @var string|null
      */
-    protected $version = null;
+    private $version = null;
 
     /**
      * Create a transport pointing to a server url.
