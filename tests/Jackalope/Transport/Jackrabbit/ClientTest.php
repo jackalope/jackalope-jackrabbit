@@ -555,7 +555,7 @@ class ClientTest extends JackrabbitTestCase
     /**
      * @dataProvider provideTestOutOfRangeCharacters
      */
-    public function testOutOfRangeCharacterOccurrence($string, $isValid): void
+    public function testOutOfRangeCharacterOccurrence($string, $version, $isValid): void
     {
         if (false === $isValid) {
             $this->expectException(ValueFormatException::class);
@@ -563,6 +563,7 @@ class ClientTest extends JackrabbitTestCase
         }
 
         $t = $this->getTransportMock();
+        $t->setVersion($version);
 
         $factory = new Factory;
         $session = $this->createMock(Session::class);
@@ -596,18 +597,20 @@ class ClientTest extends JackrabbitTestCase
     {
         // use http://rishida.net/tools/conversion/ to convert problematic utf-16 strings to code points
         return array(
-            array('This is valid too!'.$this->translateCharFromCode('\u0009'), true),
-            array('This is valid', true),
-            array($this->translateCharFromCode('\uD7FF'), true),
-            array('This is on the edge, but valid too.'. $this->translateCharFromCode('\uFFFD'), true),
-            array($this->translateCharFromCode('\u10000'), true),
-            array($this->translateCharFromCode('\u10FFFF'), true),
-            array($this->translateCharFromCode('\u0001'), false),
-            array($this->translateCharFromCode('\u0002'), false),
-            array($this->translateCharFromCode('\u0003'), false),
-            array($this->translateCharFromCode('\u0008'), false),
-            array($this->translateCharFromCode('\uFFFF'), false),
-            array($this->translateCharFromCode('Sporty Spice at Sporty spice @ work \uD83D\uDCAA\uD83D\uDCAA\uD83D\uDCAA'), false),
+            array('This is valid too!'.$this->translateCharFromCode('\u0009'), null, true),
+            array('This is valid', null, true),
+            array($this->translateCharFromCode('\uD7FF'), null, true),
+            array('This is on the edge, but valid too.'. $this->translateCharFromCode('\uFFFD'), null, true),
+            array($this->translateCharFromCode('\u10000'), null, true),
+            array($this->translateCharFromCode('\u10FFFF'), null, true),
+            array($this->translateCharFromCode('\u0001'), null, false),
+            array($this->translateCharFromCode('\u0002'), null, false),
+            array($this->translateCharFromCode('\u0003'), null, false),
+            array($this->translateCharFromCode('\u0008'), null, false),
+            array($this->translateCharFromCode('\uFFFF'), null, false),
+            array($this->translateCharFromCode('Sporty Spice at Sporty spice @ work \uD83D\uDCAA\uD83D\uDCAA\uD83D\uDCAA'), null, false),
+            array($this->translateCharFromCode('Sporty Spice at Sporty spice @ work \uD83D\uDCAA\uD83D\uDCAA\uD83D\uDCAA'), '2.8.0', false),
+            array($this->translateCharFromCode('Sporty Spice at Sporty spice @ work \uD83D\uDCAA\uD83D\uDCAA\uD83D\uDCAA'), '2.18.1', true),
         );
     }
 
