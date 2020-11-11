@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.4.2
+-----
+
+* Allow to enable UTF8 support by configuring `jackalope.jackrabbit_version` parameter.
+
 1.4.1
 -----
 

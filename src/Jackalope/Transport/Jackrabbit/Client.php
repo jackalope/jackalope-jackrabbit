@@ -69,9 +69,14 @@ use PHPCR\Version\LabelExistsVersionException;
 class Client extends BaseTransport implements JackrabbitClientInterface
 {
     /**
-     * minimal version needed for the backend server
+     * Minimal version needed for the backend server
      */
     const VERSION = "2.3.6";
+
+    /**
+     * Minimal version needed for storing unicode symbols outside of bmp
+     */
+    const UTF8_SUPPORT_MINIMAL_VERSION = "2.18.0";
 
     /**
      * Description of the namspace to be used for communication with the server.
@@ -461,6 +466,18 @@ class Client extends BaseTransport implements JackrabbitClientInterface
                 throw new UnsupportedRepositoryOperationException("The backend at {$this->server} is an unsupported version of jackrabbit: \"".
                     $this->descriptors['jcr.repository.version'].
                     '". Need at least "'.self::VERSION.'"');
+            }
+
+            // use major version and minor version without patch version for comparison
+            $serverVersion = implode('.', array_slice(explode('.', $this->descriptors['jcr.repository.version']), 0, 2));
+            $configuredVersion = $this->version ? implode('.', array_slice(explode('.', $this->version), 0, 2)) : null;
+
+            if ($configuredVersion && ! version_compare($serverVersion, $configuredVersion, '==')) {
+                trigger_error(
+                    'The version of the backend at' . $this->server . ' is "' . $this->descriptors['jcr.repository.version'] .
+                    '". This conflicts with the configured version of "' . $this->version . '"',
+                    E_USER_NOTICE
+                );
             }
         }
 
@@ -1335,7 +1352,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     {
         $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}]+/u';
 
-        if ($this->version && version_compare($this->version, '2.18.0', '>=')) {
+        if ($this->version && version_compare($this->version, self::UTF8_SUPPORT_MINIMAL_VERSION, '>=')) {
             // unicode symbols outside of bmp such as emojis are supported only by recent jackrabbit versions
             $regex = '/[^\x{9}\x{a}\x{d}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]+/u';
         }
