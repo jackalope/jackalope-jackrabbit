@@ -17,6 +17,8 @@ tests/vendor/jackrabbit-standalone*.jar
 tests/vendor/jackrabbit
 
 /jackrabbit/
+/bin/jackrabbit-standalone-*.jar
+/bin/jackrabbit/
 
 vendor
 
