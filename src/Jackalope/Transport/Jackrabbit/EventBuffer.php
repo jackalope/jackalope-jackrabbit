@@ -6,7 +6,6 @@ use DOMElement;
 use Jackalope\FactoryInterface;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
-use Jackalope\Transport\ObservationInterface;
 use PHPCR\NamespaceRegistryInterface;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
@@ -23,76 +22,48 @@ use PHPCR\RepositoryException;
  */
 class EventBuffer implements \Iterator
 {
-    /**
-     * @var FactoryInterface
-     */
-    protected $factory;
-
-    /**
-     * @var EventFilter
-     */
-    protected $filter;
+    protected FactoryInterface $factory;
+    protected EventFilter $filter;
 
     /**
      * Buffered events.
-     *
-     * @var \ArrayIterator
      */
-    protected $events;
+    private ?\ArrayIterator $events = null;
 
-    /**
-     * @var ObservationInterface
-     */
-    protected $transport;
-
-    /**
-     * @var NodeTypeManagerInterface
-     */
-    protected $nodeTypeManager;
-
-    /**
-     * @var NamespaceRegistryInterface
-     */
-    protected $namespaceRegistry;
+    protected Client $transport;
+    protected NodeTypeManagerInterface $nodeTypeManager;
+    protected NamespaceRegistryInterface $namespaceRegistry;
 
     /**
      * Timestamp in milliseconds when this buffer was created.
      * Never fetch any events newer than that.
-     *
-     * @var int
      */
-    protected $creationMillis;
+    protected ?int $creationMillis = null;
 
     /**
      * Timestamp in milliseconds of next page.
      *
-     * @var int
+     * @var int|bool|null Set to false when no next events exist
      */
-    protected $nextMillis;
+    private $nextMillis;
 
     /**
      * The prefix to extract the path from the event href attribute.
-     *
-     * @var string
      */
-    protected $workspaceRootUri;
+    protected string $workspaceRootUri;
 
     /**
      * Prepare a new EventJournal.
      *
      * Actual data loading is deferred to when it is first requested.
-     *
-     * @param EventFilter $filter           filter to apply
-     * @param string      $workspaceRootUri
-     * @param array       $rawData
      */
     public function __construct(
         FactoryInterface $factory,
         EventFilter $filter,
         Client $transport,
         NodeTypeManagerInterface $ntm,
-        $workspaceRootUri,
-        $rawData
+        string $workspaceRootUri,
+        array $rawData
     ) {
         $this->creationMillis = time() * 1000; // do this first
         $this->factory = $factory;
@@ -103,26 +74,22 @@ class EventBuffer implements \Iterator
         $this->setData($rawData);
     }
 
-    #[\ReturnTypeWillChange]
-    public function current()
+    public function current(): ?Event
     {
         return $this->events->current();
     }
 
-    #[\ReturnTypeWillChange]
-    public function next()
+    public function next(): void
     {
         $this->events->next();
     }
 
-    #[\ReturnTypeWillChange]
-    public function key()
+    public function key(): int
     {
         return $this->events->key();
     }
 
-    #[\ReturnTypeWillChange]
-    public function valid()
+    public function valid(): bool
     {
         if (!$this->events->valid() && false !== $this->nextMillis) {
             $this->fetchNextPage();
@@ -131,19 +98,18 @@ class EventBuffer implements \Iterator
         return $this->events->valid();
     }
 
-    #[\ReturnTypeWillChange]
-    public function rewind()
+    public function rewind(): void
     {
         $this->events->rewind();
     }
 
-    protected function setData($raw)
+    private function setData(array $raw): void
     {
         $this->nextMillis = $raw['nextMillis'];
         $this->events = $this->constructEventJournal($raw['data']);
     }
 
-    protected function fetchNextPage()
+    private function fetchNextPage(): void
     {
         if ($this->nextMillis >= $this->creationMillis) {
             // abort, we arrived in the present of this buffer
@@ -158,9 +124,9 @@ class EventBuffer implements \Iterator
      * Construct the event journal from the DAVEX response returned by the
      * server, immediately filtered by the current filter.
      *
-     * @return Event[]
+     * @return \ArrayIterator<Event>
      */
-    protected function constructEventJournal(\DOMDocument $data)
+    private function constructEventJournal(\DOMDocument $data): \ArrayIterator
     {
         $events = [];
         $entries = $data->getElementsByTagName('entry');
@@ -182,13 +148,14 @@ class EventBuffer implements \Iterator
      *
      * @return Event[]
      */
-    protected function extractEvents(\DOMElement $entry, $currentUserId)
+    private function extractEvents(\DOMElement $entry, string $currentUserId): array
     {
         $events = [];
         $domEvents = $entry->getElementsByTagName('event');
 
         foreach ($domEvents as $domEvent) {
-            $event = $this->factory->get('Jackalope\Observation\Event', [$this->nodeTypeManager]);
+            /** @var Event $event */
+            $event = $this->factory->get(Event::class, [$this->nodeTypeManager]);
             $event->setType($this->extractEventType($domEvent));
 
             $date = $this->getDomElement($domEvent, 'eventdate', 'The event date was not found while building the event journal:\n'.$this->getEventDom($domEvent));
@@ -230,7 +197,7 @@ class EventBuffer implements \Iterator
             $eventInfos = $this->getDomElement($domEvent, 'eventinfo');
             if ($eventInfos) {
                 foreach ($eventInfos->childNodes as $info) {
-                    if (XML_ELEMENT_NODE == $info->nodeType) {
+                    if (XML_ELEMENT_NODE === $info->nodeType) {
                         $event->addInfo($info->tagName, $info->nodeValue);
                     }
                 }
@@ -258,7 +225,7 @@ class EventBuffer implements \Iterator
      *
      * @throws RepositoryException
      */
-    protected function extractUserId(\DOMElement $entry)
+    private function extractUserId(\DOMElement $entry): string
     {
         $authors = $entry->getElementsByTagName('author');
 
@@ -266,7 +233,6 @@ class EventBuffer implements \Iterator
             throw new RepositoryException('User ID not found while building the event journal');
         }
 
-        $userId = null;
         foreach ($authors->item(0)->childNodes as $child) {
             if ($child instanceof \DOMElement) {
                 return $child->nodeValue;
@@ -279,11 +245,9 @@ class EventBuffer implements \Iterator
     /**
      * Extract an event type from a DavEx event journal response.
      *
-     * @return int The event type
-     *
      * @throws RepositoryException
      */
-    protected function extractEventType(\DOMElement $event)
+    private function extractEventType(\DOMElement $event): int
     {
         $list = $event->getElementsByTagName('eventtype');
 
@@ -307,14 +271,12 @@ class EventBuffer implements \Iterator
      *
      * @param \DOMElement $event        The DOMElement containing the searched tag
      * @param string      $tagName      The name of the searched tag
-     * @param string      $errorMessage The error message when the tag was not
+     * @param string|null $errorMessage The error message when the tag was not
      *                                  found or null if the tag is not required
-     *
-     * @return \DOMNode
      *
      * @throws RepositoryException
      */
-    protected function getDomElement(\DOMElement $event, $tagName, $errorMessage = null)
+    private function getDomElement(\DOMElement $event, string $tagName, string $errorMessage = null): ?\DOMNode
     {
         $list = $event->getElementsByTagName($tagName);
 
@@ -328,13 +290,9 @@ class EventBuffer implements \Iterator
     /**
      * Get the JCR event type from a DavEx tag representing the event type.
      *
-     * @param string $tagName
-     *
-     * @return int
-     *
      * @throws RepositoryException
      */
-    protected function getEventTypeFromTagName($tagName)
+    private function getEventTypeFromTagName(string $tagName): int
     {
         switch (strtolower($tagName)) {
             case 'nodeadded':
@@ -358,10 +316,8 @@ class EventBuffer implements \Iterator
 
     /**
      * Get the XML representation of a DOMElement to display in error messages.
-     *
-     * @return string
      */
-    protected function getEventDom(\DOMElement $event)
+    private function getEventDom(\DOMElement $event): string
     {
         return $event->ownerDocument->saveXML($event);
     }

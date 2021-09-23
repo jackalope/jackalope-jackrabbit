@@ -9,12 +9,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class RequestTest extends JackrabbitTestCase
 {
-    protected function getCurlFixture($fixture = null, $httpCode = 200, $errno = null)
+    protected function getCurlFixture(string $fixture = null, int $httpCode = 200, int $errno = null): curl
     {
-        $curl = $this
-                    ->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\curl')
-                    ->setMethods(['exec', 'getinfo', 'errno', 'setopt'])
-                    ->getMock();
+        $curl = $this->createMock(curl::class);
 
         if ($fixture) {
             if (is_file($fixture)) {
@@ -44,20 +41,20 @@ class RequestTest extends JackrabbitTestCase
         return $this->createMock(Client::class);
     }
 
-    public function getRequest($fixture = null, $httpCode = 200, $errno = null)
+    public function getRequest(string $fixture = null, int $httpCode = 200, int $errno = null)
     {
         $factory = new Factory();
 
         return new RequestMock($factory, $this->getClientMock(), $this->getCurlFixture($fixture, $httpCode, $errno), 'GET', 'http://foo/');
     }
 
-    public function testExecuteDom()
+    public function testExecuteDom(): void
     {
         $factory = new Factory();
         $request = $this
                     ->getMockBuilder(Request::class)
                     ->setMethods(['execute'])
-                    ->setConstructorArgs([$factory, $this->getClientMock(), $this->getCurlFixture(), null, null])
+                    ->setConstructorArgs([$factory, $this->getClientMock(), $this->getCurlFixture(), 'GET', null])
                     ->getMock();
         $request->expects($this->once())
             ->method('execute')
@@ -69,7 +66,7 @@ class RequestTest extends JackrabbitTestCase
     /**
      * @covers \Jackalope\Transport\Jackrabbit\Request::execute
      */
-    public function testPrepareRequestWithCredentials()
+    public function testPrepareRequestWithCredentials(): void
     {
         $request = $this->getRequest('fixtures/empty.xml');
         $request->setCredentials(new SimpleCredentials('foo', 'bar'));

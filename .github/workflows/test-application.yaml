@@ -18,17 +18,15 @@ jobs:
 
             matrix:
                 include:
-                    - php-version: '7.2'
+                    - php-version: '7.4'
                       dependencies: 'lowest'
-                    - php-version: '7.2'
-                    - php-version: '7.3'
                     - php-version: '7.4'
                     - php-version: '8.0'
                     - php-version: '8.1'
 
         steps:
             - name: Checkout project
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Install and configure PHP
               uses: shivammathur/setup-php@v2
@@ -37,15 +35,22 @@ jobs:
                   tools: 'composer:v2'
 
             - name: Install dependencies with Composer
-              uses: ramsey/composer-install@v1
+              uses: ramsey/composer-install@v2
               with:
                   dependency-versions: ${{ matrix.dependencies }}
                   composer-options: --prefer-dist
 
-            - name: Start jackrabbit
+            - name: Get source version of phpcr-utils
               run: |
-                  ./bin/jackrabbit.sh
+                  rm -rf vendor/phpcr/phpcr-utils
+                  composer update phpcr/phpcr-utils --prefer-source
+
+            - name: Start jackrabbit
+              run: bin/jackrabbit.sh
 
             - name: Execute test cases
-              run: |
-                  vendor/bin/phpunit
+              run: vendor/bin/phpunit
+
+            - name: Print Jackrabbit logs on error
+              if: ${{ failure() }}
+              run: cat bin/jackrabbit/log/*

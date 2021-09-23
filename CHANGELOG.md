@@ -1,13 +1,18 @@
 Changelog
 =========
 
-Version 1
+Version 2
 =========
 
 2.0.0 (unreleased)
 ------------------
 
+* Added static typing whereever possible. This should not change anything, but the added strictness
+  might trigger errors where it was more tolerant for incorrect types before.
 * Renamed cli-config.php.dist to cli-config.dist.php and cleaned up to be better documented.
+
+Version 1
+=========
 
 1.4.4
 -----

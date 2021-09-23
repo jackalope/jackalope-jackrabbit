@@ -22,7 +22,7 @@ jobs:
           coverage: none
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # have to install phpstan ourselves here, the phpstan-ga fails at composer install with weird errors
       - name: Install phpstan
@@ -48,7 +48,7 @@ jobs:
           coverage: none
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install phpstan
         run: |
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: PHP-CS-Fixer
         uses: docker://oskarstark/php-cs-fixer-ga

@@ -128,12 +128,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         return new Repository($factory, $transport, $options);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @api
-     */
-    public function getConfigurationKeys()
+    public function getConfigurationKeys(): array
     {
         return array_merge(self::$required, self::$optional);
     }

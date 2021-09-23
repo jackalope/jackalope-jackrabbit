@@ -19,43 +19,39 @@ class curl
      *
      * @var resource
      */
-    protected $curl;
+    private $curl;
 
     /**
      * Contains header of a response, if needed.
-     *
-     * @var array
      */
-    protected $headers = [];
+    private array $headers = [];
 
     /**
      * Response body as a string.
-     *
-     * @var string
      */
-    protected $response = '';
+    private string $response = '';
 
     /**
      * Handles the initialization of a curl session.
      *
-     * @param string $url If provided, sets the CURLOPT_URL
+     * @param string|null $url If provided, sets the CURLOPT_URL
      *
      * @see curl_init
      */
-    public function __construct($url = null)
+    public function __construct(string $url = null)
     {
         $this->curl = curl_init($url);
+        $this->setopt(CURLINFO_HEADER_OUT, true);
     }
 
     /**
      * Sets the options to be used for the request.
      *
-     * @param int   $option
      * @param mixed $value
      *
      * @see curl_setopt
      */
-    public function setopt($option, $value)
+    public function setopt(int $option, $value): bool
     {
         return curl_setopt($this->curl, $option, $value);
     }
@@ -63,11 +59,9 @@ class curl
     /**
      * Sets multiple options to be used for a request.
      *
-     * @param array $options
-     *
      * @see curl_setopt_array
      */
-    public function setopt_array($options)
+    public function setopt_array(array $options): bool
     {
         return curl_setopt_array($this->curl, $options);
     }
@@ -75,7 +69,7 @@ class curl
     /**
      * Performs a cUrl session.
      *
-     * @return bool false on failure otherwise true or string (if CURLOPT_RETURNTRANSFER option is set)
+     * @return bool|string false on failure otherwise true or string (if CURLOPT_RETURNTRANSFER option is set)
      *
      * @see curl_exec
      */
@@ -87,11 +81,9 @@ class curl
     /**
      * Gets the last error for the current cUrl session.
      *
-     * @return string
-     *
      * @see curl_error
      */
-    public function error()
+    public function error(): string
     {
         return curl_error($this->curl);
     }
@@ -99,11 +91,9 @@ class curl
     /**
      * Gets the number representation of the last error for the current cUrl session.
      *
-     * @return int
-     *
      * @see curl_errno
      */
-    public function errno()
+    public function errno(): int
     {
         return curl_errno($this->curl);
     }
@@ -111,13 +101,13 @@ class curl
     /**
      * Gets information regarding a specific transfer.
      *
-     * @param int $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
+     * @param int|null $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
      *
      * @return string|array Returns a string if options is given otherwise associative array
      *
      * @see curl_getinfo
      */
-    public function getinfo($option = null)
+    public function getinfo(int $option = null)
     {
         if (null === $option) {
             return curl_getinfo($this->curl);
@@ -131,7 +121,7 @@ class curl
      *
      * @see curl_close
      */
-    public function close()
+    public function close(): void
     {
         // This test is to avoid "not a valid cURL handle resource" warnings
         if (is_resource($this->curl)) {
@@ -139,7 +129,7 @@ class curl
         }
     }
 
-    public function readHeader($ch, $header)
+    public function readHeader($ch, $header): int
     {
         if (false !== strpos($header, ':')) {
             list($key, $value) = explode(':', $header, 2);
@@ -149,12 +139,12 @@ class curl
         return strlen($header);
     }
 
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
 
-    public function getHeader($key)
+    public function getHeader(string $key): ?string
     {
         if (isset($this->headers[$key])) {
             return $this->headers[$key];
@@ -163,18 +153,18 @@ class curl
         return null;
     }
 
-    public function parseResponseHeaders()
+    public function parseResponseHeaders(): void
     {
         $this->setopt(CURLOPT_HEADER, false);
         $this->setopt(CURLOPT_HEADERFUNCTION, [&$this, 'readHeader']);
     }
 
-    public function setResponse($r)
+    public function setResponse(string $r): void
     {
         $this->response = $r;
     }
 
-    public function getResponse()
+    public function getResponse(): string
     {
         return $this->response;
     }
