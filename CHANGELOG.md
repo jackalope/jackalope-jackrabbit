@@ -1,6 +1,11 @@
 Changelog
 =========
 
+unreleased
+----------
+
+* Support PHP 8.1
+
 1.4.2
 -----
 
