@@ -1,10 +1,11 @@
 Changelog
 =========
 
-unreleased
-----------
+1.4.3
+-----
 
 * Support PHP 8.1
+* Allow to use another version in jackrabbit.sh script
 
 1.4.2
 -----
