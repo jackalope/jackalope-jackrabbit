@@ -1,10 +1,12 @@
 Changelog
 =========
 
-unreleased
-----------
+1.4.3
+-----
 
 * Support PHP 8.1
+* Allow installation with Symfony 6
+* Allow to use another jackrabbit version in jackrabbit.sh script by setting the environment variable `JACKRABBIT_VERSION`
 
 1.4.2
 -----
