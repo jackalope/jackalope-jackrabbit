@@ -5,6 +5,7 @@ Changelog
 -----
 
 * Support PHP 8.1
+* Allow installation with Symfony 6
 * Allow to use another version in jackrabbit.sh script
 
 1.4.2
