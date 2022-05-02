@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.4.4
+-----
+
+* Make content type check with jackrabbit case insensitive, as newer versions seem to return `UTF-8` uppercase.
+
 1.4.3
 -----
 
