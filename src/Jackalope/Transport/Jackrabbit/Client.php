@@ -663,7 +663,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         $path = $this->encodeAndValidatePathForDavex($path);
         $request = $this->getRequest(Request::GET, $path);
         $curl = $request->execute(true);
-        switch ($curl->getHeader('Content-Type')) {
+        switch (strtolower($curl->getHeader('Content-Type'))) {
             case 'text/xml; charset=utf-8':
             case 'text/xml;charset=utf-8':
                 return $this->decodeBinaryDom($curl->getResponse());
