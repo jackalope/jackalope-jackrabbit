@@ -41,10 +41,5 @@
             "PHPCR": "vendor/phpcr/phpcr/tests"
         }
     },
-    "bin": ["bin/jackalope", "bin/jackrabbit.sh"],
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.x-dev"
-        }
-    }
+    "bin": ["bin/jackalope", "bin/jackrabbit.sh"]
 }
