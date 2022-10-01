@@ -1,13 +1,9 @@
-src/autoload.php
 cli-config.php
+.phpunit.result.cache
+.php-cs-fixer.cache
 
 test-reports
-.buildpath
-.project
-.buildpath
-.idea
 .settings/
-cscope.out
 doc/config/phpdoc.ini
 doc/html
 
@@ -20,7 +16,5 @@ tests/vendor/jackrabbit
 /bin/jackrabbit-standalone-*.jar
 /bin/jackrabbit/
 
-vendor
-
-composer.phar
+vendor/
 composer.lock

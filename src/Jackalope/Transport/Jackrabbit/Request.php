@@ -3,25 +3,24 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
+use Jackalope\FactoryInterface;
 use PHPCR\CredentialsInterface;
-use PHPCR\SimpleCredentials;
-use PHPCR\Lock\LockException;
-use PHPCR\RepositoryException;
-use PHPCR\LoginException;
-use PHPCR\NoSuchWorkspaceException;
 use PHPCR\ItemNotFoundException;
-use PHPCR\PathNotFoundException;
-use PHPCR\ReferentialIntegrityException;
+use PHPCR\Lock\LockException;
+use PHPCR\LoginException;
 use PHPCR\NodeType\ConstraintViolationException;
 use PHPCR\NodeType\NoSuchNodeTypeException;
-use Jackalope\FactoryInterface;
+use PHPCR\NoSuchWorkspaceException;
+use PHPCR\PathNotFoundException;
+use PHPCR\ReferentialIntegrityException;
+use PHPCR\RepositoryException;
+use PHPCR\SimpleCredentials;
 
 /**
- * Request class for the Davex protocol
+ * Request class for the Davex protocol.
  *
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
- *
  * @author Christian Stocker <chregu@liip.ch>
  * @author David Buchmann <david@liip.ch>
  * @author Roland Schilter <roland.schilter@liip.ch>
@@ -33,119 +32,138 @@ class Request
 {
     /**
      * Name of the user agent to be exposed to a client.
+     *
      * @var string
      */
-    const USER_AGENT = 'jackalope-php/1.0';
+    public const USER_AGENT = 'jackalope-php/1.0';
 
     /**
      * Identifier of the 'GET' http request method.
+     *
      * @var string
      */
-    const GET = 'GET';
+    public const GET = 'GET';
 
     /**
      * Identifier of the 'POST' http request method.
+     *
      * @var string
      */
-    const POST = 'POST';
+    public const POST = 'POST';
     /**
      * Identifier of the 'PUT' http request method.
+     *
      * @var string
      */
-    const PUT = 'PUT';
+    public const PUT = 'PUT';
 
     /**
      * Identifier of the 'MKCOL' http request method.
+     *
      * @var string
      */
-    const MKCOL = 'MKCOL';
+    public const MKCOL = 'MKCOL';
 
     /**
      * Identifier of the 'DELETE' http request method.
+     *
      * @var string
      */
-    const DELETE = 'DELETE';
+    public const DELETE = 'DELETE';
 
     /**
      * Identifier of the 'REPORT' http request method.
+     *
      * @var string
      */
-    const REPORT = 'REPORT';
+    public const REPORT = 'REPORT';
 
     /**
      * Identifier of the 'SEARCH' http request method.
+     *
      * @var string
      */
-    const SEARCH = 'SEARCH';
+    public const SEARCH = 'SEARCH';
 
     /**
      * Identifier of the 'PROPFIND' http request method.
+     *
      * @var string
      */
-    const PROPFIND = 'PROPFIND';
+    public const PROPFIND = 'PROPFIND';
 
     /**
      * Identifier of the 'PROPPATCH' http request method.
+     *
      * @var string
      */
-    const PROPPATCH = 'PROPPATCH';
+    public const PROPPATCH = 'PROPPATCH';
 
     /**
-     * Identifier of the 'LOCK' http request method
+     * Identifier of the 'LOCK' http request method.
+     *
      * @var string
      */
-    const LOCK = 'LOCK';
+    public const LOCK = 'LOCK';
 
     /**
-     * Identifier of the 'UNLOCK' http request method
+     * Identifier of the 'UNLOCK' http request method.
+     *
      * @var string
      */
-    const UNLOCK = 'UNLOCK';
+    public const UNLOCK = 'UNLOCK';
 
     /**
-     * Identifier of the 'MKWORKSPACE' http request method to make a new workspace
+     * Identifier of the 'MKWORKSPACE' http request method to make a new workspace.
+     *
      * @var string
      */
-    const MKWORKSPACE = 'MKWORKSPACE';
+    public const MKWORKSPACE = 'MKWORKSPACE';
 
     /**
      * Identifier of the 'COPY' http request method.
+     *
      * @var string
      */
-    const COPY = 'COPY';
+    public const COPY = 'COPY';
 
     /**
      * Identifier of the 'MOVE' http request method.
+     *
      * @var string
      */
-    const MOVE = 'MOVE';
+    public const MOVE = 'MOVE';
 
     /**
      * Identifier of the 'CHECKIN' http request method.
+     *
      * @var string
      */
-    const CHECKIN = 'CHECKIN';
+    public const CHECKIN = 'CHECKIN';
 
     /**
      * Identifier of the 'CHECKOUT' http request method.
+     *
      * @var string
      */
-    const CHECKOUT = 'CHECKOUT';
+    public const CHECKOUT = 'CHECKOUT';
 
     /**
      * Identifier of the 'UPDATE' http request method.
+     *
      * @var string
      */
-    const UPDATE = 'UPDATE';
+    public const UPDATE = 'UPDATE';
 
     /**
      * Identifier of the 'LABEL' http request method.
+     *
      * @var string
      */
-    const LABEL = 'LABEL';
+    public const LABEL = 'LABEL';
 
-    /** @var string     Possible argument for {@link setDepth()} */
-    const INFINITY = 'infinity';
+    /** @var string Possible argument for {@link setDepth()} */
+    public const INFINITY = 'infinity';
 
     /**
      * @var Client
@@ -159,46 +177,53 @@ class Request
 
     /**
      * Name of the request method to be used.
+     *
      * @var string
      */
     protected $method;
 
     /**
      * Url(s) to get/post/..
+     *
      * @var array
      */
     protected $uri;
 
     /**
      * Set of credentials necessary to connect to the server or else.
+     *
      * @var CredentialsInterface
      */
     protected $credentials;
 
     /**
-     * Request content-type
+     * Request content-type.
+     *
      * @var string
      */
     protected $contentType = 'text/xml; charset=utf-8';
 
     /**
-     * How far the request should go, default is 0
+     * How far the request should go, default is 0.
+     *
      * @var int
      */
     protected $depth = 0;
 
     /**
-     * Posted content for methods that require it
+     * Posted content for methods that require it.
+     *
      * @var string
      */
     protected $body = '';
 
-    /** @var array[]string  A list of additional HTTP headers to be sent */
-    protected $additionalHeaders = array();
+    /** @var array[]string A list of additional HTTP headers to be sent */
+    protected $additionalHeaders = [];
 
     /**
-     * The lock token active for this request otherwise FALSE for no locking
-     * @var string|FALSE
+     * The lock token active for this request otherwise FALSE for no locking.
+     *
+     * @var string|false
      */
     protected $lockToken = false;
 
@@ -211,7 +236,8 @@ class Request
     protected static $versionChecked = false;
 
     /**
-     * Whether we are in error handling mode to prevent infinite recursion
+     * Whether we are in error handling mode to prevent infinite recursion.
+     *
      * @var bool
      */
     protected $errorHandlingMode = false;
@@ -221,7 +247,7 @@ class Request
      *
      * @var array
      */
-    private $curlOptions = array();
+    private $curlOptions = [];
 
     /**
      * Initiaties the NodeTypes request object.
@@ -231,7 +257,7 @@ class Request
      * @param curl             $curl    The cURL object to use in this request
      * @param string           $method  the HTTP method to use, one of the class constants
      * @param string|array     $uri     the remote url for this request, including protocol,
-     *      host name, workspace and path to the object to manipulate. May be an array of uri
+     *                                  host name, workspace and path to the object to manipulate. May be an array of uri
      */
     public function __construct(FactoryInterface $factory, Client $client, curl $curl, $method, $uri)
     {
@@ -242,19 +268,17 @@ class Request
     }
 
     /**
-     * Force curl to use HTTP version 1.0
+     * Force curl to use HTTP version 1.0.
      *
      * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
      */
     public function forceHttpVersion10()
     {
-        $this->addCurlOptions(array(CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0));
+        $this->addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]);
     }
 
     /**
      * Add curl-options for this request.
-     *
-     * @param array $options
      */
     public function addCurlOptions(array $options)
     {
@@ -265,7 +289,7 @@ class Request
      * Set the credentials for the request. Setting them to null will make a
      * request without authentication header.
      *
-     * @param CredentialsInterface $creds the credentials to use in the request.
+     * @param CredentialsInterface $creds the credentials to use in the request
      */
     public function setCredentials(CredentialsInterface $creds = null)
     {
@@ -273,7 +297,7 @@ class Request
     }
 
     /**
-     * Set a different content type for this request. The default is text/xml in utf-8
+     * Set a different content type for this request. The default is text/xml in utf-8.
      *
      * @param string $contentType
      */
@@ -296,7 +320,7 @@ class Request
     }
 
     /**
-     * Set the request body
+     * Set the request body.
      *
      * @param string $body
      */
@@ -324,7 +348,7 @@ class Request
     }
 
     /**
-     * add an additional http header
+     * add an additional http header.
      *
      * @param string $header HTTP header
      */
@@ -334,17 +358,18 @@ class Request
     }
 
     /**
-     * Add the user data header
+     * Add the user data header.
+     *
      * @param string $userData
      */
     public function addUserData($userData)
     {
-        $userDataHeader = 'Link: <data:,' . urlencode($userData) . '>; rel="http://www.day.com/jcr/webdav/1.0/user-data"';
+        $userDataHeader = 'Link: <data:,'.urlencode($userData).'>; rel="http://www.day.com/jcr/webdav/1.0/user-data"';
         $this->addHeader($userDataHeader);
     }
 
     /**
-     * Set the transaction lock token to be used with this request
+     * Set the transaction lock token to be used with this request.
      *
      * @param string $lockToken the transaction lock
      */
@@ -354,9 +379,8 @@ class Request
     }
 
     /**
-     * used by multiCurl with fresh curl instances
+     * used by multiCurl with fresh curl instances.
      *
-     * @param curl $curl
      * @param bool $getCurlObject whether to return the curl object instead of the response
      */
     protected function prepareCurl(curl $curl, $getCurlObject)
@@ -366,18 +390,18 @@ class Request
         }
         // otherwise leave this alone, the new curl instance has no USERPWD yet
 
-        $headers = array(
-            'Depth: ' . $this->depth,
+        $headers = [
+            'Depth: '.$this->depth,
             'Content-Type: '.$this->contentType,
-            'User-Agent: '.self::USER_AGENT
-        );
+            'User-Agent: '.self::USER_AGENT,
+        ];
         $headers = array_merge($headers, $this->additionalHeaders);
 
         if ($this->lockToken) {
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
-        if ($this->method == self::POST) {
+        if (self::POST == $this->method) {
             /*
                Jackrabbit's CSRF protection affects any write request that could come from an HTML form
                The simplest possible fix probably is to include a Referer header field (referencing the server itself)
@@ -411,11 +435,11 @@ class Request
      * @param bool $getCurlObject wheter to return the curl object instead of the response
      * @param bool $forceMultiple whether to force parallel requests or not
      *
-     * @return string|curl|array response string or the curl object.
+     * @return string|curl|array response string or the curl object
      */
     public function execute($getCurlObject = false, $forceMultiple = false)
     {
-        if (!$forceMultiple && count($this->uri) === 1) {
+        if (!$forceMultiple && 1 === count($this->uri)) {
             return $this->singleRequest($getCurlObject);
         }
 
@@ -423,17 +447,17 @@ class Request
     }
 
     /**
-     * Requests the data for multiple requests
+     * Requests the data for multiple requests.
      *
      * @param bool $getCurlObject whether to return the curl object instead of the response
      *
-     * @return array of XML representations of responses or curl objects.
+     * @return array of XML representations of responses or curl objects
      */
     protected function multiRequest($getCurlObject = false)
     {
         $mh = curl_multi_init();
 
-        $curls = array();
+        $curls = [];
         foreach ($this->uri as $absPath => $uri) {
             $tempCurl = new curl($uri);
             $tempCurl = $this->prepareCurl($tempCurl, $getCurlObject);
@@ -445,7 +469,7 @@ class Request
 
         do {
             $mrc = curl_multi_exec($mh, $active);
-        } while ($active || $mrc == CURLM_CALL_MULTI_PERFORM);
+        } while ($active || CURLM_CALL_MULTI_PERFORM == $mrc);
 
         while ($active && CURLM_OK == $mrc) {
             if (-1 != curl_multi_select($mh)) {
@@ -455,16 +479,14 @@ class Request
             }
         }
 
-        $responses = array();
+        $responses = [];
         foreach ($curls as $key => $curl) {
-            if (empty($failed)) {
-                $httpCode = $curl->getinfo(CURLINFO_HTTP_CODE);
-                if ($httpCode >= 200 && $httpCode < 300) {
-                    if ($getCurlObject) {
-                        $responses[$key] = $curl;
-                    } else {
-                        $responses[$key] = curl_multi_getcontent($curl->getCurl());
-                    }
+            $httpCode = $curl->getinfo(CURLINFO_HTTP_CODE);
+            if ($httpCode >= 200 && $httpCode < 300) {
+                if ($getCurlObject) {
+                    $responses[$key] = $curl;
+                } else {
+                    $responses[$key] = curl_multi_getcontent($curl->getCurl());
                 }
             }
             curl_multi_remove_handle($mh, $curl->getCurl());
@@ -475,11 +497,11 @@ class Request
     }
 
     /**
-     * Requests the data for a single requests
+     * Requests the data for a single requests.
      *
      * @param bool $getCurlObject whether to return the curl object instead of the response
      *
-     * @return string|curl XML representation of a response or curl object.
+     * @return string|curl XML representation of a response or curl object
      */
     protected function singleRequest($getCurlObject)
     {
@@ -489,21 +511,21 @@ class Request
         } else {
             // we seem to be unable to remove the Authorization header
             // setting to null produces a bogus Authorization: Basic Og==
-            $curl = new curl;
+            $curl = new curl();
         }
 
-        $headers = array(
-            'Depth: ' . $this->depth,
+        $headers = [
+            'Depth: '.$this->depth,
             'Content-Type: '.$this->contentType,
-            'User-Agent: '.self::USER_AGENT
-        );
+            'User-Agent: '.self::USER_AGENT,
+        ];
         $headers = array_merge($headers, $this->additionalHeaders);
 
         if ($this->lockToken) {
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
-        if ($this->method == self::POST) {
+        if (self::POST == $this->method) {
             /*
                Jackrabbit's CSRF protection affects any write request that could come from an HTML form
                The simplest possible fix probably is to include a Referer header field (referencing the server itself)
@@ -539,27 +561,27 @@ class Request
             return $response;
         }
         $this->handleError($curl, $response, $httpCode);
+        throw new RepositoryException('handleError should always throw an exception');
     }
 
     /**
-     * Handles errors caused by singleRequest and multiRequest
+     * Handles errors caused by singleRequest and multiRequest.
      *
      * For transport level errors, tries to figure out what went wrong to
      * throw the most appropriate exception.
      *
-     * @param curl   $curl
      * @param string $response the response body
      * @param int    $httpCode the http response code
      *
      * @throws NoSuchWorkspaceException if it was not possible to reach the server (resolve host or connect)
      * @throws ItemNotFoundException    if the object was not found
-     * @throws RepositoryException      on any other error.
+     * @throws RepositoryException      on any other error
      * @throws PathNotFoundException    if the path was not found (server returned 404 without xml response)
      */
     protected function handleError(curl $curl, $response, $httpCode)
     {
         // first: check if the backend is too old for us
-        if (! self::$versionChecked) {
+        if (!self::$versionChecked) {
             // avoid endless loops.
             self::$versionChecked = true;
             try {
@@ -569,7 +591,7 @@ class Request
                 if ($e instanceof \PHPCR\UnsupportedRepositoryOperationException) {
                     throw $e;
                 }
-                //otherwise ignore exception here as to not confuse what happened
+                // otherwise ignore exception here as to not confuse what happened
             }
         }
 
@@ -577,17 +599,17 @@ class Request
             case CURLE_COULDNT_RESOLVE_HOST:
             case CURLE_COULDNT_CONNECT:
                 $info = $curl->getinfo();
-                throw new NoSuchWorkspaceException($curl->error() . ' "' . $info['url'] . '"');
+                throw new NoSuchWorkspaceException($curl->error().' "'.$info['url'].'"');
             case CURLE_RECV_ERROR:
                 throw new RepositoryException(sprintf(
-                    'CURLE_RECV_ERROR (errno 56) encountered. This has been known to happen intermittently with ' .
-                    'some versions of libcurl (see https://github.com/jackalope/jackalope-jackrabbit/issues/89). ' .
+                    'CURLE_RECV_ERROR (errno 56) encountered. This has been known to happen intermittently with '.
+                    'some versions of libcurl (see https://github.com/jackalope/jackalope-jackrabbit/issues/89). '.
                     'You can use the "jackalope.jackrabbit_force_http_version_10" option to force HTTP 1.0 as a workaround'
                 ));
         }
 
         // use XML error response if it's there
-        if (substr($response, 0, 2) === '<?') {
+        if ('<?' === substr($response, 0, 2)) {
             $dom = new DOMDocument();
             $dom->loadXML($response);
             $err = $dom->getElementsByTagNameNS(Client::NS_DCR, 'exception');
@@ -596,7 +618,7 @@ class Request
                 $errClass = $err->getElementsByTagNameNS(Client::NS_DCR, 'class')->item(0)->textContent;
                 $errMsg = $err->getElementsByTagNameNS(Client::NS_DCR, 'message')->item(0)->textContent;
 
-                $exceptionMsg = 'HTTP ' . $httpCode . ': ' . $errMsg;
+                $exceptionMsg = 'HTTP '.$httpCode.': '.$errMsg;
                 switch ($errClass) {
                     case 'javax.jcr.NoSuchWorkspaceException':
                         throw new NoSuchWorkspaceException($exceptionMsg);
@@ -608,13 +630,12 @@ class Request
                         throw new ConstraintViolationException($exceptionMsg);
                     case 'javax.jcr.ReferentialIntegrityException':
                         throw new ReferentialIntegrityException($exceptionMsg);
-                    //TODO: Two more errors needed for Transactions. How does the corresponding Jackrabbit response look like?
-                    // javax.transaction.RollbackException => \PHPCR\Transaction\RollbackException
-                    // java.lang.SecurityException => \PHPCR\AccessDeniedException
+                        // TODO: Two more errors needed for Transactions. How does the corresponding Jackrabbit response look like?
+                        // javax.transaction.RollbackException => \PHPCR\Transaction\RollbackException
+                        // java.lang.SecurityException => \PHPCR\AccessDeniedException
 
-                    //TODO: map more errors here?
+                        // TODO: map more errors here?
                     default:
-
                         // try to generically "guess" the right exception class name
                         $class = substr($errClass, strlen('javax.jcr.'));
                         $class = explode('.', $class);
@@ -626,26 +647,26 @@ class Request
                         if (class_exists($class)) {
                             throw new $class($exceptionMsg);
                         }
-                        throw new RepositoryException($exceptionMsg . " ($errClass)");
+                        throw new RepositoryException($exceptionMsg." ($errClass)");
                 }
             }
         }
         if (401 == $httpCode) {
-            throw new LoginException("HTTP 401 Unauthorized\n" . $this->getShortErrorString());
+            throw new LoginException("HTTP 401 Unauthorized\n".$this->getShortErrorString());
         }
         if (404 == $httpCode) {
-            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n" . $this->getShortErrorString());
+            throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n".$this->getShortErrorString());
         }
         if (405 == $httpCode) {
-            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n" . $this->getShortErrorString(), 405);
+            throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n".$this->getShortErrorString(), 405);
         }
         if (412 == $httpCode) {
-            throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n" . $this->getShortErrorString());
+            throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n".$this->getShortErrorString());
         }
         if ($httpCode >= 500) {
-            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n" . $this->getLongErrorString($curl, $response);
+            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n".$this->getLongErrorString($curl, $response);
             try {
-                $workspaceUri = array($this->client->getWorkSpaceUri());
+                $workspaceUri = [$this->client->getWorkSpaceUri()];
                 if (!$this->errorHandlingMode
                     && ($workspaceUri !== $this->uri || self::GET !== $this->method)
                 ) {
@@ -664,47 +685,46 @@ class Request
 
         $curlError = $curl->error();
 
-        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n" . $this->getLongErrorString($curl, $response);
+        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n".$this->getLongErrorString($curl, $response);
         throw new RepositoryException($msg);
     }
 
     /**
-     * returns a shorter error string to be used in exceptions
+     * returns a shorter error string to be used in exceptions.
      *
      * It returns a "nicely" formatted URI of the request
      *
      * @return string the error message
      */
-
     protected function getShortErrorString()
     {
-        return "--uri: --\n" . var_export($this->uri, true) . "\n";
+        return "--uri: --\n".var_export($this->uri, true)."\n";
     }
 
     /**
-     * returns a longer error string to be used in generic exceptions
+     * returns a longer error string to be used in generic exceptions.
      *
      * It returns a "nicely" formatted URI of the request
      * plus the output of curl_getinfo
      * plus the response body including its size
      *
-     * @param  curl   $curl     The curl object
-     * @param  string $response the response body
+     * @param curl   $curl     The curl object
+     * @param string $response the response body
+     *
      * @return string the error message
      */
-
     protected function getLongErrorString($curl, $response)
     {
         $string = $this->getShortErrorString();
-        $string .= "--curl getinfo: --\n" . var_export($curl->getinfo(), true) . "\n" ;
-        $string .= "--request body (size: " . strlen($this->body) . " bytes): --\n";
+        $string .= "--curl getinfo: --\n".var_export($curl->getinfo(), true)."\n";
+        $string .= '--request body (size: '.strlen($this->body)." bytes): --\n";
         if (strlen($this->body) > 2000) {
             $string .= substr($this->body, 0, 2000);
             $string .= "\n (truncated)\n";
         } else {
-            $string .= $this->body . "\n";
+            $string .= $this->body."\n";
         }
-        $string .= "--response body (size: " . strlen($response) . " bytes): --\n$response\n--end response body--\n";
+        $string .= '--response body (size: '.strlen($response)." bytes): --\n$response\n--end response body--\n";
 
         return $string;
     }
@@ -717,7 +737,7 @@ class Request
      *
      * @param bool $forceMultiple whether to force parallel requests or not
      *
-     * @return DOMDocument The loaded XML response text.
+     * @return DOMDocument the loaded XML response text
      */
     public function executeDom($forceMultiple = false)
     {
@@ -745,11 +765,11 @@ class Request
     {
         $responses = $this->execute(null, $forceMultiple);
         if (!is_array($responses)) {
-            $responses = array($responses);
+            $responses = [$responses];
             $reset = true;
         }
 
-        $json = array();
+        $json = [];
         foreach ($responses as $key => $response) {
             $json[$key] = json_decode($response);
             if (null === $json[$key] && 'null' !== strtolower($response)) {
@@ -757,7 +777,7 @@ class Request
                 throw new RepositoryException("Not a valid json object: \nRequest: {$this->method} $uri \nResponse: \n$response");
             }
         }
-        //TODO: are there error responses in json format? if so, handle them
+        // TODO: are there error responses in json format? if so, handle them
         if (isset($reset)) {
             return reset($json);
         }

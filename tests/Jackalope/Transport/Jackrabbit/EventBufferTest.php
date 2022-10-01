@@ -2,19 +2,18 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
+use Jackalope\Factory;
 use Jackalope\FactoryInterface;
+use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\TestCase;
-use Jackalope\Factory;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
-use Jackalope\Transport\Jackrabbit\Client;
-use Jackalope\NodeType\NodeTypeManager;
 use PHPCR\RepositoryException;
 
 /**
- * Unit tests for the EventJournal
+ * Unit tests for the EventJournal.
  */
 class EventBufferTest extends TestCase
 {
@@ -49,7 +48,7 @@ class EventBufferTest extends TestCase
     {
         $this->factory = new Factory();
         $this->transport = $this->createMock(Client::class);
-        $this->session = $this->getSessionMock(array('getNode', 'getNodesByIdentifier'));
+        $this->session = $this->getSessionMock();
         $this->session
             ->method('getNode')
             ->willReturn(null);
@@ -106,9 +105,9 @@ EOX;
     <updated>2012-03-13T16:30:55.099+01:00</updated>
     <content type="application/vnd.apache.jackrabbit.event+xml">
 EOF;
-        $this->entryXml .= $this->eventXml . "\n";
-        $this->entryXml .= $this->eventXml . "\n"; // The same event appears twice in this entry
-        $this->entryXml .= $this->eventWithInfoXml . "\n";
+        $this->entryXml .= $this->eventXml."\n";
+        $this->entryXml .= $this->eventXml."\n"; // The same event appears twice in this entry
+        $this->entryXml .= $this->eventWithInfoXml."\n";
         $this->entryXml .= '</content></entry>';
 
         // The object representation of the event defined above
@@ -125,7 +124,7 @@ EOF;
         $this->expectedEventWithInfo->setDate('1332163767');
         $this->expectedEventWithInfo->setIdentifier('1e80ac75-eff4-4350-bae6-7fae2a84e6f3');
         $this->expectedEventWithInfo->setPrimaryNodeTypeName('{internal}root');
-        $this->expectedEventWithInfo->setMixinNodeTypeNames(array('{internal}AccessControllable'));
+        $this->expectedEventWithInfo->setMixinNodeTypeNames(['{internal}AccessControllable']);
         $this->expectedEventWithInfo->setPath('/my_other');
         $this->expectedEventWithInfo->setType(EventInterface::NODE_MOVED);
         $this->expectedEventWithInfo->setUserData('somedifferentdata');
@@ -137,11 +136,11 @@ EOF;
     public function testExtractUserId(): void
     {
         $xml = '<author><name>admin</name></author>';
-        $res = $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
+        $res = $this->getAndCallMethod($this->buffer, 'extractUserId', [$this->getDomElement($xml)]);
         $this->assertEquals('admin', $res);
 
         $xml = '<author><name></name></author>';
-        $res = $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
+        $res = $this->getAndCallMethod($this->buffer, 'extractUserId', [$this->getDomElement($xml)]);
         $this->assertEquals('', $res);
     }
 
@@ -150,14 +149,14 @@ EOF;
         $xml = '<artist><name>admin</name></artist>';
 
         $this->expectException(RepositoryException::class);
-        $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
+        $this->getAndCallMethod($this->buffer, 'extractUserId', [$this->getDomElement($xml)]);
     }
 
     public function testExtractUserIdNoName(): void
     {
         $xml = '<author>admin</author>';
         $this->expectException(RepositoryException::class);
-        $this->getAndCallMethod($this->buffer, 'extractUserId', array($this->getDomElement($xml)));
+        $this->getAndCallMethod($this->buffer, 'extractUserId', [$this->getDomElement($xml)]);
     }
 
     public function testFiltering(): void
@@ -166,14 +165,14 @@ EOF;
 
         $buffer = new TestBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot');
 
-        $events = $this->getAndCallMethod($buffer, 'extractEvents', array($this->getDomElement($this->eventXml), 'system'));
+        $events = $this->getAndCallMethod($buffer, 'extractEvents', [$this->getDomElement($this->eventXml), 'system']);
 
-        $this->assertEquals(array(), $events);
+        $this->assertEquals([], $events);
     }
 
     public function testExtractEventType(): void
     {
-        $validEventTypes = array(
+        $validEventTypes = [
             'nodeadded' => EventInterface::NODE_ADDED,
             'nodemoved' => EventInterface::NODE_MOVED,
             'noderemoved' => EventInterface::NODE_REMOVED,
@@ -181,11 +180,11 @@ EOF;
             'propertyremoved' => EventInterface::PROPERTY_REMOVED,
             'propertychanged' => EventInterface::PROPERTY_CHANGED,
             'persist' => EventInterface::PERSIST,
-        );
+        ];
 
         foreach ($validEventTypes as $string => $integer) {
-            $xml = '<eventtype><' . $string . '/></eventtype>';
-            $res = $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
+            $xml = '<eventtype><'.$string.'/></eventtype>';
+            $res = $this->getAndCallMethod($this->buffer, 'extractEventType', [$this->getDomElement($xml)]);
             $this->assertEquals($integer, $res);
         }
     }
@@ -194,26 +193,26 @@ EOF;
     {
         $xml = '<eventtype><invalidType/></eventtype>';
         $this->expectException(RepositoryException::class);
-        $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
+        $this->getAndCallMethod($this->buffer, 'extractEventType', [$this->getDomElement($xml)]);
     }
 
     public function testExtractEventTypeNoType(): void
     {
         $xml = '<invalid><persist/></invalid>';
         $this->expectException(RepositoryException::class);
-        $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
+        $this->getAndCallMethod($this->buffer, 'extractEventType', [$this->getDomElement($xml)]);
     }
 
     public function testExtractEventTypeMalformed(): void
     {
         $xml = '<eventtype>some string</eventtype>';
         $this->expectException(RepositoryException::class);
-        $this->getAndCallMethod($this->buffer, 'extractEventType', array($this->getDomElement($xml)));
+        $this->getAndCallMethod($this->buffer, 'extractEventType', [$this->getDomElement($xml)]);
     }
 
     public function testEventInfo(): void
     {
-        $events = $this->getAndCallMethod($this->buffer, 'extractEvents', array($this->getDomElement($this->eventWithInfoXml), 'system'));
+        $events = $this->getAndCallMethod($this->buffer, 'extractEvents', [$this->getDomElement($this->eventWithInfoXml), 'system']);
         $this->assertCount(1, $events);
         $eventWithInfo = $events[0];
 
@@ -222,10 +221,10 @@ EOF;
         $eventInfo = $eventWithInfo->getInfo();
         $this->assertEquals($this->expectedEventWithInfo->getInfo(), $eventInfo);
 
-        $expectedInfo = array(
+        $expectedInfo = [
             'destAbsPath' => '/my_other',
-            'srcAbsPath' => '/my_node'
-        );
+            'srcAbsPath' => '/my_node',
+        ];
 
         $this->assertCount(count($expectedInfo), $eventInfo);
 
@@ -241,13 +240,13 @@ EOF;
         ;
 
         $this->assertTrue($eventWithInfo->getPrimaryNodeType());
-        $this->assertEquals(array('{internal}AccessControllable' => true), $eventWithInfo->getMixinNodeTypes());
+        $this->assertEquals(['{internal}AccessControllable' => true], $eventWithInfo->getMixinNodeTypes());
     }
 
     public function testEmptyEventInfo(): void
     {
         /** @var Event[] $events */
-        $events = $this->getAndCallMethod($this->buffer, 'extractEvents', array($this->getDomElement($this->eventXml), 'system'));
+        $events = $this->getAndCallMethod($this->buffer, 'extractEvents', [$this->getDomElement($this->eventXml), 'system']);
         $this->assertCount(1, $events);
         $event = $events[0];
         $this->assertInstanceOf('Jackalope\Observation\Event', $event);
@@ -262,10 +261,10 @@ EOF;
     {
         $dom = new \DOMDocument();
         $dom->loadXML($this->entryXml);
-        $data = array(
+        $data = [
             'data' => $dom,
             'nextMillis' => false,
-        );
+        ];
 
         $this->transport
             ->expects($this->never())
@@ -294,19 +293,19 @@ EOF;
     {
         $dom = new \DOMDocument();
         $dom->loadXML($this->entryXml);
-        $data = array(
+        $data = [
             'data' => $dom,
             'nextMillis' => 7,
-        );
+        ];
 
         $this->transport
             ->expects($this->once())
             ->method('fetchEventData')
             ->with(7)
-            ->willReturn(array(
+            ->willReturn([
                 'data' => $dom,
                 'nextMillis' => false,
-            ))
+            ])
         ;
 
         $buffer = new EventBuffer($this->factory, $this->filter, $this->transport, $this->nodeTypeManager, 'http://localhost:8080/server/tests/jcr%3aroot', $data);
@@ -335,7 +334,7 @@ EOF;
 }
 
 /**
- * no-argument constructor to test xml parsing
+ * no-argument constructor to test xml parsing.
  */
 class TestBuffer extends EventBuffer
 {

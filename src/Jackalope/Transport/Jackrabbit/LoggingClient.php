@@ -3,25 +3,19 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\FactoryInterface;
-use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
-use Jackalope\Transport\QueryInterface as QueryTransport;
-use Jackalope\Transport\PermissionInterface;
-use Jackalope\Transport\VersioningInterface;
-use Jackalope\Transport\NodeTypeCndManagementInterface;
-use Jackalope\Transport\LockingInterface;
-use Jackalope\Transport\ObservationInterface;
-use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\Query\Query;
+use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
+use Jackalope\Transport\Logging\LoggerInterface;
+use Jackalope\Transport\QueryInterface as QueryTransport;
+use Jackalope\Transport\VersioningInterface;
 use PHPCR\Observation\EventFilterInterface;
 use PHPCR\SessionInterface;
-use Jackalope\Transport\Logging\LoggerInterface;
 
 /**
  * Logging enabled wrapper for the Jackalope Jackrabbit client.
  *
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
- *
  * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  */
 class LoggingClient extends AbstractReadWriteLoggingWrapper implements JackrabbitClientInterface
@@ -34,9 +28,8 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * Constructor.
      *
-     * @param FactoryInterface $factory
-     * @param Client           $transport A jackalope jackrabbit client instance
-     * @param LoggerInterface  $logger    A logger instance
+     * @param Client          $transport A jackalope jackrabbit client instance
+     * @param LoggerInterface $logger    A logger instance
      */
     public function __construct(FactoryInterface $factory, Client $transport, LoggerInterface $logger)
     {
@@ -85,7 +78,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     // VersioningInterface //
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function addVersionLabel($versionPath, $label, $moveLabel)
     {
@@ -93,7 +86,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function removeVersionLabel($versionPath, $label)
     {
@@ -139,9 +132,10 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
      */
     public function query(Query $query)
     {
-        $this->logger->startCall(__FUNCTION__, func_get_args(), array('fetchDepth' => $this->transport->getFetchDepth()));
+        $this->logger->startCall(__FUNCTION__, func_get_args(), ['fetchDepth' => $this->transport->getFetchDepth()]);
         $result = $this->transport->query($query);
         $this->logger->stopCall();
+
         return $result;
     }
 
@@ -174,7 +168,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
      */
     public function registerNodeTypesCnd($cnd, $allowUpdate)
     {
-        $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
+        return $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
     }
 
     /**

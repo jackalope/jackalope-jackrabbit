@@ -74,7 +74,7 @@ class PrefetchTest extends TestCase
         $transport = $this->getTransport();
         $transport->setFetchDepth(1);
 
-        $list = $transport->getNodes(array('/node-a', '/node-b'));
+        $list = $transport->getNodes(['/node-a', '/node-b']);
 
         $raw = current($list);
         $key = key($list);
@@ -90,16 +90,16 @@ class PrefetchTest extends TestCase
     protected function assertNode($raw, $parent): void
     {
         $this->assertInstanceOf('\stdClass', $raw);
-        $name = "child-a";
+        $name = 'child-a';
         $this->assertTrue(isset($raw->$name), "The raw data is missing child $name");
         $this->assertInstanceOf('\stdClass', $raw->$name);
         $this->assertTrue(isset($raw->$name->prop), "The child $name is missing property 'prop'");
-        $this->assertEquals($parent . 'a', $raw->$name->prop);
+        $this->assertEquals($parent.'a', $raw->$name->prop);
 
         $name = 'child-b';
         $this->assertTrue(isset($raw->$name));
         $this->assertInstanceOf('\stdClass', $raw->$name);
         $this->assertTrue(isset($raw->$name->prop), "The child $name is missing property 'prop'");
-        $this->assertEquals($parent . 'b', $raw->$name->prop);
+        $this->assertEquals($parent.'b', $raw->$name->prop);
     }
 }

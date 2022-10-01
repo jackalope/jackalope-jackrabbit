@@ -6,7 +6,7 @@ use PHPCR\ConfigurationException;
 use PHPCR\RepositoryFactoryInterface;
 
 /**
- * This factory creates repositories with the jackrabbit transport
+ * This factory creates repositories with the jackrabbit transport.
  *
  * Use repository factory based on parameters (the parameters below are examples):
  *
@@ -24,18 +24,20 @@ use PHPCR\RepositoryFactoryInterface;
 class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
 {
     /**
-     * list of required parameters for jackrabbit
+     * list of required parameters for jackrabbit.
+     *
      * @var array
      */
-    private static $required = array(
+    private static $required = [
         'jackalope.jackrabbit_uri' => 'string (required): Path to the jackrabbit server',
-    );
+    ];
 
     /**
-     * list of optional parameters for jackrabbit
+     * list of optional parameters for jackrabbit.
+     *
      * @var array
      */
-    private static $optional = array(
+    private static $optional = [
         'jackalope.factory' => 'string or object: Use a custom factory class for Jackalope objects',
         'jackalope.default_header' => 'string: Set a default header to send on each request to the backend (i.e. for load balancers to identify sessions)',
         'jackalope.jackrabbit_expect' => 'boolean: Send the "Expect: 100-continue" header on larger PUT and POST requests. Disabled by default to avoid issues with proxies and load balancers.',
@@ -46,7 +48,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         'jackalope.jackrabbit_force_http_version_10' => 'boolean: Force HTTP version 1.0, this can in solving problems with curl such as https://github.com/jackalope/jackalope-jackrabbit/issues/89',
         'jackalope.jackrabbit_curl_options' => 'array: Additional global curl-options',
         'jackalope.jackrabbit_version' => 'string: Set the version of the jackrabbit server to allow the client to offer better functionality if possible',
-    );
+    ];
 
     /**
      * Get a repository connected to the jackrabbit backend specified in the
@@ -67,17 +69,17 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
 
         // check if we have all required parameters
         if (count(array_diff_key(self::$required, $parameters))) {
-            throw new ConfigurationException('A required parameter is missing: ' . implode(', ', array_keys(array_diff_key(self::$required, $parameters))));
+            throw new ConfigurationException('A required parameter is missing: '.implode(', ', array_keys(array_diff_key(self::$required, $parameters))));
         }
 
         // check if we have any unknown parameters
         if (count(array_diff_key($parameters, self::$required, self::$optional))) {
-            throw new ConfigurationException('Additional unknown parameters found: ' . implode(', ', array_keys(array_diff_key($parameters, self::$required, self::$optional))));
+            throw new ConfigurationException('Additional unknown parameters found: '.implode(', ', array_keys(array_diff_key($parameters, self::$required, self::$optional))));
         }
 
         if (isset($parameters['jackalope.factory'])) {
             $factory = $parameters['jackalope.factory'] instanceof FactoryInterface
-                ? $parameters['jackalope.factory'] : new $parameters['jackalope.factory'];
+                ? $parameters['jackalope.factory'] : new $parameters['jackalope.factory']();
         } else {
             $factory = new Jackrabbit\Factory();
         }
@@ -87,7 +89,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
             $uri .= '/';
         }
 
-        $transport = $factory->get('Transport\Jackrabbit\Client', array($uri));
+        $transport = $factory->get('Transport\Jackrabbit\Client', [$uri]);
         if (isset($parameters['jackalope.default_header'])) {
             $transport->addDefaultHeader($parameters['jackalope.default_header']);
         }
@@ -103,12 +105,12 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
         if (isset($parameters['jackalope.logger'])) {
             $transport = $factory->get(
                 'Transport\Jackrabbit\LoggingClient',
-                array($transport, $parameters['jackalope.logger'])
+                [$transport, $parameters['jackalope.logger']]
             );
         }
 
         $curlOptions = array_key_exists('jackalope.jackrabbit_curl_options', $parameters) ?
-            $parameters['jackalope.jackrabbit_curl_options'] : array();
+            $parameters['jackalope.jackrabbit_curl_options'] : [];
 
         if (isset($parameters['jackalope.jackrabbit_force_http_version_10'])) {
             $curlOptions[CURLOPT_HTTP_VERSION] = true;

@@ -1,8 +1,9 @@
 <?php
+
 namespace Jackalope\Transport\Jackrabbit;
 
 /**
- * Capsulate curl as an object
+ * Capsulate curl as an object.
  *
  * Wrapper class to abstract the curl* PHP userland functions.
  *
@@ -15,19 +16,21 @@ class curl
 {
     /**
      * Contains a connection resource to a curl session.
+     *
      * @var resource
      */
     protected $curl;
 
     /**
-     * Contains header of a response, if needed
+     * Contains header of a response, if needed.
+     *
      * @var array
      */
-
-    protected $headers = array();
+    protected $headers = [];
 
     /**
-     * Response body as a string
+     * Response body as a string.
+     *
      * @var string
      */
     protected $response = '';
@@ -108,14 +111,15 @@ class curl
     /**
      * Gets information regarding a specific transfer.
      *
-     * @param  int          $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
+     * @param int $option {@link http://ch.php.net/manual/en/function.curl-getinfo.php} to find a list of possible options.
+     *
      * @return string|array Returns a string if options is given otherwise associative array
      *
      * @see curl_getinfo
      */
     public function getinfo($option = null)
     {
-        if ($option === null) {
+        if (null === $option) {
             return curl_getinfo($this->curl);
         }
 
@@ -137,8 +141,8 @@ class curl
 
     public function readHeader($ch, $header)
     {
-        if (strpos($header, ":") !== false) {
-            list($key, $value) = explode(":", $header, 2);
+        if (false !== strpos($header, ':')) {
+            list($key, $value) = explode(':', $header, 2);
             $this->headers[$key] = trim($value);
         }
 
@@ -162,7 +166,7 @@ class curl
     public function parseResponseHeaders()
     {
         $this->setopt(CURLOPT_HEADER, false);
-        $this->setopt(CURLOPT_HEADERFUNCTION, array(&$this, 'readHeader'));
+        $this->setopt(CURLOPT_HEADERFUNCTION, [&$this, 'readHeader']);
     }
 
     public function setResponse($r)

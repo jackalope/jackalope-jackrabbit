@@ -1,16 +1,17 @@
 <?php
 
 /**
- * Implementation loader for jackalope-jackrabbit
+ * Implementation loader for jackalope-jackrabbit.
  */
 class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 {
     private static $instance = null;
 
-    private $necessaryConfigValues = array('jackrabbit.uri', 'phpcr.user', 'phpcr.pass', 'phpcr.workspace', 'phpcr.additionalWorkspace', 'phpcr.defaultWorkspace');
+    private $necessaryConfigValues = ['jackrabbit.uri', 'phpcr.user', 'phpcr.pass', 'phpcr.workspace', 'phpcr.additionalWorkspace', 'phpcr.defaultWorkspace'];
 
     /**
-     * Jackrabbit oak does not support multiple workspaces
+     * Jackrabbit oak does not support multiple workspaces.
+     *
      * @var bool
      */
     private $multiWorkspaceSupported = true;
@@ -19,8 +20,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     {
         // Make sure we have the necessary config
         foreach ($this->necessaryConfigValues as $val) {
-            if (! isset($GLOBALS[$val])) {
-                die('Please set '.$val.' in your phpunit.xml.' . "\n");
+            if (!isset($GLOBALS[$val])) {
+                exit('Please set '.$val.' in your phpunit.xml.'."\n");
             }
         }
 
@@ -28,36 +29,36 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
         // ensure workspaces exist
         $workspace = $this->getRepository()->login($this->getCredentials())->getWorkspace();
-        if (! in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames())) {
+        if (!in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames())) {
             $workspace->createWorkspace($GLOBALS['phpcr.workspace']);
         }
         if (false == $GLOBALS['phpcr.additionalWorkspace']) {
             $this->multiWorkspaceSupported = false;
-        } elseif (! in_array($GLOBALS['phpcr.additionalWorkspace'], $workspace->getAccessibleWorkspaceNames())) {
+        } elseif (!in_array($GLOBALS['phpcr.additionalWorkspace'], $workspace->getAccessibleWorkspaceNames())) {
             $workspace->createWorkspace($GLOBALS['phpcr.additionalWorkspace']);
         }
 
-        $this->unsupportedChapters = array(
+        $this->unsupportedChapters = [
             'PermissionsAndCapabilities',
             'ShareableNodes',
             'AccessControlManagement',
             'LifecycleManagement',
             'RetentionAndHold',
             'Transactions',
-        );
-        if (! $this->multiWorkspaceSupported) {
+        ];
+        if (!$this->multiWorkspaceSupported) {
             $this->unsupportedChapters[] = 'WorkspaceManagement';
         }
 
-        $this->unsupportedCases = array(
-            'Versioning\\SimpleVersionTest'
-        );
-        if (! $this->multiWorkspaceSupported) {
+        $this->unsupportedCases = [
+            'Versioning\\SimpleVersionTest',
+        ];
+        if (!$this->multiWorkspaceSupported) {
             $this->unsupportedCases[] = 'Writing\\CloneMethodsTest';
         }
 
-        $this->unsupportedTests = array(
-            'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+        $this->unsupportedTests = [
+            'Reading\\SessionReadMethodsTest::testImpersonate', // TODO: Check if that's implemented in newer jackrabbit versions.
             'Reading\\SessionNamespaceRemappingTest::testSetNamespacePrefix',
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes?
             'Reading\\BinaryReadMethodsTest::testReadEmptyBinaryMultivalue', // bug in jackrabbit import: 0 values loses type
@@ -80,8 +81,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithSource',
             'WorkspaceManagement\\WorkspaceManagementTest::testCreateWorkspaceWithInvalidSource',
             'WorkspaceManagement\\WorkspaceManagementTest::testDeleteWorkspace',
-        );
-        if (! $this->multiWorkspaceSupported) {
+        ];
+        if (!$this->multiWorkspaceSupported) {
             $this->unsupportedTests[] = 'Connecting\\RepositoryTest::testLoginNoSuchWorkspace';
             $this->unsupportedTests[] = 'Writing\\CopyMethodsTest::testCopyNoSuchWorkspace';
         }
@@ -103,19 +104,20 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getAdditionalSession($credentials = false)
     {
-        if (! $this->multiWorkspaceSupported) {
+        if (!$this->multiWorkspaceSupported) {
             return null;
         }
 
         return parent::getAdditionalSession($credentials);
     }
+
     public function getRepositoryFactoryParameters()
     {
-        return array(
+        return [
             'jackalope.jackrabbit_uri' => $GLOBALS['jackrabbit.uri'],
             \Jackalope\Session::OPTION_AUTO_LASTMODIFIED => false,
             'jackalope.logger' => new \Jackalope\Transport\Logging\Psr3Logger(new \Psr\Log\NullLogger()),
-        );
+        ];
     }
 
     public function getSessionWithLastModified()
@@ -154,6 +156,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getFixtureLoader()
     {
-        return new JackrabbitFixtureLoader(__DIR__.'/../vendor/phpcr/phpcr-api-tests/fixtures/', (isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null));
+        return new JackrabbitFixtureLoader(__DIR__.'/../vendor/phpcr/phpcr-api-tests/fixtures/', isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null);
     }
 }

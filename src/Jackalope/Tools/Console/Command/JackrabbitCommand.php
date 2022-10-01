@@ -2,43 +2,42 @@
 
 namespace Jackalope\Tools\Console\Command;
 
+use Jackalope\Tools\Console\Helper\JackrabbitHelper;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Jackalope\Tools\Console\Helper\JackrabbitHelper;
 
 /**
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
- *
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
 class JackrabbitCommand extends Command
 {
     /**
-     * Path to Jackrabbit jar file
+     * Path to Jackrabbit jar file.
+     *
      * @var string
      */
     protected $jackrabbit_jar;
 
     /**
-     * Path to the Jackrabbit workspace dir
+     * Path to the Jackrabbit workspace dir.
+     *
      * @var string
      */
     protected $workspace_dir;
 
     /**
-     * TCP port of the Jackrabbit HTTP server
-     * @var integer
+     * TCP port of the Jackrabbit HTTP server.
+     *
+     * @var int
      */
     protected $port;
 
-    /**
-     * Configures the current command.
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('jackalope:run:jackrabbit')
             ->addArgument('cmd', InputArgument::REQUIRED, 'Command to execute (start | stop | status)')
@@ -57,42 +56,34 @@ EOF
             );
     }
 
-    protected function setJackrabbitPath($jackrabbit_jar)
+    protected function setJackrabbitPath($jackrabbit_jar): void
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
     }
 
-    protected function setWorkspaceDir($workspace_dir)
+    protected function setWorkspaceDir($workspace_dir): void
     {
         $this->workspace_dir = $workspace_dir;
     }
 
-    protected function setPort($port)
+    protected function setPort($port): void
     {
         $this->port = $port;
     }
 
-    /**
-     * Executes the current command.
-     *
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
-     *
-     * @return integer 0 if everything went fine, or an error code
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $cmd = $input->getArgument('cmd');
 
-        if (! in_array(strtolower($cmd), array('start', 'stop', 'status'))) {
-            $output->writeln($this->asText());
+        if (!in_array(strtolower($cmd), ['start', 'stop', 'status'])) {
+            $output->writeln($this->getSynopsis());
 
             return 1;
         }
 
-        $jar = $input->getOption('jackrabbit_jar')?: $this->jackrabbit_jar;
+        $jar = $input->getOption('jackrabbit_jar') ?: $this->jackrabbit_jar;
 
-        if (! $jar) {
+        if (!$jar) {
             throw new \InvalidArgumentException('Either specify the path to the jackrabbit jar file or configure the command accordingly');
         }
 
@@ -100,13 +91,13 @@ EOF
             throw new \Exception("Could not find the specified Jackrabbit .jar file '$jar'");
         }
 
-        $workspace_dir = $input->getOption('workspace_dir')?:$this->workspace_dir?:null;
+        $workspace_dir = $input->getOption('workspace_dir') ?: $this->workspace_dir ?: null;
 
         if ($workspace_dir && !file_exists($workspace_dir)) {
             throw new \Exception("Could not find the specified directory'$workspace_dir'");
         }
 
-        $port = $input->getOption('port')?:$this->port;
+        $port = $input->getOption('port') ?: $this->port;
 
         $helper = new JackrabbitHelper($jar, $workspace_dir, $port);
 
@@ -118,7 +109,7 @@ EOF
                 $helper->stopServer();
                 break;
             case 'status':
-                $output->writeln("Jackrabbit server " . ($helper->isServerRunning() ? 'is running' : 'is not running'));
+                $output->writeln('Jackrabbit server '.($helper->isServerRunning() ? 'is running' : 'is not running'));
                 break;
         }
 

@@ -13,7 +13,7 @@ class Factory extends \Jackalope\Factory
     /**
      * {@inheritDoc}
      */
-    public function get($name, array $params = array())
+    public function get($name, array $params = [])
     {
         switch ($name) {
             case 'Query\QOM\QueryObjectModelFactory':

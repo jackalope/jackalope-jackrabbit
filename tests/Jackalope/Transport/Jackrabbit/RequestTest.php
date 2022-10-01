@@ -2,11 +2,9 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
+use DOMDocument;
 use Jackalope\Factory;
 use Jackalope\Test\JackrabbitTestCase;
-use DOMDocument;
-use Jackalope\Transport\Jackrabbit\Client;
-use Jackalope\Transport\Jackrabbit\Request;
 use PHPCR\SimpleCredentials;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -14,9 +12,9 @@ class RequestTest extends JackrabbitTestCase
 {
     protected function getCurlFixture($fixture = null, $httpCode = 200, $errno = null)
     {
-        $curl =  $this
+        $curl = $this
                     ->getMockBuilder('Jackalope\\Transport\\Jackrabbit\\curl')
-                    ->setMethods(array('exec', 'getinfo', 'errno', 'setopt'))
+                    ->setMethods(['exec', 'getinfo', 'errno', 'setopt'])
                     ->getMock();
 
         if ($fixture) {
@@ -49,18 +47,18 @@ class RequestTest extends JackrabbitTestCase
 
     public function getRequest($fixture = null, $httpCode = 200, $errno = null)
     {
-        $factory = new Factory;
+        $factory = new Factory();
 
         return new RequestMock($factory, $this->getClientMock(), $this->getCurlFixture($fixture, $httpCode, $errno), 'GET', 'http://foo/');
     }
 
     public function testExecuteDom()
     {
-        $factory = new Factory;
+        $factory = new Factory();
         $request = $this
                     ->getMockBuilder(Request::class)
-                    ->setMethods(array('execute'))
-                    ->setConstructorArgs(array($factory, $this->getClientMock(), $this->getCurlFixture(), null,null))
+                    ->setMethods(['execute'])
+                    ->setConstructorArgs([$factory, $this->getClientMock(), $this->getCurlFixture(), null, null])
                     ->getMock();
         $request->expects($this->once())
             ->method('execute')
@@ -85,12 +83,14 @@ class RequestTest extends JackrabbitTestCase
                     if (CURLOPT_USERPWD === $name) {
                         $passwordParam = true;
                     }
+
                     return true;
                 }),
                 $this->callback(static function ($value) use (&$passwordCorrect): bool {
                     if ('foo:bar' === $value) {
                         $passwordCorrect = true;
                     }
+
                     return true;
                 })
             )
