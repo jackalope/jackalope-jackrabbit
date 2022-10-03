@@ -42,9 +42,9 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
     public function sendExpect($send = true);
 
     /**
-     * Set to true to force HTTP version 1.0
+     * Set to true to force HTTP version 1.0.
      *
-     * @param boolean
+     * @param bool
      *
      * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
      */
@@ -55,16 +55,14 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      *
      * This options will be used foreach curl-request.
      *
-     * @param array $options
-     *
      * @return array all curl-options
      */
     public function addCurlOptions(array $options);
 
     /**
-     * Return the URL to the workspace determined during login
+     * Return the URL to the workspace determined during login.
      *
-     * @return null|string
+     * @return string|null
      */
     public function getWorkspaceUri();
 
@@ -81,8 +79,8 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      * @param $date
      *
      * @return array hashmap with 'data' containing unfiltered DOM of xml atom
-     *      feed of events, 'nextMillis' is the next timestamp if there are
-     *      more events to be found, false otherwise.
+     *               feed of events, 'nextMillis' is the next timestamp if there are
+     *               more events to be found, false otherwise
      *
      * @private
      */

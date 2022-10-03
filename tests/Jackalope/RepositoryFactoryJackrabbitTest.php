@@ -13,7 +13,7 @@ class RepositoryFactoryJackrabbitTest extends TestCase
 
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('missing');
-        $factory->getRepository(array());
+        $factory->getRepository([]);
     }
 
     public function testExtraParameter(): void
@@ -22,9 +22,9 @@ class RepositoryFactoryJackrabbitTest extends TestCase
 
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('unknown');
-        $factory->getRepository(array(
+        $factory->getRepository([
             'jackalope.jackrabbit_uri' => 'http://localhost',
             'unknown' => 'garbage',
-        ));
+        ]);
     }
 }

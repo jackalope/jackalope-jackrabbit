@@ -3,11 +3,10 @@
 namespace Jackalope\Tools\Console\Helper;
 
 /**
- * Helper class for basic jackrabbit server management
+ * Helper class for basic jackrabbit server management.
  *
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
- *
  * @author Daniel Barsotti <daniel.barsotti@liip.ch>
  */
 class JackrabbitHelper
@@ -18,9 +17,10 @@ class JackrabbitHelper
 
     /**
      * construct an instance of the helper.
+     *
      * @param string $jackrabbit_jar the path to the jackrabbit server jar file
      * @param string $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
-     * @param integer $port          if provided this will be used as port for HTTP server, otherwise the default is used
+     * @param int    $port           if provided this will be used as port for HTTP server, otherwise the default is used
      */
     public function __construct($jackrabbit_jar, $workspace_dir = null, $port = null)
     {
@@ -35,7 +35,7 @@ class JackrabbitHelper
     public function startServer()
     {
         $pid = $this->getServerPid();
-        if (! $pid) {
+        if (!$pid) {
             chdir($this->workspace_dir);
             $port_option = $this->port ? ' --port '.$this->port : '';
             // TODO: check java is executable
@@ -56,17 +56,18 @@ class JackrabbitHelper
 
     /**
      * Return true if the jackrabbit server is running, false otherwise.
-     * @return boolean
+     *
+     * @return bool
      */
     public function isServerRunning()
     {
-        return $this->getServerPid() !== '';
+        return '' !== $this->getServerPid();
     }
 
     public function getServerPid()
     {
         $pid = trim(shell_exec("pgrep -f -n 'java \-jar {$this->jackrabbit_jar}'"));
-        //TODO: check it's a valid pid
+        // TODO: check it's a valid pid
         return $pid;
     }
 }

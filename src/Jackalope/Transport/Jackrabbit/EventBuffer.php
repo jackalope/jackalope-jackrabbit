@@ -2,10 +2,11 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
+use ArrayIterator;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
-use ArrayIterator;
+use Jackalope\FactoryInterface;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\Transport\ObservationInterface;
@@ -13,7 +14,6 @@ use PHPCR\NamespaceRegistryInterface;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 use PHPCR\RepositoryException;
-use Jackalope\FactoryInterface;
 
 /**
  * This buffer parses the Jackrabbit atom xml feed.
@@ -22,7 +22,6 @@ use Jackalope\FactoryInterface;
  *
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
- *
  * @author David Buchmann <mail@davidbu.ch>
  */
 class EventBuffer implements \Iterator
@@ -38,7 +37,7 @@ class EventBuffer implements \Iterator
     protected $filter;
 
     /**
-     * Buffered events
+     * Buffered events.
      *
      * @var ArrayIterator
      */
@@ -75,7 +74,7 @@ class EventBuffer implements \Iterator
     protected $nextMillis;
 
     /**
-     * The prefix to extract the path from the event href attribute
+     * The prefix to extract the path from the event href attribute.
      *
      * @var string
      */
@@ -86,12 +85,9 @@ class EventBuffer implements \Iterator
      *
      * Actual data loading is deferred to when it is first requested.
      *
-     * @param FactoryInterface         $factory
-     * @param EventFilter              $filter           filter to apply.
-     * @param Client                   $transport
-     * @param NodeTypeManagerInterface $ntm
-     * @param string                   $workspaceRootUri
-     * @param array                    $rawData
+     * @param EventFilter $filter           filter to apply
+     * @param string      $workspaceRootUri
+     * @param array       $rawData
      */
     public function __construct(
         FactoryInterface $factory,
@@ -110,21 +106,25 @@ class EventBuffer implements \Iterator
         $this->setData($rawData);
     }
 
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->events->current();
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         $this->events->next();
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->events->key();
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         if (!$this->events->valid() && false !== $this->nextMillis) {
@@ -134,6 +134,7 @@ class EventBuffer implements \Iterator
         return $this->events->valid();
     }
 
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->events->rewind();
@@ -160,13 +161,11 @@ class EventBuffer implements \Iterator
      * Construct the event journal from the DAVEX response returned by the
      * server, immediately filtered by the current filter.
      *
-     * @param DOMDocument $data
-     *
      * @return Event[]
      */
     protected function constructEventJournal(DOMDocument $data)
     {
-        $events = array();
+        $events = [];
         $entries = $data->getElementsByTagName('entry');
 
         foreach ($entries as $entry) {
@@ -179,24 +178,23 @@ class EventBuffer implements \Iterator
     }
 
     /**
-     * Parse the events in an <entry> section
+     * Parse the events in an <entry> section.
      *
-     * @param DOMElement $entry
-     * @param string     $currentUserId The current user ID as extracted from
-     *      the <entry> part
+     * @param string $currentUserId The current user ID as extracted from
+     *                              the <entry> part
      *
      * @return Event[]
      */
     protected function extractEvents(DOMElement $entry, $currentUserId)
     {
-        $events = array();
+        $events = [];
         $domEvents = $entry->getElementsByTagName('event');
 
         foreach ($domEvents as $domEvent) {
-            $event = $this->factory->get('Jackalope\Observation\Event', array($this->nodeTypeManager));
+            $event = $this->factory->get('Jackalope\Observation\Event', [$this->nodeTypeManager]);
             $event->setType($this->extractEventType($domEvent));
 
-            $date = $this->getDomElement($domEvent, 'eventdate', 'The event date was not found while building the event journal:\n' . $this->getEventDom($domEvent));
+            $date = $this->getDomElement($domEvent, 'eventdate', 'The event date was not found while building the event journal:\n'.$this->getEventDom($domEvent));
             $event->setUserId($currentUserId);
 
             // The timestamps in Java contain milliseconds, it's not the case in PHP
@@ -211,7 +209,7 @@ class EventBuffer implements \Iterator
             $href = $this->getDomElement($domEvent, 'href');
             if ($href) {
                 $path = str_replace($this->workspaceRootUri, '', $href->nodeValue);
-                if (substr($path, -1) === '/') {
+                if ('/' === substr($path, -1)) {
                     // Jackrabbit might return paths with trailing slashes. Eliminate them if present.
                     $path = substr($path, 0, -1);
                 }
@@ -235,7 +233,7 @@ class EventBuffer implements \Iterator
             $eventInfos = $this->getDomElement($domEvent, 'eventinfo');
             if ($eventInfos) {
                 foreach ($eventInfos->childNodes as $info) {
-                    if ($info->nodeType == XML_ELEMENT_NODE) {
+                    if (XML_ELEMENT_NODE == $info->nodeType) {
                         $event->addInfo($info->tagName, $info->nodeValue);
                     }
                 }
@@ -257,9 +255,7 @@ class EventBuffer implements \Iterator
     }
 
     /**
-     * Extract a user id from the author tag in an entry section
-     *
-     * @param DOMElement $entry
+     * Extract a user id from the author tag in an entry section.
      *
      * @return string user id of the event
      *
@@ -270,7 +266,7 @@ class EventBuffer implements \Iterator
         $authors = $entry->getElementsByTagName('author');
 
         if (!$authors->length) {
-            throw new RepositoryException("User ID not found while building the event journal");
+            throw new RepositoryException('User ID not found while building the event journal');
         }
 
         $userId = null;
@@ -280,13 +276,11 @@ class EventBuffer implements \Iterator
             }
         }
 
-        throw new RepositoryException("Malformed user ID while building the event journal");
+        throw new RepositoryException('Malformed user ID while building the event journal');
     }
 
     /**
-     * Extract an event type from a DavEx event journal response
-     *
-     * @param DOMElement $event
+     * Extract an event type from a DavEx event journal response.
      *
      * @return int The event type
      *
@@ -297,7 +291,7 @@ class EventBuffer implements \Iterator
         $list = $event->getElementsByTagName('eventtype');
 
         if (!$list->length) {
-            throw new RepositoryException("Event type not found while building the event journal");
+            throw new RepositoryException('Event type not found while building the event journal');
         }
 
         // Here we cannot simply take the first child as the <eventtype> tag might contain
@@ -308,16 +302,16 @@ class EventBuffer implements \Iterator
             }
         }
 
-        throw new RepositoryException("Malformed event type while building the event journal");
+        throw new RepositoryException('Malformed event type while building the event journal');
     }
 
     /**
-     * Extract a given DOMElement from the children of another DOMElement
+     * Extract a given DOMElement from the children of another DOMElement.
      *
      * @param DOMElement $event        The DOMElement containing the searched tag
      * @param string     $tagName      The name of the searched tag
      * @param string     $errorMessage The error message when the tag was not
-     *      found or null if the tag is not required
+     *                                 found or null if the tag is not required
      *
      * @return DOMNode
      *
@@ -335,7 +329,7 @@ class EventBuffer implements \Iterator
     }
 
     /**
-     * Get the JCR event type from a DavEx tag representing the event type
+     * Get the JCR event type from a DavEx tag representing the event type.
      *
      * @param string $tagName
      *
@@ -366,9 +360,7 @@ class EventBuffer implements \Iterator
     }
 
     /**
-     * Get the XML representation of a DOMElement to display in error messages
-     *
-     * @param DOMElement $event
+     * Get the XML representation of a DOMElement to display in error messages.
      *
      * @return string
      */

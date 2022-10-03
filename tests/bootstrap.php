@@ -4,19 +4,19 @@
 error_reporting(E_ALL | E_STRICT);
 
 if (!$loader = @include __DIR__.'/../vendor/autoload.php') {
-    die('You must set up the project dependencies, run the following commands:'.PHP_EOL.
+    exit('You must set up the project dependencies, run the following commands:'.PHP_EOL.
         'curl -s http://getcomposer.org/installer | php'.PHP_EOL.
         'php composer.phar install'.PHP_EOL);
 }
 
-/** Make Jackalope base tests autoloadable */
+/* Make Jackalope base tests autoloadable */
 $loader->add('Jackalope', __DIR__.'/../vendor/jackalope/jackalope/tests');
 
 /** Load the implementation loader class */
-require_once __DIR__ . '/ImplementationLoader.php';
-require_once __DIR__ . '/JackrabbitFixtureLoader.php';
+require_once __DIR__.'/ImplementationLoader.php';
+require_once __DIR__.'/JackrabbitFixtureLoader.php';
 
-/**
+/*
  * constants for the repository descriptor test for JCR 1.0/JSR-170 and JSR-283 specs
  */
 
