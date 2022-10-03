@@ -24,6 +24,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # have to install phpstan ourselves here, the phpstan-ga fails at composer install with weird errors
       - name: Install phpstan
         run: |
           composer require --no-update phpstan/phpstan

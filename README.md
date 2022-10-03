@@ -20,38 +20,21 @@ This code is dual licensed under the MIT license and the Apache License Version
 
 # Preconditions
 
-* php >= 5.3
 * libxml version >= 2.7.0 (due to a bug in libxml [http://bugs.php.net/bug.php?id=36501](http://bugs.php.net/bug.php?id=36501))
 * libcurl (if you get ``Problem (2) in the Chunked-Encoded data`` with version 7.35, try updating your curl version)
-* phpunit >= 3.6 (if you want to run the tests)
 * [composer](http://getcomposer.org/)
 
 
 # Installation
 
-If you do not yet have composer, install it like this
+The recommended way to install jackalope is through [composer](http://getcomposer.org/).
 
 ```sh
-$ curl -s http://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin
+$ mkdir my-project
+$ cd my-project
+$ composer init
+$ composer require jackalope/jackalope-jackrabbit
 ```
-
-To install jackalope itself, run the following in the parent directory of where you want jackalope
-
-```sh
-$ git clone git://github.com/jackalope/jackalope-jackrabbit.git
-$ cd jackalope-jackrabbit
-$ php /usr/local/bin/composer.phar install
-```
-
-Note that this will also install the test suite. If you want to install jackalope without the test
-suite, you should run composer with the --no-dev parameter, ie
-
-```sh
-$ php /usr/local/bin/composer.phar install --no-dev
-```
-
-You can run this command whether or not you have already run it without the --no-dev parameter
-
 
 ## Jackrabbit storage server
 
