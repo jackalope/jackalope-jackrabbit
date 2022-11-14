@@ -15,6 +15,7 @@ use PHPCR\Query\QOM\NotInterface;
 use PHPCR\Query\QOM\OrInterface;
 use PHPCR\Query\QOM\PropertyExistenceInterface;
 use PHPCR\Query\QOM\PropertyValueInterface;
+use PHPCR\Query\QOM\QueryObjectModelInterface;
 use PHPCR\Query\QOM\SelectorInterface;
 use PHPCR\Query\QOM\SourceInterface;
 use PHPCR\Query\QOM\UpperCaseInterface;
@@ -40,7 +41,7 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
         array $orderings = [],
         array $columns = [],
         $simpleQuery = false
-    ) {
+    ): QueryObjectModelInterface {
         $className = $this->isSimple($source, $constraint)
             ? 'Query\QOM\QueryObjectModelSql1' : 'Query\QOM\QueryObjectModel';
 

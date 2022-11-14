@@ -23,6 +23,7 @@ use LogicException;
 use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
 use PHPCR\ItemNotFoundException;
+use PHPCR\Lock\LockInterface;
 use PHPCR\LoginException;
 use PHPCR\Observation\EventFilterInterface;
 use PHPCR\PathNotFoundException;
@@ -359,7 +360,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function login(CredentialsInterface $credentials = null, $workspaceName = null)
+    public function login(CredentialsInterface $credentials = null, $workspaceName = null): string
     {
         if ($this->credentials) {
             throw new RepositoryException(
@@ -411,7 +412,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function logout()
+    public function logout(): void
     {
         if (!empty($this->curl)) {
             $this->curl->close();
@@ -430,7 +431,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getRepositoryDescriptors()
+    public function getRepositoryDescriptors(): array
     {
         if (null == $this->descriptors) {
             $request = $this->getRequest(Request::REPORT, $this->server);
@@ -501,7 +502,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getAccessibleWorkspaceNames()
+    public function getAccessibleWorkspaceNames(): array
     {
         $request = $this->getRequest(Request::PROPFIND, $this->server);
         $request->setBody($this->buildPropfindRequest(['D:workspace']));
@@ -537,7 +538,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getNodes($paths, $query = ':include')
+    public function getNodes($paths, $query = ':include'): array
     {
         if (0 == count($paths)) {
             return [];
@@ -609,7 +610,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getNodePathForIdentifier($uuid, $workspace = null)
+    public function getNodePathForIdentifier($uuid, $workspace = null): string
     {
         if (null !== $workspace && $workspace != $this->workspace) {
             $client = new Client($this->factory, $this->server);
@@ -647,7 +648,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getProperty($path)
+    public function getProperty($path): \stdClass
     {
         throw new NotImplementedException();
         /*
@@ -724,7 +725,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getReferences($path, $name = null)
+    public function getReferences($path, $name = null): array
     {
         return $this->getNodeReferences($path, $name);
     }
@@ -732,7 +733,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getWeakReferences($path, $name = null)
+    public function getWeakReferences($path, $name = null): array
     {
         return $this->getNodeReferences($path, $name, true);
     }
@@ -795,7 +796,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function addVersionLabel($versionPath, $label, $moveLabel)
+    public function addVersionLabel($versionPath, $label, $moveLabel): void
     {
         $versionPath = $this->encodeAndValidatePathForDavex($versionPath);
 
@@ -824,7 +825,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function removeVersionLabel($versionPath, $label)
+    public function removeVersionLabel($versionPath, $label): void
     {
         $versionPath = $this->encodeAndValidatePathForDavex($versionPath);
 
@@ -833,14 +834,12 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         $request = $this->getRequest(Request::LABEL, $versionPath);
         $request->setBody($body);
         $request->execute();
-
-        return;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function checkinItem($path)
+    public function checkinItem($path): string
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
@@ -864,7 +863,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function checkoutItem($path)
+    public function checkoutItem($path): void
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         try {
@@ -884,7 +883,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function restoreItem($removeExisting, $versionPath, $path)
+    public function restoreItem($removeExisting, $versionPath, $path): void
     {
         $path = $this->encodeAndValidatePathForDavex($path);
 
@@ -907,13 +906,11 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function removeVersion($versionPath, $versionName)
+    public function removeVersion($versionPath, $versionName): void
     {
         $path = $this->encodeAndValidatePathForDavex($versionPath.'/'.$versionName);
         $request = $this->getRequest(Request::DELETE, $path);
-        $resp = $request->execute();
-
-        return $resp;
+        $request->execute();
     }
 
     // QueryTransport //
@@ -921,7 +918,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function query(Query $query)
+    public function query(Query $query): array
     {
         // TODO handle bind variables
         $querystring = $query->getStatement();
@@ -1009,7 +1006,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getSupportedQueryLanguages()
+    public function getSupportedQueryLanguages(): array
     {
         return [
             QueryInterface::JCR_SQL2,
@@ -1048,7 +1045,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteNodes(array $operations)
+    public function deleteNodes(array $operations): void
     {
         // Reverse sort the batch; work-around for problem with
         // deleting same-name siblings. Not guaranteed to work
@@ -1081,7 +1078,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteProperties(array $operations)
+    public function deleteProperties(array $operations): void
     {
         foreach ($operations as $operation) {
             $this->deleteItem($operation->srcPath);
@@ -1091,7 +1088,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteNodeImmediately($path)
+    public function deleteNodeImmediately($path): void
     {
         $this->prepareSave();
         $this->deleteItem($path);
@@ -1101,7 +1098,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function deletePropertyImmediately($path)
+    public function deletePropertyImmediately($path): void
     {
         $this->prepareSave();
         $this->deleteItem($path);
@@ -1123,7 +1120,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function copyNode($srcAbsPath, $dstAbsPath, $srcWorkspace = null)
+    public function copyNode($srcAbsPath, $dstAbsPath, $srcWorkspace = null): void
     {
         if ($srcWorkspace) {
             $this->copyNodeOtherWorkspace($srcAbsPath, $dstAbsPath, $srcWorkspace);
@@ -1172,7 +1169,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function moveNodes(array $operations)
+    public function moveNodes(array $operations): void
     {
         foreach ($operations as $operation) {
             PathHelper::assertValidAbsolutePath($operation->srcPath);
@@ -1185,7 +1182,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function moveNodeImmediately($srcAbsPath, $dstAbsPath)
+    public function moveNodeImmediately($srcAbsPath, $dstAbsPath): void
     {
         $request = $this->getRequest(Request::MOVE, $srcAbsPath);
         $request->setDepth(Request::INFINITY);
@@ -1196,7 +1193,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function reorderChildren(Node $node)
+    public function reorderChildren(Node $node): void
     {
         $reorders = $node->getOrderCommands();
 
@@ -1220,7 +1217,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function cloneFrom($srcWorkspace, $srcAbsPath, $destAbsPath, $removeExisting)
+    public function cloneFrom($srcWorkspace, $srcAbsPath, $destAbsPath, $removeExisting): void
     {
         $srcAbsPath = $this->encodeAndValidatePathForDavex($srcAbsPath);
         $destAbsPath = $this->encodeAndValidatePathForDavex($destAbsPath);
@@ -1278,7 +1275,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function updateNode(Node $node, $srcWorkspace)
+    public function updateNode(Node $node, $srcWorkspace): void
     {
         $path = $this->encodeAndValidatePathForDavex($node->getPath());
         $srcWorkspaceUri = $this->server.$srcWorkspace;
@@ -1302,7 +1299,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function storeNodes(array $operations)
+    public function storeNodes(array $operations): void
     {
         /** @var $operation \Jackalope\Transport\AddNodeOperation */
         foreach ($operations as $operation) {
@@ -1374,7 +1371,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function updateProperties(Node $node)
+    public function updateProperties(Node $node): void
     {
         $this->updateLastModified($node);
         foreach ($node->getProperties() as $property) {
@@ -1487,7 +1484,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getNamespaces()
+    public function getNamespaces(): array
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUri);
         $request->setBody($this->buildReportRequest('dcr:registerednamespaces'));
@@ -1511,7 +1508,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function registerNamespace($prefix, $uri)
+    public function registerNamespace($prefix, $uri): void
     {
         // seems jackrabbit always expects full list of namespaces
         $namespaces = $this->getNamespaces();
@@ -1546,7 +1543,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function unregisterNamespace($prefix)
+    public function unregisterNamespace($prefix): void
     {
         throw new UnsupportedRepositoryOperationException('Unregistering namespace not supported by jackrabbit backend');
         /*
@@ -1563,7 +1560,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getNodeTypes($nodeTypes = [])
+    public function getNodeTypes($nodeTypes = []): array
     {
         $request = $this->getRequest(Request::REPORT, $this->workspaceUriRoot);
         $request->setBody($this->buildNodeTypesRequest($nodeTypes));
@@ -1585,13 +1582,11 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function registerNodeTypesCnd($cnd, $allowUpdate)
+    public function registerNodeTypesCnd($cnd, $allowUpdate): void
     {
         $request = $this->getRequest(Request::PROPPATCH, $this->workspaceUri);
         $request->setBody($this->buildRegisterNodeTypeRequest($cnd, $allowUpdate));
         $request->execute();
-
-        return true;
     }
 
     // PermissionInterface //
@@ -1599,7 +1594,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getPermissions($path)
+    public function getPermissions($path): array
     {
         // TODO: OPTIMIZE - once we have ACL this might be done without any server request
         $body = '<?xml version="1.0" encoding="UTF-8"?>'.
@@ -1637,7 +1632,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null)
+    public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null): LockInterface
     {
         $timeout = PHP_INT_MAX === $timeoutHint ? 'infinite' : $timeoutHint;
         $ownerInfo = (null === $ownerInfo) ? $this->credentials->getUserID() : (string) $ownerInfo;
@@ -1665,7 +1660,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function isLocked($absPath)
+    public function isLocked($absPath): bool
     {
         $request = $this->getRequest(Request::PROPFIND, $absPath);
         $request->setBody($this->buildPropfindRequest(['D:lockdiscovery']));
@@ -1680,7 +1675,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function unlock($absPath, $lockToken)
+    public function unlock($absPath, $lockToken): void
     {
         $request = $this->getRequest(Request::UNLOCK, $absPath);
         $request->setLockToken($lockToken);
@@ -1690,7 +1685,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
+    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session): \Iterator
     {
         return $this->factory->get('Jackalope\Transport\Jackrabbit\EventBuffer', [
             $filter,
@@ -1730,7 +1725,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function setUserData($userData)
+    public function setUserData($userData): void
     {
         $this->userData = $userData;
     }
@@ -1746,7 +1741,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function createWorkspace($name, $srcWorkspace = null)
+    public function createWorkspace($name, $srcWorkspace = null): void
     {
         if (null != $srcWorkspace) {
             // https://issues.apache.org/jira/browse/JCR-3144
@@ -1772,7 +1767,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function deleteWorkspace($name)
+    public function deleteWorkspace($name): void
     {
         // https://issues.apache.org/jira/browse/JCR-3144
         throw new UnsupportedRepositoryOperationException("Can not delete a workspace as jackrabbit can not do it. Find the jackrabbit folder and look for workspaces/$name and delete that folder");
@@ -1894,7 +1889,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function setNodeTypeManager($nodeTypeManager)
+    public function setNodeTypeManager($nodeTypeManager): void
     {
         $this->nodeTypeManager = $nodeTypeManager;
     }
@@ -2107,14 +2102,14 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function prepareSave()
+    public function prepareSave(): void
     {
     }
 
     /**
      * {@inheritDoc}
      */
-    public function finishSave()
+    public function finishSave(): void
     {
         if (count($this->jsopBody) > 0) {
             $request = $this->getRequest(Request::POST, '/');
@@ -2159,7 +2154,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
     /**
      * {@inheritDoc}
      */
-    public function rollbackSave()
+    public function rollbackSave(): void
     {
     }
 

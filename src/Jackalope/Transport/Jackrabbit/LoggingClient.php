@@ -8,6 +8,7 @@ use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
 use Jackalope\Transport\Logging\LoggerInterface;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\VersioningInterface;
+use PHPCR\Lock\LockInterface;
 use PHPCR\Observation\EventFilterInterface;
 use PHPCR\SessionInterface;
 
@@ -20,22 +21,6 @@ use PHPCR\SessionInterface;
  */
 class LoggingClient extends AbstractReadWriteLoggingWrapper implements JackrabbitClientInterface
 {
-    /**
-     * @var Client
-     */
-    protected $transport;
-
-    /**
-     * Constructor.
-     *
-     * @param Client          $transport A jackalope jackrabbit client instance
-     * @param LoggerInterface $logger    A logger instance
-     */
-    public function __construct(FactoryInterface $factory, Client $transport, LoggerInterface $logger)
-    {
-        parent::__construct($factory, $transport, $logger);
-    }
-
     /**
      * Add a HTTP header which is sent on each Request.
      *
@@ -80,7 +65,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function addVersionLabel($versionPath, $label, $moveLabel)
+    public function addVersionLabel($versionPath, $label, $moveLabel): void
     {
         $this->transport->addVersionLabel($versionPath, $label, $moveLabel);
     }
@@ -88,7 +73,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function removeVersionLabel($versionPath, $label)
+    public function removeVersionLabel($versionPath, $label): void
     {
         $this->transport->removeVersionLabel($versionPath, $label);
     }
@@ -96,7 +81,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function checkinItem($path)
+    public function checkinItem($path): string
     {
         return $this->transport->checkinItem($path);
     }
@@ -104,7 +89,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function checkoutItem($path)
+    public function checkoutItem($path): void
     {
         $this->transport->checkoutItem($path);
     }
@@ -112,7 +97,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function restoreItem($removeExisting, $versionPath, $path)
+    public function restoreItem($removeExisting, $versionPath, $path): void
     {
         $this->transport->restoreItem($removeExisting, $versionPath, $path);
     }
@@ -120,9 +105,9 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function removeVersion($versionPath, $versionName)
+    public function removeVersion($versionPath, $versionName): void
     {
-        return $this->transport->removeVersion($versionPath, $versionName);
+        $this->transport->removeVersion($versionPath, $versionName);
     }
 
     // QueryTransport //
@@ -130,7 +115,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function query(Query $query)
+    public function query(Query $query): array
     {
         $this->logger->startCall(__FUNCTION__, func_get_args(), ['fetchDepth' => $this->transport->getFetchDepth()]);
         $result = $this->transport->query($query);
@@ -142,7 +127,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function getSupportedQueryLanguages()
+    public function getSupportedQueryLanguages(): array
     {
         return $this->transport->getSupportedQueryLanguages();
     }
@@ -150,7 +135,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function registerNamespace($prefix, $uri)
+    public function registerNamespace($prefix, $uri): void
     {
         $this->transport->registerNamespace($prefix, $uri);
     }
@@ -158,7 +143,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function unregisterNamespace($prefix)
+    public function unregisterNamespace($prefix): void
     {
         $this->transport->unregisterNamespace($prefix);
     }
@@ -166,15 +151,15 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function registerNodeTypesCnd($cnd, $allowUpdate)
+    public function registerNodeTypesCnd($cnd, $allowUpdate): void
     {
-        return $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
+        $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getPermissions($path)
+    public function getPermissions($path): array
     {
         return $this->transport->getPermissions($path);
     }
@@ -182,7 +167,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null)
+    public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null): LockInterface
     {
         return $this->transport->lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint, $ownerInfo);
     }
@@ -190,7 +175,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function isLocked($absPath)
+    public function isLocked($absPath): bool
     {
         return $this->transport->isLocked($absPath);
     }
@@ -198,7 +183,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function unlock($absPath, $lockToken)
+    public function unlock($absPath, $lockToken): void
     {
         $this->transport->unlock($absPath, $lockToken);
     }
@@ -206,7 +191,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
+    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session): \Iterator
     {
         return $this->transport->getEvents($date, $filter, $session);
     }
@@ -222,7 +207,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function setUserData($userData)
+    public function setUserData($userData): void
     {
         $this->transport->setUserData($userData);
     }
@@ -238,7 +223,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function createWorkspace($name, $srcWorkspace = null)
+    public function createWorkspace($name, $srcWorkspace = null): void
     {
         $this->transport->createWorkspace($name, $srcWorkspace);
     }
@@ -246,7 +231,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
     /**
      * {@inheritDoc}
      */
-    public function deleteWorkspace($name)
+    public function deleteWorkspace($name): void
     {
         $this->transport->deleteWorkspace($name);
     }
