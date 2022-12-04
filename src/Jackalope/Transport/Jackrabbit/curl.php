@@ -45,6 +45,7 @@ class curl
     public function __construct($url = null)
     {
         $this->curl = curl_init($url);
+        $this->setopt(CURLINFO_HEADER_OUT, true);
     }
 
     /**

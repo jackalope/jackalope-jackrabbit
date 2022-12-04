@@ -553,7 +553,7 @@ class Request
         $curl->setResponse($response);
 
         $httpCode = $curl->getinfo(CURLINFO_HTTP_CODE);
-        if ($httpCode >= 200 && $httpCode < 300) {
+        if ($httpCode >= 200 && $httpCode < 300 && $this->method !== 'LOCK') {
             if ($getCurlObject) {
                 return $curl;
             }
@@ -663,7 +663,7 @@ class Request
         if (412 == $httpCode) {
             throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n".$this->getShortErrorString());
         }
-        if ($httpCode >= 500) {
+        if ($httpCode >= 500 && $this->method === 'LOCK') {
             $msg = "HTTP $httpCode Error from backend on: {$this->method} \n".$this->getLongErrorString($curl, $response);
             try {
                 $workspaceUri = [$this->client->getWorkSpaceUri()];
