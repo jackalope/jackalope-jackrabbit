@@ -2,10 +2,7 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use ArrayIterator;
-use DOMDocument;
 use DOMElement;
-use DOMNode;
 use Jackalope\FactoryInterface;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
@@ -39,7 +36,7 @@ class EventBuffer implements \Iterator
     /**
      * Buffered events.
      *
-     * @var ArrayIterator
+     * @var \ArrayIterator
      */
     protected $events;
 
@@ -163,7 +160,7 @@ class EventBuffer implements \Iterator
      *
      * @return Event[]
      */
-    protected function constructEventJournal(DOMDocument $data)
+    protected function constructEventJournal(\DOMDocument $data)
     {
         $events = [];
         $entries = $data->getElementsByTagName('entry');
@@ -174,7 +171,7 @@ class EventBuffer implements \Iterator
             $events = array_merge($events, $moreEvents);
         }
 
-        return new ArrayIterator($events);
+        return new \ArrayIterator($events);
     }
 
     /**
@@ -185,7 +182,7 @@ class EventBuffer implements \Iterator
      *
      * @return Event[]
      */
-    protected function extractEvents(DOMElement $entry, $currentUserId)
+    protected function extractEvents(\DOMElement $entry, $currentUserId)
     {
         $events = [];
         $domEvents = $entry->getElementsByTagName('event');
@@ -261,7 +258,7 @@ class EventBuffer implements \Iterator
      *
      * @throws RepositoryException
      */
-    protected function extractUserId(DOMElement $entry)
+    protected function extractUserId(\DOMElement $entry)
     {
         $authors = $entry->getElementsByTagName('author');
 
@@ -271,7 +268,7 @@ class EventBuffer implements \Iterator
 
         $userId = null;
         foreach ($authors->item(0)->childNodes as $child) {
-            if ($child instanceof DOMElement) {
+            if ($child instanceof \DOMElement) {
                 return $child->nodeValue;
             }
         }
@@ -286,7 +283,7 @@ class EventBuffer implements \Iterator
      *
      * @throws RepositoryException
      */
-    protected function extractEventType(DOMElement $event)
+    protected function extractEventType(\DOMElement $event)
     {
         $list = $event->getElementsByTagName('eventtype');
 
@@ -297,7 +294,7 @@ class EventBuffer implements \Iterator
         // Here we cannot simply take the first child as the <eventtype> tag might contain
         // text fragments (i.e. newlines) that will be returned as DOMText elements.
         foreach ($list->item(0)->childNodes as $el) {
-            if ($el instanceof DOMElement) {
+            if ($el instanceof \DOMElement) {
                 return $this->getEventTypeFromTagName($el->tagName);
             }
         }
@@ -308,16 +305,16 @@ class EventBuffer implements \Iterator
     /**
      * Extract a given DOMElement from the children of another DOMElement.
      *
-     * @param DOMElement $event        The DOMElement containing the searched tag
-     * @param string     $tagName      The name of the searched tag
-     * @param string     $errorMessage The error message when the tag was not
-     *                                 found or null if the tag is not required
+     * @param \DOMElement $event        The DOMElement containing the searched tag
+     * @param string      $tagName      The name of the searched tag
+     * @param string      $errorMessage The error message when the tag was not
+     *                                  found or null if the tag is not required
      *
-     * @return DOMNode
+     * @return \DOMNode
      *
      * @throws RepositoryException
      */
-    protected function getDomElement(DOMElement $event, $tagName, $errorMessage = null)
+    protected function getDomElement(\DOMElement $event, $tagName, $errorMessage = null)
     {
         $list = $event->getElementsByTagName($tagName);
 
@@ -364,7 +361,7 @@ class EventBuffer implements \Iterator
      *
      * @return string
      */
-    protected function getEventDom(DOMElement $event)
+    protected function getEventDom(\DOMElement $event)
     {
         return $event->ownerDocument->saveXML($event);
     }

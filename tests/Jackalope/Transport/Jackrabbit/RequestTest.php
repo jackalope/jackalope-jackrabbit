@@ -2,7 +2,6 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use DOMDocument;
 use Jackalope\Factory;
 use Jackalope\Test\JackrabbitTestCase;
 use PHPCR\SimpleCredentials;
@@ -64,7 +63,7 @@ class RequestTest extends JackrabbitTestCase
             ->method('execute')
             ->willReturn('<xml/>');
 
-        $this->assertInstanceOf(DOMDocument::class, $request->executeDom());
+        $this->assertInstanceOf(\DOMDocument::class, $request->executeDom());
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use DOMDocument;
 use Jackalope\Factory;
 use Jackalope\Node;
 use Jackalope\NodeType\NodeTypeManager;
@@ -110,7 +109,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetRepositoryDescriptorsEmptyBackendResponse(): void
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
         $t = $this->getTransportMock();
         $request = $this->getRequestMock($dom, ['setBody']);
@@ -127,7 +126,7 @@ class ClientTest extends JackrabbitTestCase
     public function testGetRepositoryDescriptors(): void
     {
         $reportRequest = $this->getTransportMock()->buildReportRequestMock('dcr:repositorydescriptors');
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/repositoryDescriptors.xml');
         $t = $this->getTransportMock();
         $request = $this->getRequestMock($dom, ['setBody']);
@@ -218,7 +217,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginEmptyBackendResponse(): void
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
         $t = $this->getTransportMock();
         $request = $this->getRequestMock($dom, ['setBody']);
@@ -234,7 +233,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginWrongWorkspace(): void
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/wrongWorkspace.xml');
         $t = $this->getTransportMock();
         $request = $this->getRequestMock($dom, ['setBody']);
@@ -251,7 +250,7 @@ class ClientTest extends JackrabbitTestCase
     public function testLogin(): void
     {
         $propfindRequest = $this->getTransportMock()->buildPropfindRequestMock(['D:workspace', 'dcr:workspaceName']);
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/loginResponse.xml');
         $t = $this->getTransportMock();
 
@@ -333,7 +332,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetNamespacesEmptyResponse(): void
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
 
         $t = $this->getTransportMock($this->config['url']);
@@ -352,7 +351,7 @@ class ClientTest extends JackrabbitTestCase
     public function testGetNamespaces(): void
     {
         $reportRequest = $this->getTransportMock()->buildReportRequestMock('dcr:registerednamespaces');
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/registeredNamespaces.xml');
 
         $t = $this->getTransportMock($this->config['url']);
@@ -376,7 +375,7 @@ class ClientTest extends JackrabbitTestCase
     /** START TESTING NODE TYPES **/
     protected function setUpNodeTypeMock($params, $fixture)
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load($fixture);
 
         $requestStr = $this->getTransportMock()->buildNodeTypesRequestMock($params);
@@ -456,7 +455,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetAccessibleWorkspaceNames(): void
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/accessibleWorkspaces.xml');
 
         $t = $this->getTransportMock('testuri');
