@@ -4,6 +4,11 @@ Changelog
 Version 1
 =========
 
+2.0.0 (unreleased)
+------------------
+
+* Renamed cli-config.php.dist to cli-config.dist.php and cleaned up to be better documented.
+
 1.4.4
 -----
 

@@ -3,9 +3,6 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use DOMDocument;
-use DOMElement;
-use DOMXPath;
-use InvalidArgumentException;
 use Jackalope\FactoryInterface;
 use Jackalope\Lock\Lock;
 use Jackalope\Node;
@@ -19,7 +16,6 @@ use Jackalope\Transport\PermissionInterface;
 use Jackalope\Transport\QueryInterface as QueryTransport;
 use Jackalope\Transport\VersioningInterface;
 use Jackalope\Transport\WritingInterface;
-use LogicException;
 use PHPCR\CredentialsInterface;
 use PHPCR\ItemExistsException;
 use PHPCR\ItemNotFoundException;
@@ -340,7 +336,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
             $this->curl = new curl();
         } elseif (false === $this->curl) {
             // but do not re-connect, rather report the error if trying to access a closed connection
-            throw new LogicException('Tried to start a request on a closed transport.');
+            throw new \LogicException('Tried to start a request on a closed transport.');
         }
 
         return $this->curl;
@@ -699,7 +695,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      */
     private function decodeBinaryDom($xml)
     {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         if (!$dom->loadXML($xml)) {
             throw new RepositoryException("Failed to load xml data:\n\n$xml");
         }
@@ -969,9 +965,9 @@ class Client extends BaseTransport implements JackrabbitClientInterface
 
         $rawData = $request->execute();
 
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->loadXML($rawData);
-        $domXpath = new DOMXPath($dom);
+        $domXpath = new \DOMXPath($dom);
 
         $rows = [];
         foreach ($domXpath->query('D:response') as $row) {
@@ -1028,12 +1024,12 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      *
      * <dcr:value dcr:type="Boolean">false</dcr:value>
      *
-     * @param DOMElement $node      a dcr:value xml element
-     * @param string     $attribute the attribute name
+     * @param \DOMElement $node      a dcr:value xml element
+     * @param string      $attribute the attribute name
      *
      * @return mixed the node value converted to the specified type
      */
-    private function getDcrValue(DOMElement $node)
+    private function getDcrValue(\DOMElement $node)
     {
         $type = $node->getAttribute('dcr:type');
         if (PropertyType::TYPENAME_BOOLEAN == $type && 'false' == $node->nodeValue) {
@@ -1241,10 +1237,6 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      * Prevent accidental creation of same name siblings during clone operation.
      *
      * Jackrabbit supports them, but jackalope does not.
-     *
-     * @param $srcWorkspace
-     * @param $srcAbsPath
-     * @param $destAbsPath
      *
      * @throws \PHPCR\ItemExistsException
      */
@@ -1711,7 +1703,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         $request->addHeader(sprintf('If-None-Match: "%s"', base_convert($date, 10, 16)));
         $curl = $request->execute(true);
         // create new DOMDocument and load the response text.
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->loadXML($curl->getResponse());
 
         $next = base_convert(trim($curl->getHeader('ETag'), '"'), 16, 10);
@@ -2068,7 +2060,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      * @return int the expire timestamp to be used with Lock::setExpireTime,
      *             that is when this lock expires in seconds since 1970 or null for inifinite
      *
-     * @throws InvalidArgumentException if the timeout value can not be parsed
+     * @throws \InvalidArgumentException if the timeout value can not be parsed
      */
     protected function parseTimeout($timeoutValue)
     {
