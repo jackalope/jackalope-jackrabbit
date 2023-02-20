@@ -1,6 +1,6 @@
 # Jackalope Jackrabbit
 
-[![Build Status](https://secure.travis-ci.org/jackalope/jackalope-jackrabbit.png?branch=master)](http://travis-ci.org/jackalope/jackalope-jackrabbit)
+[![Build Status](https://secure.travis-ci.org/jackalope/jackalope-jackrabbit.png?branch=2.x)](http://travis-ci.org/jackalope/jackalope-jackrabbit)
 [![Latest Stable Version](https://poser.pugx.org/jackalope/jackalope-jackrabbit/version.png)](https://packagist.org/packages/jackalope/jackalope-jackrabbit)
 [![Total Downloads](https://poser.pugx.org/jackalope/jackalope-jackrabbit/d/total.png)](https://packagist.org/packages/jackalope/jackalope-jackrabbit)
 
