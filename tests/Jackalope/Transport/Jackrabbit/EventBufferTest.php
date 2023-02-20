@@ -8,6 +8,8 @@ use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;
 use Jackalope\TestCase;
+use PHPCR\NodeInterface;
+use PHPCR\NodeType\NodeTypeInterface;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Observation\EventInterface;
 use PHPCR\RepositoryException;
@@ -51,7 +53,7 @@ class EventBufferTest extends TestCase
         $this->session = $this->getSessionMock();
         $this->session
             ->method('getNode')
-            ->willReturn(null);
+            ->willReturn($this->createMock(NodeInterface::class));
         $this->session
             ->method('getNodesByIdentifier')
             ->willReturn([]);
@@ -233,14 +235,17 @@ EOF;
             $this->assertSame($expectedValue, $value);
         }
 
+        $rootType = $this->createMock(NodeTypeInterface::class);
+        $accessType = $this->createMock(NodeTypeInterface::class);
+
         $this->nodeTypeManager
             ->method('getNodeType')
             ->withConsecutive(['{internal}root'], ['{internal}AccessControllable'])
-            ->willReturnOnConsecutiveCalls(true, true)
+            ->willReturnOnConsecutiveCalls($rootType, $accessType)
         ;
 
-        $this->assertTrue($eventWithInfo->getPrimaryNodeType());
-        $this->assertEquals(['{internal}AccessControllable' => true], $eventWithInfo->getMixinNodeTypes());
+        $this->assertSame($rootType, $eventWithInfo->getPrimaryNodeType());
+        $this->assertSame(['{internal}AccessControllable' => $accessType], $eventWithInfo->getMixinNodeTypes());
     }
 
     public function testEmptyEventInfo(): void

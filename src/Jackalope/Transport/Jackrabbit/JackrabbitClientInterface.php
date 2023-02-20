@@ -29,7 +29,7 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      *
      * @param string $header a valid HTTP header to add to each request
      */
-    public function addDefaultHeader($header);
+    public function addDefaultHeader(string $header): void;
 
     /**
      * If you want to send the "Expect: 100-continue" header on larger
@@ -39,16 +39,7 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      *
      * @param bool $send Whether to send the header or not
      */
-    public function sendExpect($send = true);
-
-    /**
-     * Set to true to force HTTP version 1.0.
-     *
-     * @param bool
-     *
-     * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
-     */
-    public function forceHttpVersion10($forceHttpVersion10 = true);
+    public function sendExpect(bool $send = true): void;
 
     /**
      * Add global curl-options.
@@ -57,21 +48,19 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      *
      * @return array all curl-options
      */
-    public function addCurlOptions(array $options);
+    public function addCurlOptions(array $options): array;
 
     /**
      * Return the URL to the workspace determined during login.
-     *
-     * @return string|null
      */
-    public function getWorkspaceUri();
+    public function getWorkspaceUri(): ?string;
 
     /**
      * Configure whether to check if we are logged in before doing a request.
      *
      * Will improve error reporting at the cost of some round trips.
      */
-    public function setCheckLoginOnServer($bool);
+    public function setCheckLoginOnServer(bool $bool): void;
 
     /**
      * Internal method to fetch event data.
@@ -82,10 +71,7 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
      *
      * @private
      */
-    public function fetchEventData($date);
+    public function fetchEventData(int $date): array;
 
-    /**
-     * @return mixed null or string
-     */
-    public function getUserData();
+    public function getUserData(): ?string;
 }

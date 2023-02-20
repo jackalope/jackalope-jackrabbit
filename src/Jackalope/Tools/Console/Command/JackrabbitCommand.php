@@ -18,24 +18,18 @@ class JackrabbitCommand extends Command
 {
     /**
      * Path to Jackrabbit jar file.
-     *
-     * @var string
      */
-    protected $jackrabbit_jar;
+    private string $jackrabbit_jar;
 
     /**
      * Path to the Jackrabbit workspace dir.
-     *
-     * @var string
      */
-    protected $workspace_dir;
+    private string $workspace_dir;
 
     /**
      * TCP port of the Jackrabbit HTTP server.
-     *
-     * @var int
      */
-    protected $port;
+    private int $port;
 
     protected function configure(): void
     {

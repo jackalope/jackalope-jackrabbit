@@ -3,16 +3,22 @@
 namespace Jackalope\Transport\Jackrabbit;
 
 use Jackalope\Factory;
+use Jackalope\FactoryInterface;
 use Jackalope\Node;
+use Jackalope\NodeType\NodeType;
 use Jackalope\NodeType\NodeTypeManager;
 use Jackalope\ObjectManager;
+use Jackalope\Repository;
 use Jackalope\Session;
 use Jackalope\Test\JackrabbitTestCase;
 use Jackalope\Transport\RemoveNodeOperation;
 use Jackalope\Workspace;
+use PHPCR\CredentialsInterface;
 use PHPCR\LoginException;
 use PHPCR\NoSuchWorkspaceException;
 use PHPCR\RepositoryException;
+use PHPCR\RepositoryInterface;
+use PHPCR\SimpleCredentials;
 use PHPCR\ValueFormatException;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -22,9 +28,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 class ClientTest extends JackrabbitTestCase
 {
     /**
-     * @return MockObject|ClientMock
+     * @return MockObject&ClientMock
      */
-    public function getTransportMock($args = 'testuri', $changeMethods = [])
+    private function buildTransportMock($args = 'testuri', $changeMethods = [])
     {
         $factory = new Factory();
         // Array XOR
@@ -32,31 +38,76 @@ class ClientTest extends JackrabbitTestCase
         $mockMethods = array_merge(array_diff($defaultMockMethods, $changeMethods), array_diff($changeMethods, $defaultMockMethods));
 
         return $this
-                ->getMockBuilder(ClientMock::class)
-                ->setMethods($mockMethods)
-                ->setConstructorArgs([$factory, $args])
-                ->getMock();
+            ->getMockBuilder(ClientMock::class)
+            ->setMethods($mockMethods)
+            ->setConstructorArgs([$factory, $args])
+            ->getMock()
+        ;
     }
 
-    public function getRequestMock($response = '', $changeMethods = [])
+    /**
+     * @param mixed    $response
+     * @param string[] $changeMethods
+     *
+     * @return Request&MockObject
+     */
+    private function buildRequestMock($response, array $changeMethods)
     {
-        $defaultMockMethods = ['execute', 'executeDom', 'executeJson'];
-        $mockMethods = array_merge(array_diff($defaultMockMethods, $changeMethods), array_diff($changeMethods, $defaultMockMethods));
+        $mockMethods = array_unique(array_merge(['execute', 'executeDom', 'executeJson'], $changeMethods));
         $request = $this->getMockBuilder(Request::class)
             ->disableOriginalConstructor()
-            ->getMock($mockMethods);
+            ->getMock($mockMethods)
+        ;
 
         $request
             ->method('execute')
-            ->willReturn($response);
+            ->willReturn($response)
+        ;
+
+        return $request;
+    }
+
+    /**
+     * @param string[] $changeMethods
+     *
+     * @return Request&MockObject
+     */
+    private function buildJsonRequestMock(array $changeMethods = [])
+    {
+        $response = new \stdClass();
+        $request = $this->buildRequestMock($response, $changeMethods);
 
         $request
+            ->expects($this->never())
             ->method('executeDom')
-            ->willReturn($response);
+        ;
 
         $request
             ->method('executeJson')
-            ->willReturn($response);
+            ->willReturn($response)
+        ;
+
+        return $request;
+    }
+
+    /**
+     * @param string[] $changeMethods
+     *
+     * @return Request&MockObject
+     */
+    private function buildXmlRequestMock(\DOMDocument $response, array $changeMethods = [])
+    {
+        $request = $this->buildRequestMock($response, $changeMethods);
+
+        $request
+            ->method('executeDom')
+            ->willReturn($response)
+        ;
+
+        $request
+            ->expects($this->never())
+            ->method('executeJson')
+        ;
 
         return $request;
     }
@@ -87,7 +138,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetRequestDoesntReinitCurl(): void
     {
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
         $t->curl = 'test';
         $t->getRequestMock('GET', '/foo');
         $this->assertSame('test', $t->curl);
@@ -100,7 +151,7 @@ class ClientTest extends JackrabbitTestCase
     {
         $this->assertSame(
             '<?xml version="1.0" encoding="UTF-8"?><foo xmlns:dcr="http://www.day.com/jcr/webdav/1.0"/>',
-            $this->getTransportMock()->buildReportRequestMock('foo')
+            $this->buildTransportMock()->buildReportRequestMock('foo')
         );
     }
 
@@ -111,8 +162,8 @@ class ClientTest extends JackrabbitTestCase
     {
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
-        $t = $this->getTransportMock();
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock();
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->willReturn($request);
@@ -125,11 +176,11 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetRepositoryDescriptors(): void
     {
-        $reportRequest = $this->getTransportMock()->buildReportRequestMock('dcr:repositorydescriptors');
+        $reportRequest = $this->buildTransportMock()->buildReportRequestMock('dcr:repositorydescriptors');
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/repositoryDescriptors.xml');
-        $t = $this->getTransportMock();
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock();
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::REPORT, 'testuri/')
@@ -177,7 +228,7 @@ class ClientTest extends JackrabbitTestCase
         $xmlStr = '<?xml version="1.0" encoding="UTF-8"?><D:propfind xmlns:D="DAV:" xmlns:dcr="http://www.day.com/jcr/webdav/1.0"><D:prop>';
         $xmlStr .= '<foo/>';
         $xmlStr .= '</D:prop></D:propfind>';
-        $this->assertSame($xmlStr, $this->getTransportMock()->buildPropfindRequestMock('foo'));
+        $this->assertSame($xmlStr, $this->buildTransportMock()->buildPropfindRequestMock(['foo']));
     }
 
     /**
@@ -188,7 +239,7 @@ class ClientTest extends JackrabbitTestCase
         $xmlStr = '<?xml version="1.0" encoding="UTF-8"?><D:propfind xmlns:D="DAV:" xmlns:dcr="http://www.day.com/jcr/webdav/1.0"><D:prop>';
         $xmlStr .= '<foo/><bar/>';
         $xmlStr .= '</D:prop></D:propfind>';
-        $this->assertSame($xmlStr, $this->getTransportMock()->buildPropfindRequestMock(['foo', 'bar']));
+        $this->assertSame($xmlStr, $this->buildTransportMock()->buildPropfindRequestMock(['foo', 'bar']));
     }
 
     /**
@@ -196,8 +247,8 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginAlreadyLoggedin(): void
     {
-        $t = $this->getTransportMock();
-        $t->setCredentials('test');
+        $t = $this->buildTransportMock();
+        $t->setCredentials(new SimpleCredentials('test', 'pass'));
         $this->expectException(RepositoryException::class);
         $t->login($this->credentials, $this->config['workspace']);
     }
@@ -207,7 +258,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLoginUnsportedCredentials(): void
     {
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
         $this->expectException(LoginException::class);
         $t->login(new falseCredentialsMock(), $this->config['workspace']);
     }
@@ -219,8 +270,8 @@ class ClientTest extends JackrabbitTestCase
     {
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
-        $t = $this->getTransportMock();
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock();
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->willReturn($request);
@@ -235,8 +286,8 @@ class ClientTest extends JackrabbitTestCase
     {
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/wrongWorkspace.xml');
-        $t = $this->getTransportMock();
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock();
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->willReturn($request);
@@ -249,12 +300,12 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testLogin(): void
     {
-        $propfindRequest = $this->getTransportMock()->buildPropfindRequestMock(['D:workspace', 'dcr:workspaceName']);
+        $propfindRequest = $this->buildTransportMock()->buildPropfindRequestMock(['D:workspace', 'dcr:workspaceName']);
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/loginResponse.xml');
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
 
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::PROPFIND, 'testuri/tests')
@@ -297,7 +348,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetNodeWithoutAbsPath(): void
     {
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
         $this->expectException(RepositoryException::class);
         $t->getNode('foo');
     }
@@ -307,15 +358,16 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetNode(): void
     {
-        $t = $this->getTransportMock($this->config['url']);
+        $t = $this->buildTransportMock($this->config['url']);
 
-        $request = $this->getRequestMock();
+        $request = $this->buildJsonRequestMock();
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::GET, '/foobar.0.json')
-            ->willReturn($request);
+            ->willReturn($request)
+        ;
 
-        $json = $t->getNode('/foobar');
+        $t->getNode('/foobar');
     }
 
     /**
@@ -324,7 +376,7 @@ class ClientTest extends JackrabbitTestCase
     public function testBuildLocateRequestMock(): void
     {
         $xmlstr = '<?xml version="1.0" encoding="UTF-8"?><dcr:locate-by-uuid xmlns:dcr="http://www.day.com/jcr/webdav/1.0"><D:href xmlns:D="DAV:">test</D:href></dcr:locate-by-uuid>';
-        $this->assertSame($xmlstr, $this->getTransportMock()->buildLocateRequestMock('test'));
+        $this->assertSame($xmlstr, $this->buildTransportMock()->buildLocateRequestMock('test'));
     }
 
     /**
@@ -335,8 +387,8 @@ class ClientTest extends JackrabbitTestCase
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/empty.xml');
 
-        $t = $this->getTransportMock($this->config['url']);
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock($this->config['url']);
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->willReturn($request);
@@ -350,12 +402,12 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testGetNamespaces(): void
     {
-        $reportRequest = $this->getTransportMock()->buildReportRequestMock('dcr:registerednamespaces');
+        $reportRequest = $this->buildTransportMock()->buildReportRequestMock('dcr:registerednamespaces');
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/registeredNamespaces.xml');
 
-        $t = $this->getTransportMock($this->config['url']);
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock($this->config['url']);
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::REPORT, 'testWorkspaceUri')
@@ -378,10 +430,10 @@ class ClientTest extends JackrabbitTestCase
         $dom = new \DOMDocument();
         $dom->load($fixture);
 
-        $requestStr = $this->getTransportMock()->buildNodeTypesRequestMock($params);
+        $requestStr = $this->buildTransportMock()->buildNodeTypesRequestMock($params);
 
-        $t = $this->getTransportMock();
-        $request = $this->getRequestMock($dom, ['setBody']);
+        $t = $this->buildTransportMock();
+        $request = $this->buildXmlRequestMock($dom, ['setBody']);
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::REPORT, 'testWorkspaceUriRoot')
@@ -399,7 +451,7 @@ class ClientTest extends JackrabbitTestCase
     public function testGetAllNodeTypesRequest(): void
     {
         $xmlStr = '<?xml version="1.0" encoding="utf-8" ?><jcr:nodetypes xmlns:jcr="http://www.day.com/jcr/webdav/1.0"><jcr:all-nodetypes/></jcr:nodetypes>';
-        $this->assertSame($xmlStr, $this->getTransportMock()->buildNodeTypesRequestMock([]));
+        $this->assertSame($xmlStr, $this->buildTransportMock()->buildNodeTypesRequestMock([]));
     }
 
     /**
@@ -408,7 +460,7 @@ class ClientTest extends JackrabbitTestCase
     public function testSpecificNodeTypesRequest(): void
     {
         $xmlStr = '<?xml version="1.0" encoding="utf-8" ?><jcr:nodetypes xmlns:jcr="http://www.day.com/jcr/webdav/1.0"><jcr:nodetype><jcr:nodetypename>foo</jcr:nodetypename></jcr:nodetype><jcr:nodetype><jcr:nodetypename>bar</jcr:nodetypename></jcr:nodetype><jcr:nodetype><jcr:nodetypename>foobar</jcr:nodetypename></jcr:nodetype></jcr:nodetypes>';
-        $this->assertSame($xmlStr, $this->getTransportMock()->buildNodeTypesRequestMock(['foo', 'bar', 'foobar']));
+        $this->assertSame($xmlStr, $this->buildTransportMock()->buildNodeTypesRequestMock(['foo', 'bar', 'foobar']));
     }
 
     /**
@@ -458,15 +510,15 @@ class ClientTest extends JackrabbitTestCase
         $dom = new \DOMDocument();
         $dom->load(__DIR__.'/../../../fixtures/accessibleWorkspaces.xml');
 
-        $t = $this->getTransportMock('testuri');
-        $request = $this->getRequestMock($dom, ['setBody', 'setDepth']);
+        $t = $this->buildTransportMock('testuri');
+        $request = $this->buildXmlRequestMock($dom, ['setBody', 'setDepth']);
         $t->expects($this->once())
             ->method('getRequest')
             ->with(Request::PROPFIND, 'testuri/')
             ->willReturn($request);
         $request->expects($this->once())
             ->method('setBody')
-            ->with($this->getTransportMock()->buildPropfindRequestMock(['D:workspace']));
+            ->with($this->buildTransportMock()->buildPropfindRequestMock(['D:workspace']));
         $request->expects($this->once())
             ->method('setDepth')
             ->with(1);
@@ -494,7 +546,7 @@ class ClientTest extends JackrabbitTestCase
      */
     public function testDeleteNodes($nodePaths, $expectedJsopString): void
     {
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
 
         $nodes = [];
         foreach ($nodePaths as $nodePath) {
@@ -553,14 +605,14 @@ class ClientTest extends JackrabbitTestCase
     /**
      * @dataProvider provideTestOutOfRangeCharacters
      */
-    public function testOutOfRangeCharacterOccurrence($string, $version, $isValid): void
+    public function testOutOfRangeCharacterOccurrence(string $string, ?string $version, bool $isValid): void
     {
-        if (false === $isValid) {
+        if (!$isValid) {
             $this->expectException(ValueFormatException::class);
             $this->expectExceptionMessage('Invalid character found in property "test". Are you passing a valid string?');
         }
 
-        $t = $this->getTransportMock();
+        $t = $this->buildTransportMock();
         $t->setVersion($version);
 
         $factory = new Factory();
@@ -570,7 +622,20 @@ class ClientTest extends JackrabbitTestCase
             ->method('getWorkspace')
             ->with()
             ->willReturn($workspace);
-        $repository = $this->getMockBuilder('Jackalope\Repository')->disableOriginalConstructor()->getMock();
+        $repository = $this->createMock(RepositoryInterface::class);
+        $repository->method('getDescriptor')
+            ->willReturnCallback(function ($key) {
+                switch ($key) {
+                    case Repository::OPTION_TRANSACTIONS_SUPPORTED:
+                    case Repository::JACKALOPE_OPTION_STREAM_WRAPPER:
+                        return true;
+                    case RepositoryInterface::OPTION_LOCKING_SUPPORTED:
+                        return false;
+                }
+
+                throw new \Exception('todo: '.$key);
+            })
+        ;
         $session
             ->method('getRepository')
             ->with()
@@ -580,7 +645,7 @@ class ClientTest extends JackrabbitTestCase
             ->method('getNodeTypeManager')
             ->with()
             ->willReturn($ntm);
-        $nt = $this->getMockBuilder('Jackalope\NodeType\NodeType')->disableOriginalConstructor()->getMock();
+        $nt = $this->createMock(NodeType::class);
         $ntm
             ->method('getNodeType')
             ->with()
@@ -589,6 +654,9 @@ class ClientTest extends JackrabbitTestCase
         $article = new Node($factory, [], '/jcr:root', $session, $objectManager, true);
         $article->setProperty('test', $string);
         $t->updateProperties($article);
+        if ($isValid) {
+            $this->addToAssertionCount(1);
+        }
     }
 
     public function provideTestOutOfRangeCharacters(): array
@@ -618,22 +686,22 @@ class ClientTest extends JackrabbitTestCase
     }
 }
 
-class falseCredentialsMock implements \PHPCR\CredentialsInterface
+class falseCredentialsMock implements CredentialsInterface
 {
 }
 
 class ClientMock extends Client
 {
     public $curl;
-    public $server = 'testserver';
-    public $workspace = 'testWorkspace';
-    public $workspaceUri = 'testWorkspaceUri';
-    public $workspaceUriRoot = 'testWorkspaceUriRoot';
+    public string $server = 'testserver';
+    public ?string $workspace = 'testWorkspace';
+    public ?string $workspaceUri = 'testWorkspaceUri';
+    public ?string $workspaceUriRoot = 'testWorkspaceUriRoot';
 
     /**
      * overwrite client constructor which checks backend version.
      */
-    public function __construct($factory, $serverUri)
+    public function __construct(FactoryInterface $factory, string $serverUri)
     {
         $this->factory = $factory;
         // append a slash if not there
@@ -648,32 +716,32 @@ class ClientMock extends Client
         return $this->buildNodeTypesRequest($params);
     }
 
-    public function buildReportRequestMock($name = ''): string
+    public function buildReportRequestMock(string $name = ''): string
     {
         return $this->buildReportRequest($name);
     }
 
-    public function buildPropfindRequestMock($args = []): string
+    public function buildPropfindRequestMock(array $args = []): string
     {
         return $this->buildPropfindRequest($args);
     }
 
-    public function buildLocateRequestMock($arg = ''): string
+    public function buildLocateRequestMock(string $arg = ''): string
     {
         return $this->buildLocateRequest($arg);
     }
 
-    public function setCredentials($credentials): void
+    public function setCredentials(SimpleCredentials $credentials): void
     {
         $this->credentials = $credentials;
     }
 
-    public function getRequestMock($method, $uri)
+    public function getRequestMock(string $method, string $uri): Request
     {
         return $this->getRequest($method, $uri);
     }
 
-    public function addWorkspacePathToUriMock($uri): string
+    public function addWorkspacePathToUriMock(string $uri): string
     {
         return $this->addWorkspacePathToUri($uri);
     }

@@ -15,6 +15,7 @@ use PHPCR\PathNotFoundException;
 use PHPCR\ReferentialIntegrityException;
 use PHPCR\RepositoryException;
 use PHPCR\SimpleCredentials;
+use PHPCR\UnsupportedRepositoryOperationException;
 
 /**
  * Request class for the Davex protocol.
@@ -32,225 +33,175 @@ class Request
 {
     /**
      * Name of the user agent to be exposed to a client.
-     *
-     * @var string
      */
-    public const USER_AGENT = 'jackalope-php/1.0';
+    public const USER_AGENT = 'jackalope-php/2.0';
 
     /**
      * Identifier of the 'GET' http request method.
-     *
-     * @var string
      */
     public const GET = 'GET';
 
     /**
      * Identifier of the 'POST' http request method.
-     *
-     * @var string
      */
     public const POST = 'POST';
     /**
      * Identifier of the 'PUT' http request method.
-     *
-     * @var string
      */
     public const PUT = 'PUT';
 
     /**
      * Identifier of the 'MKCOL' http request method.
-     *
-     * @var string
      */
     public const MKCOL = 'MKCOL';
 
     /**
      * Identifier of the 'DELETE' http request method.
-     *
-     * @var string
      */
     public const DELETE = 'DELETE';
 
     /**
      * Identifier of the 'REPORT' http request method.
-     *
-     * @var string
      */
     public const REPORT = 'REPORT';
 
     /**
      * Identifier of the 'SEARCH' http request method.
-     *
-     * @var string
      */
     public const SEARCH = 'SEARCH';
 
     /**
      * Identifier of the 'PROPFIND' http request method.
-     *
-     * @var string
      */
     public const PROPFIND = 'PROPFIND';
 
     /**
      * Identifier of the 'PROPPATCH' http request method.
-     *
-     * @var string
      */
     public const PROPPATCH = 'PROPPATCH';
 
     /**
      * Identifier of the 'LOCK' http request method.
-     *
-     * @var string
      */
     public const LOCK = 'LOCK';
 
     /**
      * Identifier of the 'UNLOCK' http request method.
-     *
-     * @var string
      */
     public const UNLOCK = 'UNLOCK';
 
     /**
      * Identifier of the 'MKWORKSPACE' http request method to make a new workspace.
-     *
-     * @var string
      */
     public const MKWORKSPACE = 'MKWORKSPACE';
 
     /**
      * Identifier of the 'COPY' http request method.
-     *
-     * @var string
      */
     public const COPY = 'COPY';
 
     /**
      * Identifier of the 'MOVE' http request method.
-     *
-     * @var string
      */
     public const MOVE = 'MOVE';
 
     /**
      * Identifier of the 'CHECKIN' http request method.
-     *
-     * @var string
      */
     public const CHECKIN = 'CHECKIN';
 
     /**
      * Identifier of the 'CHECKOUT' http request method.
-     *
-     * @var string
      */
     public const CHECKOUT = 'CHECKOUT';
 
     /**
      * Identifier of the 'UPDATE' http request method.
-     *
-     * @var string
      */
     public const UPDATE = 'UPDATE';
 
     /**
      * Identifier of the 'LABEL' http request method.
-     *
-     * @var string
      */
     public const LABEL = 'LABEL';
 
-    /** @var string Possible argument for {@link setDepth()} */
-    public const INFINITY = 'infinity';
-
     /**
-     * @var Client
+     * Possible argument for {@link setDepth()}.
      */
-    protected $client;
+    public const INFINITY = -1;
 
     /**
-     * @var curl
-     */
-    protected $curl;
-
-    /**
-     * Name of the request method to be used.
+     * Jackrabbit uses the word infinity for infinite depth.
      *
-     * @var string
+     * In the PHP code we want to be type consistent and therefore use -1 to represent infinity.
      */
-    protected $method;
+    private const JACKRABBIT_INFINITY = 'infinity';
+
+    private Client $client;
+
+    protected curl $curl;
+
+    /**
+     * Name of the HTTP request method to be used.
+     */
+    private string $method;
 
     /**
      * Url(s) to get/post/..
      *
-     * @var array
+     * @var string[]
      */
-    protected $uri;
+    private array $uri;
 
     /**
      * Set of credentials necessary to connect to the server or else.
-     *
-     * @var CredentialsInterface
      */
-    protected $credentials;
+    private ?CredentialsInterface $credentials = null;
+
+    private string $contentType = 'text/xml; charset=utf-8';
 
     /**
-     * Request content-type.
-     *
-     * @var string
+     * How far the request should go.
      */
-    protected $contentType = 'text/xml; charset=utf-8';
+    private int $depth = 0;
 
     /**
-     * How far the request should go, default is 0.
-     *
-     * @var int
+     * HTTP request body for methods that require it.
      */
-    protected $depth = 0;
+    private string $body = '';
 
     /**
-     * Posted content for methods that require it.
+     * A list of additional HTTP headers to be sent.
      *
-     * @var string
+     * @var string[]
      */
-    protected $body = '';
-
-    /** @var array[]string A list of additional HTTP headers to be sent */
-    protected $additionalHeaders = [];
+    private array $additionalHeaders = [];
 
     /**
      * The lock token active for this request otherwise FALSE for no locking.
      *
      * @var string|false
      */
-    protected $lockToken = false;
+    private $lockToken = false;
 
     /**
      * Whether we already did a version check in handling an error.
      * Doing this once per php process is enough.
-     *
-     * @var bool
      */
-    protected static $versionChecked = false;
+    private static bool $versionChecked = false;
 
     /**
      * Whether we are in error handling mode to prevent infinite recursion.
-     *
-     * @var bool
      */
-    protected $errorHandlingMode = false;
+    private bool $errorHandlingMode = false;
 
     /**
      * Global curl-options used in this request.
-     *
-     * @var array
      */
-    private $curlOptions = [];
+    private array $curlOptions = [];
 
     /**
-     * Initiaties the NodeTypes request object.
+     * Initiates the NodeTypes request object.
      *
      * @param FactoryInterface $factory Ignored for now, as this class does not create objects
      * @param Client           $client  The jackrabbit client instance
@@ -259,7 +210,7 @@ class Request
      * @param string|array     $uri     the remote url for this request, including protocol,
      *                                  host name, workspace and path to the object to manipulate. May be an array of uri
      */
-    public function __construct(FactoryInterface $factory, Client $client, curl $curl, $method, $uri)
+    public function __construct(FactoryInterface $factory, Client $client, curl $curl, string $method, $uri)
     {
         $this->client = $client;
         $this->curl = $curl;
@@ -268,19 +219,9 @@ class Request
     }
 
     /**
-     * Force curl to use HTTP version 1.0.
-     *
-     * @deprecated use addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]) instead
-     */
-    public function forceHttpVersion10()
-    {
-        $this->addCurlOptions([CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_0]);
-    }
-
-    /**
      * Add curl-options for this request.
      */
-    public function addCurlOptions(array $options)
+    public function addCurlOptions(array $options): void
     {
         $this->curlOptions += $options;
     }
@@ -288,22 +229,18 @@ class Request
     /**
      * Set the credentials for the request. Setting them to null will make a
      * request without authentication header.
-     *
-     * @param CredentialsInterface $creds the credentials to use in the request
      */
-    public function setCredentials(CredentialsInterface $creds = null)
+    public function setCredentials(CredentialsInterface $creds = null): void
     {
         $this->credentials = $creds;
     }
 
     /**
      * Set a different content type for this request. The default is text/xml in utf-8.
-     *
-     * @param string $contentType
      */
-    public function setContentType($contentType)
+    public function setContentType(string $contentType): void
     {
-        $this->contentType = (string) $contentType;
+        $this->contentType = $contentType;
     }
 
     /**
@@ -311,30 +248,24 @@ class Request
      *
      * To support more than 0, we need to implement more logic in parsing
      * the response too.
-     *
-     * @param int|string $depth
      */
-    public function setDepth($depth)
+    public function setDepth(int $depth): void
     {
         $this->depth = $depth;
     }
 
     /**
      * Set the request body.
-     *
-     * @param string $body
      */
-    public function setBody($body)
+    public function setBody(string $body): void
     {
         $this->body = (string) $body;
     }
 
     /**
      * Set or update the HTTP method to be used in this request.
-     *
-     * @param string $method the HTTP method to use, one of the class constants
      */
-    public function setMethod($method)
+    public function setMethod(string $method): void
     {
         $this->method = $method;
     }
@@ -342,27 +273,23 @@ class Request
     /**
      * @param string|array $uri the request target
      */
-    public function setUri($uri)
+    public function setUri($uri): void
     {
         $this->uri = (array) $uri;
     }
 
     /**
-     * add an additional http header.
-     *
-     * @param string $header HTTP header
+     * Add an additional http header.
      */
-    public function addHeader($header)
+    public function addHeader(string $header): void
     {
         $this->additionalHeaders[] = $header;
     }
 
     /**
      * Add the user data header.
-     *
-     * @param string $userData
      */
-    public function addUserData($userData)
+    public function addUserData(string $userData): void
     {
         $userDataHeader = 'Link: <data:,'.urlencode($userData).'>; rel="http://www.day.com/jcr/webdav/1.0/user-data"';
         $this->addHeader($userDataHeader);
@@ -370,12 +297,10 @@ class Request
 
     /**
      * Set the transaction lock token to be used with this request.
-     *
-     * @param string $lockToken the transaction lock
      */
-    public function setLockToken($lockToken)
+    public function setLockToken(string $lockToken): void
     {
-        $this->lockToken = (string) $lockToken;
+        $this->lockToken = $lockToken;
     }
 
     /**
@@ -383,7 +308,7 @@ class Request
      *
      * @param bool $getCurlObject whether to return the curl object instead of the response
      */
-    protected function prepareCurl(curl $curl, $getCurlObject)
+    private function prepareCurl(curl $curl, bool $getCurlObject): curl
     {
         if ($this->credentials instanceof SimpleCredentials) {
             $curl->setopt(CURLOPT_USERPWD, $this->credentials->getUserID().':'.$this->credentials->getPassword());
@@ -391,7 +316,7 @@ class Request
         // otherwise leave this alone, the new curl instance has no USERPWD yet
 
         $headers = [
-            'Depth: '.$this->depth,
+            'Depth: '.(self::INFINITY === $this->depth ? self::JACKRABBIT_INFINITY : $this->depth),
             'Content-Type: '.$this->contentType,
             'User-Agent: '.self::USER_AGENT,
         ];
@@ -401,7 +326,7 @@ class Request
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
-        if (self::POST == $this->method) {
+        if (self::POST === $this->method) {
             /*
                Jackrabbit's CSRF protection affects any write request that could come from an HTML form
                The simplest possible fix probably is to include a Referer header field (referencing the server itself)
@@ -432,12 +357,12 @@ class Request
      * Prepares the curl object, executes it and checks
      * for transport level errors, throwing the appropriate exceptions.
      *
-     * @param bool $getCurlObject wheter to return the curl object instead of the response
+     * @param bool $getCurlObject whether to return the curl object instead of the response
      * @param bool $forceMultiple whether to force parallel requests or not
      *
      * @return string|curl|array response string or the curl object
      */
-    public function execute($getCurlObject = false, $forceMultiple = false)
+    public function execute(bool $getCurlObject = false, bool $forceMultiple = false)
     {
         if (!$forceMultiple && 1 === count($this->uri)) {
             return $this->singleRequest($getCurlObject);
@@ -453,7 +378,7 @@ class Request
      *
      * @return array of XML representations of responses or curl objects
      */
-    protected function multiRequest($getCurlObject = false)
+    private function multiRequest(bool $getCurlObject = false): array
     {
         $mh = curl_multi_init();
 
@@ -469,13 +394,13 @@ class Request
 
         do {
             $mrc = curl_multi_exec($mh, $active);
-        } while ($active || CURLM_CALL_MULTI_PERFORM == $mrc);
+        } while ($active || CURLM_CALL_MULTI_PERFORM === $mrc);
 
-        while ($active && CURLM_OK == $mrc) {
-            if (-1 != curl_multi_select($mh)) {
+        while ($active && CURLM_OK === $mrc) {
+            if (-1 !== curl_multi_select($mh)) {
                 do {
                     $mrc = curl_multi_exec($mh, $active);
-                } while (CURLM_CALL_MULTI_PERFORM == $mrc);
+                } while (CURLM_CALL_MULTI_PERFORM === $mrc);
             }
         }
 
@@ -503,7 +428,7 @@ class Request
      *
      * @return string|curl XML representation of a response or curl object
      */
-    protected function singleRequest($getCurlObject)
+    private function singleRequest(bool $getCurlObject)
     {
         if ($this->credentials instanceof SimpleCredentials) {
             $this->curl->setopt(CURLOPT_USERPWD, $this->credentials->getUserID().':'.$this->credentials->getPassword());
@@ -515,7 +440,7 @@ class Request
         }
 
         $headers = [
-            'Depth: '.$this->depth,
+            'Depth: '.(self::INFINITY === $this->depth ? self::JACKRABBIT_INFINITY : $this->depth),
             'Content-Type: '.$this->contentType,
             'User-Agent: '.self::USER_AGENT,
         ];
@@ -525,13 +450,13 @@ class Request
             $headers[] = 'Lock-Token: <'.$this->lockToken.'>';
         }
 
-        if (self::POST == $this->method) {
-            /*
-               Jackrabbit's CSRF protection affects any write request that could come from an HTML form
-               The simplest possible fix probably is to include a Referer header field (referencing the server itself)
-               see https://github.com/jackalope/jackalope-jackrabbit/issues/138
-            */
-            $headers[] = 'Referer: '.$this->client->getWorkspaceUri();
+        /*
+           Jackrabbit's CSRF protection affects any write request that could come from an HTML form
+           The simplest possible fix probably is to include a Referer header field (referencing the server itself)
+           see https://github.com/jackalope/jackalope-jackrabbit/issues/138
+        */
+        if ($workspaceUri = $this->client->getWorkspaceUri()) {
+            $headers[] = 'Referer: '.$workspaceUri;
         }
 
         foreach ($this->curlOptions as $option => $optionValue) {
@@ -570,15 +495,12 @@ class Request
      * For transport level errors, tries to figure out what went wrong to
      * throw the most appropriate exception.
      *
-     * @param string $response the response body
-     * @param int    $httpCode the http response code
-     *
      * @throws NoSuchWorkspaceException if it was not possible to reach the server (resolve host or connect)
      * @throws ItemNotFoundException    if the object was not found
      * @throws RepositoryException      on any other error
      * @throws PathNotFoundException    if the path was not found (server returned 404 without xml response)
      */
-    protected function handleError(curl $curl, $response, $httpCode)
+    private function handleError(curl $curl, string $responseBody, int $httpCode): void
     {
         // first: check if the backend is too old for us
         if (!self::$versionChecked) {
@@ -588,7 +510,7 @@ class Request
                 // getting the descriptors triggers a version check
                 $this->client->getRepositoryDescriptors();
             } catch (\Exception $e) {
-                if ($e instanceof \PHPCR\UnsupportedRepositoryOperationException) {
+                if ($e instanceof UnsupportedRepositoryOperationException) {
                     throw $e;
                 }
                 // otherwise ignore exception here as to not confuse what happened
@@ -609,9 +531,9 @@ class Request
         }
 
         // use XML error response if it's there
-        if ('<?' === substr($response, 0, 2)) {
+        if ('<?' === substr($responseBody, 0, 2)) {
             $dom = new \DOMDocument();
-            $dom->loadXML($response);
+            $dom->loadXML($responseBody);
             $err = $dom->getElementsByTagNameNS(Client::NS_DCR, 'exception');
             if ($err->length > 0) {
                 $err = $err->item(0);
@@ -639,7 +561,7 @@ class Request
                         // try to generically "guess" the right exception class name
                         $class = substr($errClass, strlen('javax.jcr.'));
                         $class = explode('.', $class);
-                        array_walk($class, function (&$ns) {
+                        array_walk($class, static function (&$ns) {
                             $ns = ucfirst(str_replace('nodetype', 'NodeType', $ns));
                         });
                         $class = '\\PHPCR\\'.implode('\\', $class);
@@ -651,20 +573,20 @@ class Request
                 }
             }
         }
-        if (401 == $httpCode) {
+        if (401 === $httpCode) {
             throw new LoginException("HTTP 401 Unauthorized\n".$this->getShortErrorString());
         }
-        if (404 == $httpCode) {
+        if (404 === $httpCode) {
             throw new PathNotFoundException("HTTP 404 Path Not Found: {$this->method} \n".$this->getShortErrorString());
         }
-        if (405 == $httpCode) {
+        if (405 === $httpCode) {
             throw new HTTPErrorException("HTTP 405 Method Not Allowed: {$this->method} \n".$this->getShortErrorString(), 405);
         }
-        if (412 == $httpCode) {
+        if (412 === $httpCode) {
             throw new LockException("Unable to lock the non-lockable node '".reset($this->uri)."\n".$this->getShortErrorString());
         }
         if ($httpCode >= 500) {
-            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n".$this->getLongErrorString($curl, $response);
+            $msg = "HTTP $httpCode Error from backend on: {$this->method} \n".$this->getLongErrorString($curl, $responseBody);
             try {
                 $workspaceUri = [$this->client->getWorkSpaceUri()];
                 if (!$this->errorHandlingMode
@@ -685,7 +607,7 @@ class Request
 
         $curlError = $curl->error();
 
-        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n".$this->getLongErrorString($curl, $response);
+        $msg = "Unexpected error: \nCURL Error: $curlError \nResponse (HTTP $httpCode): {$this->method} \n".$this->getLongErrorString($curl, $responseBody);
         throw new RepositoryException($msg);
     }
 
@@ -693,10 +615,8 @@ class Request
      * returns a shorter error string to be used in exceptions.
      *
      * It returns a "nicely" formatted URI of the request
-     *
-     * @return string the error message
      */
-    protected function getShortErrorString()
+    private function getShortErrorString(): string
     {
         return "--uri: --\n".var_export($this->uri, true)."\n";
     }
@@ -707,13 +627,8 @@ class Request
      * It returns a "nicely" formatted URI of the request
      * plus the output of curl_getinfo
      * plus the response body including its size
-     *
-     * @param curl   $curl     The curl object
-     * @param string $response the response body
-     *
-     * @return string the error message
      */
-    protected function getLongErrorString($curl, $response)
+    private function getLongErrorString(curl $curl, string $responseBody): string
     {
         $string = $this->getShortErrorString();
         $string .= "--curl getinfo: --\n".var_export($curl->getinfo(), true)."\n";
@@ -724,7 +639,7 @@ class Request
         } else {
             $string .= $this->body."\n";
         }
-        $string .= '--response body (size: '.strlen($response)." bytes): --\n$response\n--end response body--\n";
+        $string .= '--response body (size: '.strlen($responseBody)." bytes): --\n$responseBody\n--end response body--\n";
 
         return $string;
     }
@@ -739,10 +654,9 @@ class Request
      *
      * @return \DOMDocument the loaded XML response text
      */
-    public function executeDom($forceMultiple = false)
+    public function executeDom(bool $forceMultiple = false): \DOMDocument
     {
-        $xml = $this->execute(null, $forceMultiple);
-
+        $xml = $this->execute(false, $forceMultiple);
         // create new DOMDocument and load the response text.
         $dom = new \DOMDocument();
         $dom->loadXML($xml);
@@ -757,13 +671,13 @@ class Request
      *
      * @param bool $forceMultiple whether to force parallel requests or not
      *
-     * @return mixed
+     * @return \stdClass|\stdClass[]
      *
      * @throws RepositoryException if the json response is not valid
      */
-    public function executeJson($forceMultiple = false)
+    public function executeJson(bool $forceMultiple = false)
     {
-        $responses = $this->execute(null, $forceMultiple);
+        $responses = $this->execute(false, $forceMultiple);
         if (!is_array($responses)) {
             $responses = [$responses];
             $reset = true;
@@ -771,7 +685,7 @@ class Request
 
         $json = [];
         foreach ($responses as $key => $response) {
-            $json[$key] = json_decode($response);
+            $json[$key] = json_decode($response, false);
             if (null === $json[$key] && 'null' !== strtolower($response)) {
                 $uri = reset($this->uri);
                 throw new RepositoryException("Not a valid json object: \nRequest: {$this->method} $uri \nResponse: \n$response");

@@ -6,8 +6,7 @@ use Jackalope\FactoryInterface;
 use Jackalope\Query\Query;
 use Jackalope\Transport\AbstractReadWriteLoggingWrapper;
 use Jackalope\Transport\Logging\LoggerInterface;
-use Jackalope\Transport\QueryInterface as QueryTransport;
-use Jackalope\Transport\VersioningInterface;
+use PHPCR\Lock\LockInterface;
 use PHPCR\Observation\EventFilterInterface;
 use PHPCR\SessionInterface;
 
@@ -20,117 +19,61 @@ use PHPCR\SessionInterface;
  */
 class LoggingClient extends AbstractReadWriteLoggingWrapper implements JackrabbitClientInterface
 {
-    /**
-     * @var Client
-     */
-    protected $transport;
-
-    /**
-     * Constructor.
-     *
-     * @param Client          $transport A jackalope jackrabbit client instance
-     * @param LoggerInterface $logger    A logger instance
-     */
     public function __construct(FactoryInterface $factory, Client $transport, LoggerInterface $logger)
     {
         parent::__construct($factory, $transport, $logger);
     }
 
-    /**
-     * Add a HTTP header which is sent on each Request.
-     *
-     * This is used for example for a session identifier header to help a proxy
-     * to route all requests from the same session to the same server.
-     *
-     * This is a Jackrabbit Davex specific option called from the repository
-     * factory.
-     *
-     * @param string $header a valid HTTP header to add to each request
-     */
-    public function addDefaultHeader($header)
+    public function addDefaultHeader(string $header): void
     {
         $this->transport->addDefaultHeader($header);
     }
 
-    /**
-     * If you want to send the "Expect: 100-continue" header on larger
-     * PUT and POST requests, set this to true.
-     *
-     * This is a Jackrabbit Davex specific option.
-     *
-     * @param bool $send Whether to send the header or not
-     */
-    public function sendExpect($send = true)
+    public function sendExpect(bool $send = true): void
     {
         $this->transport->sendExpect($send);
     }
 
-    /**
-     * Configure whether to check if we are logged in before doing a request.
-     *
-     * Will improve error reporting at the cost of some round trips.
-     */
-    public function setCheckLoginOnServer($bool)
+    public function setCheckLoginOnServer(bool $bool): void
     {
         $this->transport->setCheckLoginOnServer($bool);
     }
 
     // VersioningInterface //
 
-    /**
-     * {@inheritDoc}
-     */
-    public function addVersionLabel($versionPath, $label, $moveLabel)
+    public function addVersionLabel(string $versionPath, string $label, bool $moveLabel): void
     {
         $this->transport->addVersionLabel($versionPath, $label, $moveLabel);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function removeVersionLabel($versionPath, $label)
+    public function removeVersionLabel(string $versionPath, string $label): void
     {
         $this->transport->removeVersionLabel($versionPath, $label);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function checkinItem($path)
+    public function checkinItem(string $path): string
     {
         return $this->transport->checkinItem($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function checkoutItem($path)
+    public function checkoutItem(string $path): void
     {
         $this->transport->checkoutItem($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function restoreItem($removeExisting, $versionPath, $path)
+    public function restoreItem(bool $removeExisting, string $versionPath, string $path): void
     {
         $this->transport->restoreItem($removeExisting, $versionPath, $path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function removeVersion($versionPath, $versionName)
+    public function removeVersion(string $versionPath, string $versionName): void
     {
-        return $this->transport->removeVersion($versionPath, $versionName);
+        $this->transport->removeVersion($versionPath, $versionName);
     }
 
     // QueryTransport //
 
-    /**
-     * {@inheritDoc}
-     */
-    public function query(Query $query)
+    public function query(Query $query): array
     {
         $this->logger->startCall(__FUNCTION__, func_get_args(), ['fetchDepth' => $this->transport->getFetchDepth()]);
         $result = $this->transport->query($query);
@@ -139,138 +82,84 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
         return $result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getSupportedQueryLanguages()
+    public function getSupportedQueryLanguages(): array
     {
         return $this->transport->getSupportedQueryLanguages();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function registerNamespace($prefix, $uri)
+    // NodeTypeCndManagementInterface //
+
+    public function registerNodeTypesCnd(string $cnd, bool $allowUpdate): void
     {
-        $this->transport->registerNamespace($prefix, $uri);
+        $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function unregisterNamespace($prefix)
-    {
-        $this->transport->unregisterNamespace($prefix);
-    }
+    // PermissionInterface //
 
-    /**
-     * {@inheritDoc}
-     */
-    public function registerNodeTypesCnd($cnd, $allowUpdate)
-    {
-        return $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getPermissions($path)
+    public function getPermissions(string $path): array
     {
         return $this->transport->getPermissions($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null)
+    // LockingInterface //
+
+    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, string $ownerInfo = null): LockInterface
     {
         return $this->transport->lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint, $ownerInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function isLocked($absPath)
+    public function isLocked(string $absPath): bool
     {
         return $this->transport->isLocked($absPath);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function unlock($absPath, $lockToken)
+    public function unlock(string $absPath, string $lockToken): void
     {
         $this->transport->unlock($absPath, $lockToken);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
+    // ObservationInterface //
+
+    public function getEvents(int $date, EventFilterInterface $filter, SessionInterface $session): \Iterator
     {
         return $this->transport->getEvents($date, $filter, $session);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function fetchEventData($date)
+    public function fetchEventData(int $date): array
     {
         return $this->transport->fetchEventData($date);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function setUserData($userData)
+    public function setUserData(?string $userData): void
     {
         $this->transport->setUserData($userData);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getUserData()
+    public function getUserData(): ?string
     {
         return $this->transport->getUserData();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function createWorkspace($name, $srcWorkspace = null)
+    // WorkspaceManagementInterface //
+
+    public function createWorkspace(string $name, string $srcWorkspace = null): void
     {
         $this->transport->createWorkspace($name, $srcWorkspace);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function deleteWorkspace($name)
+    public function deleteWorkspace(string $name): void
     {
         $this->transport->deleteWorkspace($name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function forceHttpVersion10($forceHttpVersion10 = true)
-    {
-        $this->transport->forceHttpVersion10($forceHttpVersion10);
-    }
+    // JackrabbitClientInterface //
 
-    /**
-     * {@inheritDoc}
-     */
-    public function addCurlOptions(array $options)
+    public function addCurlOptions(array $options): array
     {
         return $this->transport->addCurlOptions($options);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getWorkspaceUri()
+    public function getWorkspaceUri(): ?string
     {
         return $this->transport->getWorkspaceUri();
     }

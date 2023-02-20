@@ -11,28 +11,28 @@ namespace Jackalope\Tools\Console\Helper;
  */
 class JackrabbitHelper
 {
-    protected $jackrabbit_jar;
-    protected $workspace_dir;
-    protected $port;
+    private string $jackrabbit_jar;
+    private string $workspace_dir;
+    private ?int $port;
 
     /**
      * construct an instance of the helper.
      *
-     * @param string $jackrabbit_jar the path to the jackrabbit server jar file
-     * @param string $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
-     * @param int    $port           if provided this will be used as port for HTTP server, otherwise the default is used
+     * @param string      $jackrabbit_jar the path to the jackrabbit server jar file
+     * @param string|null $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
+     * @param int|null    $port           if provided this will be used as port for HTTP server, otherwise the default is used
      */
-    public function __construct($jackrabbit_jar, $workspace_dir = null, $port = null)
+    public function __construct(string $jackrabbit_jar, string $workspace_dir = null, int $port = null)
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
-        $this->workspace_dir = $workspace_dir ? $workspace_dir : dirname($jackrabbit_jar);
+        $this->workspace_dir = $workspace_dir ?: dirname($jackrabbit_jar);
         $this->port = $port;
     }
 
     /**
      * Start the jackrabbit server. If it is already running, silently return.
      */
-    public function startServer()
+    public function startServer(): void
     {
         $pid = $this->getServerPid();
         if (!$pid) {
@@ -46,7 +46,7 @@ class JackrabbitHelper
     /**
      * Stop the jackrabbit server. If it is not running, silently return.
      */
-    public function stopServer()
+    public function stopServer(): void
     {
         $pid = $this->getServerPid();
         if ($pid) {
@@ -56,15 +56,13 @@ class JackrabbitHelper
 
     /**
      * Return true if the jackrabbit server is running, false otherwise.
-     *
-     * @return bool
      */
-    public function isServerRunning()
+    public function isServerRunning(): bool
     {
         return '' !== $this->getServerPid();
     }
 
-    public function getServerPid()
+    public function getServerPid(): string
     {
         $pid = trim(shell_exec("pgrep -f -n 'java \-jar {$this->jackrabbit_jar}'"));
         // TODO: check it's a valid pid
