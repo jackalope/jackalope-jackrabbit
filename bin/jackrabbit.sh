@@ -9,16 +9,29 @@ JAR=jackrabbit-standalone-$VERSION.jar
 # download jackrabbit jar from archive, as the dist only contains the latest
 # stable versions
 if [ ! -f "$DIR/$JAR" ]; then
-    wget http://archive.apache.org/dist/jackrabbit/$VERSION/$JAR
+    wget -nv http://archive.apache.org/dist/jackrabbit/$VERSION/$JAR
 fi
 
 java -jar $DIR/$JAR&
+pid=$!
+echo "started prodcess $pid"
 
 echo "Waiting until Jackrabbit is ready on port 8080"
 while [[ -z `curl -s 'http://localhost:8080' ` ]]
 do
     echo -n "."
     sleep 2s
+    count=$(ps | grep "$pid[^[]" | wc -l)
+    if [[ $count -eq 0 ]]
+    then
+        echo "process $pid not found, waiting on it to determine exit status"
+        if wait $pid; then
+		echo "jackrabbit terminated with success status (this should not happen)"
+        else
+                echo "jackrabbit failed (returned $?)"
+        fi
+	exit 1
+    fi
 done
 
 echo "Jackrabbit is up"
