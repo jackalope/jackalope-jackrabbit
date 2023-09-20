@@ -2,7 +2,6 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
-use DOMElement;
 use Jackalope\FactoryInterface;
 use Jackalope\Observation\Event;
 use Jackalope\Observation\EventFilter;

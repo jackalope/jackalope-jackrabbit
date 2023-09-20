@@ -14,6 +14,11 @@ Version 2
 Version 1
 =========
 
+1.4.5
+-----
+
+* Improved the bin/jackrabbit.sh script to detect when the .jar fails to be started.
+
 1.4.4
 -----
 
