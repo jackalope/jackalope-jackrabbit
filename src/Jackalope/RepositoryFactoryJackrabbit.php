@@ -129,8 +129,6 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @api
      */
     public function getConfigurationKeys()

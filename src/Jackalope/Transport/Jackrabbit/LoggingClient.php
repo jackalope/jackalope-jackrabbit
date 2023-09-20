@@ -77,49 +77,31 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
 
     // VersioningInterface //
 
-    /**
-     * {@inheritDoc}
-     */
     public function addVersionLabel($versionPath, $label, $moveLabel)
     {
         $this->transport->addVersionLabel($versionPath, $label, $moveLabel);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function removeVersionLabel($versionPath, $label)
     {
         $this->transport->removeVersionLabel($versionPath, $label);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function checkinItem($path)
     {
         return $this->transport->checkinItem($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function checkoutItem($path)
     {
         $this->transport->checkoutItem($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function restoreItem($removeExisting, $versionPath, $path)
     {
         $this->transport->restoreItem($removeExisting, $versionPath, $path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function removeVersion($versionPath, $versionName)
     {
         return $this->transport->removeVersion($versionPath, $versionName);
@@ -127,9 +109,6 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
 
     // QueryTransport //
 
-    /**
-     * {@inheritDoc}
-     */
     public function query(Query $query)
     {
         $this->logger->startCall(__FUNCTION__, func_get_args(), ['fetchDepth' => $this->transport->getFetchDepth()]);
@@ -139,137 +118,86 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
         return $result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getSupportedQueryLanguages()
     {
         return $this->transport->getSupportedQueryLanguages();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function registerNamespace($prefix, $uri)
     {
         $this->transport->registerNamespace($prefix, $uri);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function unregisterNamespace($prefix)
     {
         $this->transport->unregisterNamespace($prefix);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function registerNodeTypesCnd($cnd, $allowUpdate)
     {
         return $this->transport->registerNodeTypesCnd($cnd, $allowUpdate);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPermissions($path)
     {
         return $this->transport->getPermissions($path);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint = PHP_INT_MAX, $ownerInfo = null)
     {
         return $this->transport->lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint, $ownerInfo);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function isLocked($absPath)
     {
         return $this->transport->isLocked($absPath);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function unlock($absPath, $lockToken)
     {
         $this->transport->unlock($absPath, $lockToken);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getEvents($date, EventFilterInterface $filter, SessionInterface $session)
     {
         return $this->transport->getEvents($date, $filter, $session);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function fetchEventData($date)
     {
         return $this->transport->fetchEventData($date);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function setUserData($userData)
     {
         $this->transport->setUserData($userData);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getUserData()
     {
         return $this->transport->getUserData();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function createWorkspace($name, $srcWorkspace = null)
     {
         $this->transport->createWorkspace($name, $srcWorkspace);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function deleteWorkspace($name)
     {
         $this->transport->deleteWorkspace($name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function forceHttpVersion10($forceHttpVersion10 = true)
     {
         $this->transport->forceHttpVersion10($forceHttpVersion10);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function addCurlOptions(array $options)
     {
         return $this->transport->addCurlOptions($options);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getWorkspaceUri()
     {
         return $this->transport->getWorkspaceUri();

@@ -20,8 +20,6 @@ use PHPCR\Query\QOM\SourceInterface;
 use PHPCR\Query\QOM\UpperCaseInterface;
 
 /**
- * {@inheritDoc}
- *
  * @license http://www.apache.org/licenses Apache License Version 2.0, January 2004
  * @license http://opensource.org/licenses/MIT MIT License
  *
@@ -30,8 +28,6 @@ use PHPCR\Query\QOM\UpperCaseInterface;
 class QueryObjectModelFactory extends BaseQueryObjectModelFactory
 {
     /**
-     * {@inheritDoc}
-     *
      * @api
      */
     public function createQuery(

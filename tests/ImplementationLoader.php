@@ -5,7 +5,7 @@
  */
 class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 {
-    private static $instance = null;
+    private static $instance;
 
     private $necessaryConfigValues = ['jackrabbit.uri', 'phpcr.user', 'phpcr.pass', 'phpcr.workspace', 'phpcr.additionalWorkspace', 'phpcr.defaultWorkspace'];
 

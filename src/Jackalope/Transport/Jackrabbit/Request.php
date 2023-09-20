@@ -610,7 +610,7 @@ class Request
 
         // use XML error response if it's there
         if ('<?' === substr($response, 0, 2)) {
-            $dom = new DOMDocument();
+            $dom = new \DOMDocument();
             $dom->loadXML($response);
             $err = $dom->getElementsByTagNameNS(Client::NS_DCR, 'exception');
             if ($err->length > 0) {
@@ -737,14 +737,14 @@ class Request
      *
      * @param bool $forceMultiple whether to force parallel requests or not
      *
-     * @return DOMDocument the loaded XML response text
+     * @return \DOMDocument the loaded XML response text
      */
     public function executeDom($forceMultiple = false)
     {
         $xml = $this->execute(null, $forceMultiple);
 
         // create new DOMDocument and load the response text.
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         $dom->loadXML($xml);
 
         return $dom;
@@ -756,8 +756,6 @@ class Request
      * Returns a decoded json string from the backend or throws exception
      *
      * @param bool $forceMultiple whether to force parallel requests or not
-     *
-     * @return mixed
      *
      * @throws RepositoryException if the json response is not valid
      */
