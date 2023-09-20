@@ -76,8 +76,6 @@ interface JackrabbitClientInterface extends QueryTransport, PermissionInterface,
     /**
      * Internal method to fetch event data.
      *
-     * @param $date
-     *
      * @return array hashmap with 'data' containing unfiltered DOM of xml atom
      *               feed of events, 'nextMillis' is the next timestamp if there are
      *               more events to be found, false otherwise

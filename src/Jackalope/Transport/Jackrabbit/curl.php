@@ -50,8 +50,7 @@ class curl
     /**
      * Sets the options to be used for the request.
      *
-     * @param int   $option
-     * @param mixed $value
+     * @param int $option
      *
      * @see curl_setopt
      */

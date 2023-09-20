@@ -10,9 +10,6 @@ namespace Jackalope\Jackrabbit;
  */
 class Factory extends \Jackalope\Factory
 {
-    /**
-     * {@inheritDoc}
-     */
     public function get($name, array $params = [])
     {
         switch ($name) {
