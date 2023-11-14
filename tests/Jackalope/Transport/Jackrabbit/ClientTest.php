@@ -46,7 +46,6 @@ class ClientTest extends JackrabbitTestCase
     }
 
     /**
-     * @param mixed    $response
      * @param string[] $changeMethods
      *
      * @return Request&MockObject

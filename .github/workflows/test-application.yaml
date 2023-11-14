@@ -11,7 +11,7 @@ on:
 jobs:
     test:
         name: 'PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}'
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-22.04
 
         strategy:
             fail-fast: false
@@ -24,10 +24,25 @@ jobs:
                     - php-version: '8.0'
                     - php-version: '8.1'
                     - php-version: '8.2'
+                    - php-version: '8.3'
 
         steps:
             - name: Checkout project
               uses: actions/checkout@v3
+
+            - name: Cache Jackrabbit
+              id: cache-jackrabbit
+              uses: actions/cache@v3
+              with:
+                path: bin/jackrabbit-standalone-*
+                key: jackrabbit
+
+            # default java installation not able to run newer versions of jackrabbit
+            - name: Install and configure Java
+              uses: actions/setup-java@v3
+              with:
+                  distribution: temurin
+                  java-version: '8'
 
             - name: Install and configure PHP
               uses: shivammathur/setup-php@v2
