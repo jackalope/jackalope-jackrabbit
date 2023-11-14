@@ -1266,8 +1266,6 @@ class Client extends BaseTransport implements JackrabbitClientInterface
 
     /**
      * This method is used when building a JSOP of the properties.
-     *
-     * @return mixed
      */
     private function propertyToJsopString(Property $property)
     {
@@ -1424,7 +1422,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         return $result;
     }
 
-    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, ?string $ownerInfo = null): LockInterface
+    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, string $ownerInfo = null): LockInterface
     {
         $timeout = PHP_INT_MAX === $timeoutHint ? 'infinite' : $timeoutHint;
         $ownerInfo = $ownerInfo ?? $this->credentials->getUserID();

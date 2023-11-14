@@ -47,8 +47,6 @@ class curl
     /**
      * Sets the options to be used for the request.
      *
-     * @param mixed $value
-     *
      * @see curl_setopt
      */
     public function setopt(int $option, $value): bool
