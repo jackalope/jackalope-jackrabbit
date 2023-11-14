@@ -31,7 +31,7 @@ class JackrabbitCommand extends Command
      */
     private int $port;
 
-    protected function configure(): void
+    protected function configure()
     {
         $this->setName('jackalope:run:jackrabbit')
             ->addArgument('cmd', InputArgument::REQUIRED, 'Command to execute (start | stop | status)')
@@ -65,7 +65,7 @@ EOF
         $this->port = $port;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $cmd = $input->getArgument('cmd');
 

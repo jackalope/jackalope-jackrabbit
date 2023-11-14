@@ -14,6 +14,11 @@ Version 2
 Version 1
 =========
 
+1.4.6
+-----
+
+* Revert BC break with the command return type declarations.
+
 1.4.5
 -----
 
