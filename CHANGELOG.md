@@ -10,6 +10,8 @@ Version 2
 * Added static typing whereever possible. This should not change anything, but the added strictness
   might trigger errors where it was more tolerant for incorrect types before.
 * Renamed cli-config.php.dist to cli-config.dist.php and cleaned up to be better documented.
+* Dropped support for PHP 7.
+* Allow installation with Symfony 7.
 
 Version 1
 =========
