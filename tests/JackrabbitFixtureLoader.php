@@ -1,5 +1,7 @@
 <?php
 
+use PHPCR\Test\FixtureLoaderInterface;
+
 /**
  * Handles basic importing and exporting of fixtures trough
  * the java binary jack.jar.
@@ -12,7 +14,7 @@
  *      <var name="phpcr.workspace" value="tests" />
  *    </php>
  */
-class JackrabbitFixtureLoader implements \PHPCR\Test\FixtureLoaderInterface
+class JackrabbitFixtureLoader implements FixtureLoaderInterface
 {
     protected $fixturePath;
     protected $jar;
