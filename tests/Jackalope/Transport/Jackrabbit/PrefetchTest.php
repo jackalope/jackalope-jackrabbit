@@ -2,6 +2,7 @@
 
 namespace Jackalope\Transport\Jackrabbit;
 
+use Jackalope\Factory;
 use Jackalope\TestCase;
 
 /**
@@ -53,7 +54,7 @@ class PrefetchTest extends TestCase
 
     protected function getTransport(): Client
     {
-        $transport = new \Jackalope\Transport\Jackrabbit\Client(new \Jackalope\Factory(), $GLOBALS['jackrabbit.uri']);
+        $transport = new Client(new Factory(), $GLOBALS['jackrabbit.uri']);
         $transport->login(self::$loader->getCredentials(), self::$loader->getWorkspaceName());
 
         return $transport;

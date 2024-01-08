@@ -1,9 +1,16 @@
 <?php
 
+use Jackalope\RepositoryFactoryJackrabbit;
+use Jackalope\Session;
+use Jackalope\Transport\Logging\Psr3Logger;
+use PHPCR\SimpleCredentials;
+use PHPCR\Test\AbstractLoader;
+use Psr\Log\NullLogger;
+
 /**
  * Implementation loader for jackalope-jackrabbit.
  */
-class ImplementationLoader extends \PHPCR\Test\AbstractLoader
+class ImplementationLoader extends AbstractLoader
 {
     private static $instance;
 
@@ -25,16 +32,16 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             }
         }
 
-        parent::__construct('Jackalope\RepositoryFactoryJackrabbit', $GLOBALS['phpcr.workspace'], $GLOBALS['phpcr.additionalWorkspace']);
+        parent::__construct(RepositoryFactoryJackrabbit::class, $GLOBALS['phpcr.workspace'], $GLOBALS['phpcr.additionalWorkspace']);
 
         // ensure workspaces exist
         $workspace = $this->getRepository()->login($this->getCredentials())->getWorkspace();
-        if (!in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames())) {
+        if (!in_array($GLOBALS['phpcr.workspace'], $workspace->getAccessibleWorkspaceNames(), true)) {
             $workspace->createWorkspace($GLOBALS['phpcr.workspace']);
         }
-        if (false == $GLOBALS['phpcr.additionalWorkspace']) {
+        if (!$GLOBALS['phpcr.additionalWorkspace']) {
             $this->multiWorkspaceSupported = false;
-        } elseif (!in_array($GLOBALS['phpcr.additionalWorkspace'], $workspace->getAccessibleWorkspaceNames())) {
+        } elseif (!in_array($GLOBALS['phpcr.additionalWorkspace'], $workspace->getAccessibleWorkspaceNames(), true)) {
             $workspace->createWorkspace($GLOBALS['phpcr.additionalWorkspace']);
         }
 
@@ -115,33 +122,33 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     {
         return [
             'jackalope.jackrabbit_uri' => $GLOBALS['jackrabbit.uri'],
-            \Jackalope\Session::OPTION_AUTO_LASTMODIFIED => false,
-            'jackalope.logger' => new \Jackalope\Transport\Logging\Psr3Logger(new \Psr\Log\NullLogger()),
+            Session::OPTION_AUTO_LASTMODIFIED => false,
+            'jackalope.logger' => new Psr3Logger(new NullLogger()),
         ];
     }
 
     public function getSessionWithLastModified()
     {
-        /** @var $session \Jackalope\Session */
+        /** @var $session Session */
         $session = $this->getSession();
-        $session->setSessionOption(\Jackalope\Session::OPTION_AUTO_LASTMODIFIED, true);
+        $session->setSessionOption(Session::OPTION_AUTO_LASTMODIFIED, true);
 
         return $session;
     }
 
     public function getCredentials()
     {
-        return new \PHPCR\SimpleCredentials($GLOBALS['phpcr.user'], $GLOBALS['phpcr.pass']);
+        return new SimpleCredentials($GLOBALS['phpcr.user'], $GLOBALS['phpcr.pass']);
     }
 
     public function getInvalidCredentials()
     {
-        return new \PHPCR\SimpleCredentials('nonexistinguser', '');
+        return new SimpleCredentials('nonexistinguser', '');
     }
 
     public function getRestrictedCredentials()
     {
-        return new \PHPCR\SimpleCredentials('anonymous', 'abc');
+        return new SimpleCredentials('anonymous', 'abc');
     }
 
     public function prepareAnonymousLogin()
@@ -154,8 +161,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         return $GLOBALS['phpcr.user'];
     }
 
-    public function getFixtureLoader()
+    public function getFixtureLoader(): JackrabbitFixtureLoader
     {
-        return new JackrabbitFixtureLoader(__DIR__.'/../vendor/phpcr/phpcr-api-tests/fixtures/', isset($GLOBALS['jackrabbit.jar']) ? $GLOBALS['jackrabbit.jar'] : null);
+        return new JackrabbitFixtureLoader(__DIR__.'/../vendor/phpcr/phpcr-api-tests/fixtures/', $GLOBALS['jackrabbit.jar'] ?? null);
     }
 }

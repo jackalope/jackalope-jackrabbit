@@ -1790,7 +1790,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      *
      * @return bool|\DOMNode
      *
-     * @throws \PHPCR\RepositoryException When the element is not found and an $errorMessage is set
+     * @throws RepositoryException When the element is not found and an $errorMessage is set
      */
     private function getRequiredDomElementByTagNameNS($dom, string $namespace, string $element, string $errorMessage = '')
     {
