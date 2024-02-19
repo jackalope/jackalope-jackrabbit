@@ -19,17 +19,17 @@ class JackrabbitCommand extends Command
     /**
      * Path to Jackrabbit jar file.
      */
-    private string $jackrabbit_jar;
+    private ?string $jackrabbit_jar = null;
 
     /**
      * Path to the Jackrabbit workspace dir.
      */
-    private string $workspace_dir;
+    private ?string $workspace_dir = null;
 
     /**
      * TCP port of the Jackrabbit HTTP server.
      */
-    private int $port;
+    private ?int $port = null;
 
     protected function configure(): void
     {
@@ -50,12 +50,12 @@ EOF
             );
     }
 
-    protected function setJackrabbitPath($jackrabbit_jar): void
+    protected function setJackrabbitPath(?string $jackrabbit_jar): void
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
     }
 
-    protected function setWorkspaceDir($workspace_dir): void
+    protected function setWorkspaceDir(?string $workspace_dir): void
     {
         $this->workspace_dir = $workspace_dir;
     }
