@@ -230,7 +230,7 @@ class Request
      * Set the credentials for the request. Setting them to null will make a
      * request without authentication header.
      */
-    public function setCredentials(CredentialsInterface $creds = null): void
+    public function setCredentials(?CredentialsInterface $creds = null): void
     {
         $this->credentials = $creds;
     }

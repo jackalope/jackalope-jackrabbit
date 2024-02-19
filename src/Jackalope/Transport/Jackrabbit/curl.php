@@ -38,7 +38,7 @@ class curl
      *
      * @see curl_init
      */
-    public function __construct(string $url = null)
+    public function __construct(?string $url = null)
     {
         $this->curl = curl_init($url);
         $this->setopt(CURLINFO_HEADER_OUT, true);
@@ -105,7 +105,7 @@ class curl
      *
      * @see curl_getinfo
      */
-    public function getinfo(int $option = null)
+    public function getinfo(?int $option = null)
     {
         if (null === $option) {
             return curl_getinfo($this->curl);

@@ -275,7 +275,7 @@ class EventBuffer implements \Iterator
      *
      * @throws RepositoryException
      */
-    private function getDomElement(\DOMElement $event, string $tagName, string $errorMessage = null): ?\DOMNode
+    private function getDomElement(\DOMElement $event, string $tagName, ?string $errorMessage = null): ?\DOMNode
     {
         $list = $event->getElementsByTagName($tagName);
 

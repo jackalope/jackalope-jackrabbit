@@ -296,7 +296,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
 
     // CoreInterface //
 
-    public function login(CredentialsInterface $credentials = null, string $workspaceName = null): string
+    public function login(?CredentialsInterface $credentials = null, ?string $workspaceName = null): string
     {
         if ($this->credentials) {
             throw new RepositoryException(
@@ -519,7 +519,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         return $data;
     }
 
-    public function getNodePathForIdentifier(string $uuid, string $workspace = null): string
+    public function getNodePathForIdentifier(string $uuid, ?string $workspace = null): string
     {
         if (null !== $workspace && $workspace !== $this->workspace) {
             $client = new Client($this->factory, $this->server);
@@ -625,12 +625,12 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         return $ret;
     }
 
-    public function getReferences(string $path, string $name = null): array
+    public function getReferences(string $path, ?string $name = null): array
     {
         return $this->getNodeReferences($path, $name);
     }
 
-    public function getWeakReferences(string $path, string $name = null): array
+    public function getWeakReferences(string $path, ?string $name = null): array
     {
         return $this->getNodeReferences($path, $name, true);
     }
@@ -642,7 +642,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      *
      * @return array list of paths to nodes that reference $path
      */
-    private function getNodeReferences(string $path, string $name = null, bool $weak_reference = false): array
+    private function getNodeReferences(string $path, ?string $name = null, bool $weak_reference = false): array
     {
         $path = $this->encodeAndValidatePathForDavex($path);
         $identifier = $weak_reference ? 'weakreferences' : 'references';
@@ -967,7 +967,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         $this->setJsopBody('-'.$path.' : ');
     }
 
-    public function copyNode(string $srcAbsPath, string $destAbsPath, string $srcWorkspace = null): void
+    public function copyNode(string $srcAbsPath, string $destAbsPath, ?string $srcWorkspace = null): void
     {
         if ($srcWorkspace) {
             $this->copyNodeOtherWorkspace($srcAbsPath, $destAbsPath, $srcWorkspace);
@@ -1422,7 +1422,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         return $result;
     }
 
-    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, string $ownerInfo = null): LockInterface
+    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, ?string $ownerInfo = null): LockInterface
     {
         $timeout = PHP_INT_MAX === $timeoutHint ? 'infinite' : $timeoutHint;
         $ownerInfo = $ownerInfo ?? $this->credentials->getUserID();
@@ -1513,7 +1513,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
         return $this->userData;
     }
 
-    public function createWorkspace(string $name, string $srcWorkspace = null): void
+    public function createWorkspace(string $name, ?string $srcWorkspace = null): void
     {
         if (null !== $srcWorkspace) {
             // https://issues.apache.org/jira/browse/JCR-3144
@@ -1723,7 +1723,7 @@ class Client extends BaseTransport implements JackrabbitClientInterface
      *                                                we created it in this request)
      * @param string|null              $path          the owning node path, if we created this node
      */
-    private function generateLockFromDavResponse($response, bool $sessionOwning = false, string $path = null): LockInterface
+    private function generateLockFromDavResponse($response, bool $sessionOwning = false, ?string $path = null): LockInterface
     {
         $lock = new Lock();
         $lockDom = $this->getRequiredDomElementByTagNameNS($response, self::NS_DAV, 'activelock', 'No lock received');

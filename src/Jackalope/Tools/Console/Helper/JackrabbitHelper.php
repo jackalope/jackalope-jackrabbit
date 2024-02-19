@@ -22,7 +22,7 @@ class JackrabbitHelper
      * @param string|null $workspace_dir  if provided this will be used as workspace directory, otherwise the directory of the jar file is used
      * @param int|null    $port           if provided this will be used as port for HTTP server, otherwise the default is used
      */
-    public function __construct(string $jackrabbit_jar, string $workspace_dir = null, int $port = null)
+    public function __construct(string $jackrabbit_jar, ?string $workspace_dir = null, ?int $port = null)
     {
         $this->jackrabbit_jar = $jackrabbit_jar;
         $this->workspace_dir = $workspace_dir ?: dirname($jackrabbit_jar);

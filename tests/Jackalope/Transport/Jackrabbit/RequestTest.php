@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class RequestTest extends JackrabbitTestCase
 {
-    protected function getCurlFixture(string $fixture = null, int $httpCode = 200, int $errno = null): curl
+    protected function getCurlFixture(?string $fixture = null, int $httpCode = 200, ?int $errno = null): curl
     {
         $curl = $this->createMock(curl::class);
 
@@ -41,7 +41,7 @@ class RequestTest extends JackrabbitTestCase
         return $this->createMock(Client::class);
     }
 
-    public function getRequest(string $fixture = null, int $httpCode = 200, int $errno = null)
+    public function getRequest(?string $fixture = null, int $httpCode = 200, ?int $errno = null)
     {
         $factory = new Factory();
 
