@@ -61,7 +61,7 @@ class RepositoryFactoryJackrabbit implements RepositoryFactoryInterface
      *
      * @api
      */
-    public function getRepository(array $parameters = null)
+    public function getRepository(?array $parameters = null)
     {
         if (null === $parameters) {
             throw new ConfigurationException('Jackalope-jackrabbit needs parameters');

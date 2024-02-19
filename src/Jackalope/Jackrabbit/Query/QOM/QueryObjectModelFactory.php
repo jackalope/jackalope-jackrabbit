@@ -30,7 +30,7 @@ class QueryObjectModelFactory extends BaseQueryObjectModelFactory
 {
     public function createQuery(
         SourceInterface $source,
-        ConstraintInterface $constraint = null,
+        ?ConstraintInterface $constraint = null,
         array $orderings = [],
         array $columns = [],
         $simpleQuery = false

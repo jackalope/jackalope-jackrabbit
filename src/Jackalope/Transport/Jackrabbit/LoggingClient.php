@@ -103,7 +103,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
 
     // LockingInterface //
 
-    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, string $ownerInfo = null): LockInterface
+    public function lockNode(string $absPath, bool $isDeep, bool $isSessionScoped, int $timeoutHint = PHP_INT_MAX, ?string $ownerInfo = null): LockInterface
     {
         return $this->transport->lockNode($absPath, $isDeep, $isSessionScoped, $timeoutHint, $ownerInfo);
     }
@@ -142,7 +142,7 @@ class LoggingClient extends AbstractReadWriteLoggingWrapper implements Jackrabbi
 
     // WorkspaceManagementInterface //
 
-    public function createWorkspace(string $name, string $srcWorkspace = null): void
+    public function createWorkspace(string $name, ?string $srcWorkspace = null): void
     {
         $this->transport->createWorkspace($name, $srcWorkspace);
     }
