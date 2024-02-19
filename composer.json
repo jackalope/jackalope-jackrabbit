@@ -22,7 +22,7 @@
         "ext-json":"*",
         "phpcr/phpcr": "~2.1.5",
         "phpcr/phpcr-utils": "^1.8.0 || ^2.0",
-        "jackalope/jackalope": "^2.0.0-RC1"
+        "jackalope/jackalope": "dev-more-typehints as 2.0.0-RC1"
     },
     "provide": {
         "jackalope/jackalope-transport": "2.0.0"
